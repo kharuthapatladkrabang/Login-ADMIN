@@ -2,14 +2,14 @@
 class AIAssistantLoginForm {
     constructor() {
         this.form = document.getElementById('loginForm');
-        this.emailInput = document.getElementById('email');
+        this.emailInput = document.getElementById('email'); // ใช้ ID เดิม แต่หมายถึง Student ID
         this.passwordInput = document.getElementById('password');
         this.passwordToggle = document.getElementById('passwordToggle');
         this.submitButton = this.form.querySelector('.neural-button');
         this.successMessage = document.getElementById('successMessage');
         this.socialButtons = document.querySelectorAll('.social-neural');
         
-        this.signupLink = document.querySelector('.neural-signup'); // ลิงก์ "Join the network"
+        this.signupLink = document.querySelector('.neural-signup'); 
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
@@ -17,7 +17,7 @@ class AIAssistantLoginForm {
         
         // *****************************************************************************************
         // *** สำคัญ: ต้องใส่ URL Web App ที่ได้จากการ Deploy Google Apps Script ที่นี่ ***
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby2c1ZLInxUSdP-YvFPpioDp_GNwZF0JK5dUsWYjioMQOwLUc-A3yYBvnBW5qvM_1s5/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxZB0thNQVgCsEP1m5ZBzg0MIY5-_koqE8cAj0w5ufWV8eFaZEv5zITMx2myVh_s9cq/exec'; 
         // *****************************************************************************************
 
         this.init();
@@ -28,7 +28,7 @@ class AIAssistantLoginForm {
         this.setupPasswordToggle();
         this.setupSocialButtons();
         this.setupAIEffects();
-        this.updateFormMode('login'); // ตั้งค่า UI เริ่มต้น
+        this.updateFormMode('login'); // ตั้งค่า UI เริ่มต้นเป็น Login
     }
     
     bindEvents() {
@@ -51,11 +51,11 @@ class AIAssistantLoginForm {
     
     updateFormMode(mode) {
         this.currentMode = mode;
-        this.formHeader.textContent = mode === 'login' ? 'Neural Access' : 'New Network Access';
-        this.formSubHeader.textContent = mode === 'login' ? 'Connect to your AI workspace' : 'Create your security key';
-        this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'Initialize Connection' : 'Register & Verify';
-        this.actionText.textContent = mode === 'login' ? 'New to Neural? ' : 'Already registered? ';
-        this.signupLink.textContent = mode === 'login' ? 'Join the network' : 'Back to Login';
+        this.formHeader.textContent = mode === 'login' ? 'Neural Access' : 'การลงทะเบียนใหม่';
+        this.formSubHeader.textContent = mode === 'login' ? 'เชื่อมต่อสู่พื้นที่ทำงาน AI ของคุณ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
+        this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เริ่มการเชื่อมต่อ' : 'ลงทะเบียนและยืนยัน';
+        this.actionText.textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
+        this.signupLink.textContent = mode === 'login' ? 'เข้าร่วมเครือข่าย' : 'กลับไปที่ล็อกอิน';
         
         // เคลียร์ค่าและข้อความ error
         this.emailInput.value = '';
@@ -87,7 +87,6 @@ class AIAssistantLoginForm {
     }
     
     setupAIEffects() {
-        // Add neural connection effect on input focus
         [this.emailInput, this.passwordInput].forEach(input => {
             input.addEventListener('focus', (e) => {
                 this.triggerNeuralEffect(e.target.closest('.smart-field'));
@@ -96,7 +95,6 @@ class AIAssistantLoginForm {
     }
     
     triggerNeuralEffect(field) {
-        // Add subtle AI processing effect
         const indicator = field.querySelector('.ai-indicator');
         indicator.style.opacity = '1';
         
@@ -109,7 +107,7 @@ class AIAssistantLoginForm {
         const studentId = this.emailInput.value.trim();
         
         if (!studentId) {
-            this.showError('email', 'Student ID is required for access');
+            this.showError('email', 'จำเป็นต้องระบุรหัสนักศึกษา');
             return false;
         }
         
@@ -121,12 +119,12 @@ class AIAssistantLoginForm {
         const password = this.passwordInput.value;
         
         if (!password) {
-            this.showError('password', 'Security key required');
+            this.showError('password', 'ต้องใช้รหัสความปลอดภัย');
             return false;
         }
         
         if (password.length < 6) {
-            this.showError('password', 'Security key must be at least 6 characters');
+            this.showError('password', 'รหัสความปลอดภัยต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
             return false;
         }
         
@@ -170,7 +168,7 @@ class AIAssistantLoginForm {
         // ส่ง action และข้อมูลที่จำเป็นไปให้ Apps Script
         formData.append('action', this.currentMode); 
         formData.append('studentId', this.emailInput.value.trim()); // ใช้ studentId สำหรับการลงทะเบียน
-        formData.append('email', this.emailInput.value.trim()); // ส่ง 'email' เดิมไปด้วยสำหรับ doLogin
+        formData.append('email', this.emailInput.value.trim()); // ใช้ 'email' field สำหรับ doLogin ใน Apps Script
         formData.append('password', this.passwordInput.value);
         
         try {
@@ -192,22 +190,22 @@ class AIAssistantLoginForm {
                     
                     setTimeout(() => {
                         console.log(`Neural link established - accessing AI workspace at: ${result.redirectUrl}`);
-                        // window.location.href = result.redirectUrl;
+                        // ในการใช้งานจริง: window.location.href = result.redirectUrl;
                     }, 3200);
                 } else {
-                    // ลงทะเบียนสำเร็จ: สลับกลับไปหน้าล็อกอิน
-                    alert('Registration Successful! You can now log in.');
+                    // ลงทะเบียนสำเร็จ: สลับกลับไปหน้าล็อกอินและแสดง Alert
+                    alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้เลย');
                     this.updateFormMode('login');
                 }
                 
             } else {
                 // ล็อกอิน/ลงทะเบียนไม่สำเร็จ
-                this.showError('password', result.message || `${this.currentMode} failed. Please check details.`);
+                this.showError('password', result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
             }
 
         } catch (error) {
             console.error(`${this.currentMode} error:`, error);
-            this.showError('password', 'Neural connection failed. Please retry.');
+            this.showError('password', 'การเชื่อมต่อระบบประสาทล้มเหลว โปรดลองอีกครั้ง');
         } finally {
             this.setLoading(false);
         }
@@ -228,7 +226,7 @@ class AIAssistantLoginForm {
                 <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite; animation-delay: 0.1s;"></div>
                 <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite; animation-delay: 0.2s;"></div>
             </div>
-            <span>Connecting...</span>
+            <span>กำลังเชื่อมต่อ...</span>
             <div class="social-glow"></div>
         `;
         
@@ -251,7 +249,6 @@ class AIAssistantLoginForm {
         this.submitButton.classList.toggle('loading', loading);
         this.submitButton.disabled = loading;
         
-        // Disable social buttons during neural processing
         this.socialButtons.forEach(button => {
             button.style.pointerEvents = loading ? 'none' : 'auto';
             button.style.opacity = loading ? '0.5' : '1';
@@ -259,7 +256,6 @@ class AIAssistantLoginForm {
     }
     
     showNeuralSuccess() {
-        // Hide form with neural transition
         this.form.style.transform = 'scale(0.95)';
         this.form.style.opacity = '0';
         
@@ -269,14 +265,12 @@ class AIAssistantLoginForm {
             document.querySelector('.signup-section').style.display = 'none';
             document.querySelector('.auth-separator').style.display = 'none';
             
-            // Show neural success
             this.successMessage.classList.add('show');
             
         }, 300);
     }
 }
 
-// Initialize the neural form when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new AIAssistantLoginForm();
 });
