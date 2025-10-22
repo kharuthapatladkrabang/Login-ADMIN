@@ -121,8 +121,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%; /* เพื่อให้รูปภาพดูเป็นวงกลมหากต้องการ */
-    overflow: hidden;
 }
 
 .login-header h1 {
@@ -138,6 +136,17 @@ body {
     font-size: 14px;
     font-weight: 400;
 }
+
+/* --- การแก้ไขสำหรับ Modal ลืมรหัสผ่าน --- */
+/* ปรับสไตล์ Modal เพื่อให้ข้อความสีขาวเมื่อแสดง */
+#forgotPasswordContainer .login-header h2 {
+    color: #f8fafc !important; /* บังคับให้เป็นสีขาว */
+}
+#forgotPasswordContainer .login-header p {
+    color: #94a3b8 !important; 
+}
+/* -------------------------------------- */
+
 
 /* Smart Fields */
 .smart-field {
