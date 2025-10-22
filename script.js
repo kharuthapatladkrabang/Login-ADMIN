@@ -6,7 +6,7 @@ class AIAssistantLoginForm {
         this.passwordInput = document.getElementById('password');
         this.passwordToggle = document.getElementById('passwordToggle');
         this.submitButton = this.form.querySelector('.neural-button'); // ปุ่ม Login หลัก
-        this.signupLink = document.getElementById('signupLink'); // ลิงก์ลงทะเบียน
+        this.signupLink = document.getElementById('signupLink'); // ลิงก์ลงทะเบียน (แก้ไข)
         this.adminRedirectButton = document.getElementById('adminRedirectButton'); // ปุ่ม Redirect Admin
         this.successMessage = document.getElementById('successMessage');
         
@@ -14,9 +14,9 @@ class AIAssistantLoginForm {
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
         this.currentMode = 'login'; 
-        this.redirectUrl = null; // ตัวแปรสำหรับเก็บ URL ที่จะ Redirect
+        this.redirectUrl = null; 
 
-        // URL Web App ล่าสุด
+        // URL Web App ล่าสุดที่คุณให้มา
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzHcKp2KppyD66XuIBmKMUTh3jA0ztyzq7Tovm9yTAfqvvJXLAqe2mhaFKpx_5t6EfD/exec'; 
 
         this.init();
@@ -36,7 +36,7 @@ class AIAssistantLoginForm {
         this.emailInput.addEventListener('input', () => this.clearError('email'));
         this.passwordInput.addEventListener('input', () => this.clearError('password'));
         
-        // ผูก Event กับลิงก์ "ลงทะเบียน" / "กลับไปล็อกอิน"
+        // *** แก้ไข: ผูก Event กับลิงก์ signupLink โดยตรง ***
         this.signupLink.addEventListener('click', (e) => {
             e.preventDefault();
             const newMode = this.currentMode === 'login' ? 'register' : 'login';
