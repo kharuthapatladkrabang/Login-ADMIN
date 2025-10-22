@@ -180,7 +180,7 @@ class AIAssistantLoginForm {
         
         // Update Header (ใช้คำว่า Admin)
         this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
-        this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
+        this.formSubHeader.textContent = mode === 'login' ? 'เฉพาะผู้ที่ได้รับอนุญาตให้เป็น Admin เท่านั้น!!' : 'สร้างบัญชี เฉพาะผู้ที่ได้รับอนุญาตให้เป็น Admin เท่านั้น!!';
         this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
         // Update Signup/Login Link Text
@@ -226,7 +226,7 @@ class AIAssistantLoginForm {
     validatePassword() {
         const password = this.passwordInput.value;
         if (!password) {
-            this.showError('password', 'ต้องใช้รหัสความปลอดภัย');
+            this.showError('password', 'ต้องใช้รหัสผ่าน');
             return false;
         }
         if (password.length < 6) {
