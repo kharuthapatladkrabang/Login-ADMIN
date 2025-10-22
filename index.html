@@ -31,8 +31,7 @@
             <form class="login-form" id="loginForm" novalidate>
                 <div class="smart-field" data-field="email">
                     <div class="field-background"></div>
-                    <input type="text" id="email" name="studentId" required autocomplete="off"> 
-                    <label for="email">รหัสนักศึกษา</label> 
+                    <input type="text" id="email" name="studentId" required autocomplete="username"> <label for="email">รหัสนักศึกษา</label> 
                     <div class="ai-indicator">
                         <div class="ai-pulse"></div>
                     </div>
@@ -128,7 +127,7 @@
                 <p style="color: #94a3b8;">กรุณากรอกรหัสรีเซ็ตและรหัสผ่านใหม่</p>
             </div>
             
-            <form id="resetPasswordForm" novalidate> 
+            <form id="resetPasswordForm" novalidate>
                 <div class="smart-field" data-field="resetCode">
                     <div class="field-background"></div>
                     <input type="text" id="resetCode" name="resetCode" required autocomplete="off"> 
@@ -179,7 +178,7 @@
                 รหัสนักศึกษา: <span id="displayStudentId"></span><br>
                 เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง
             </p>
-            <div id="redirectButtonsContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <div id="redirectButtonsContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px;">
                 </div>
             <p style="margin-top: 20px;">กำลังเข้าสู่พื้นที่ทำงาน...</p>
         </div>
