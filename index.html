@@ -15,7 +15,8 @@
         <div class="neural-node"></div>
     </div>
 
-    <div class="login-container" id="mainLoginContainer">
+    <div class="login-container" id="mainContainerWrapper">
+        
         <div class="login-card" id="mainLoginCard">
             <div class="ai-glow"></div>
             
@@ -24,7 +25,7 @@
                     <img src="https://img5.pic.in.th/file/secure-sv1/Asset-401.png" alt="Admin Logo" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <h1>เข้าสู่ระบบ Admin</h1> 
-                <p>เข้าสู่ระบบ Admin</p>
+                <p>เข้าสู่ระบบผู้ดูแลระบบ</p>
             </div>
             
             <form class="login-form" id="loginForm" novalidate>
@@ -93,32 +94,9 @@
                 <span>ยังไม่มีบัญชีใช่หรือไม่? </span> 
                 <a href="#" class="neural-signup" id="signupLink">ลงทะเบียน</a>
             </div>
-
-            <div class="success-neural" id="successMessage">
-                <div class="success-core">
-                    <div class="success-rings">
-                        <div class="success-ring"></div>
-                        <div class="success-ring"></div>
-                        <div class="success-ring"></div>
-                    </div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h3 id="adminWelcome">สวัสดี, แอดมิน!</h3>
-                <p id="adminDetails">
-                    รหัสนักศึกษา: <span id="displayStudentId"></span><br>
-                    เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง
-                </p>
-                <div id="redirectButtonsContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-                    </div>
-                <p style="margin-top: 20px;">กำลังเข้าสู่พื้นที่ทำงาน...</p>
-            </div>
         </div>
-    </div>
-    
-    <div class="login-container" id="forgotPasswordContainer" style="display:none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-        <div class="login-card">
+
+        <div class="login-card" id="forgotPasswordCard1" style="display:none;">
             <div class="ai-glow"></div>
             <div class="login-header">
                 <h2 style="color: #f8fafc;">รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 1)</h2>
@@ -143,7 +121,7 @@
             <a href="#" class="neural-link" id="backToLoginLink">ย้อนกลับสู่หน้าเข้าสู่ระบบ</a>
         </div>
 
-        <div class="login-card" id="resetPasswordStep2" style="display:none; margin-top: 20px;">
+        <div class="login-card" id="forgotPasswordCard2" style="display:none;">
             <div class="ai-glow"></div>
             <div class="login-header">
                 <h2 style="color: #f8fafc;">รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 2)</h2>
@@ -182,6 +160,28 @@
                     <div class="button-glow"></div>
                 </button>
             </form>
+        </div>
+
+        <div class="login-card success-neural" id="successMessage" style="display:none;">
+            <div class="ai-glow"></div>
+            <div class="success-core">
+                <div class="success-rings">
+                    <div class="success-ring"></div>
+                    <div class="success-ring"></div>
+                    <div class="success-ring"></div>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3 id="adminWelcome">สวัสดี, แอดมิน!</h3>
+            <p id="adminDetails">
+                รหัสนักศึกษา: <span id="displayStudentId"></span><br>
+                เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง
+            </p>
+            <div id="redirectButtonsContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
+                </div>
+            <p style="margin-top: 20px;">กำลังเข้าสู่พื้นที่ทำงาน...</p>
         </div>
     </div>
 
