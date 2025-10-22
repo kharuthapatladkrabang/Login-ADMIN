@@ -21,17 +21,7 @@
             
             <div class="login-header">
                 <div class="ai-logo">
-                    <div class="logo-core">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
-                            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" stroke="currentColor" stroke-width="1.5"/>
-                        </svg>
-                    </div>
-                    <div class="logo-rings">
-                        <div class="ring ring-1"></div>
-                        <div class="ring ring-2"></div>
-                        <div class="ring ring-3"></div>
-                    </div>
+                    <img src="https://drive.google.com/uc?export=view&id=1zK7DyOaGCXzi5HiMUs5LsTfSrKx1R-uv" alt="Admin Logo" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <h1>ระบบเข้าสู่ระบบ</h1> 
                 <p>เข้าสู่ระบบผู้ดูแลระบบ</p>
@@ -107,11 +97,7 @@
 
             <div class="signup-section">
                 <span>ยังไม่มีบัญชีใช่หรือไม่? </span> 
-                <button type="button" class="neural-button register-button">
-                    <div class="button-bg"></div>
-                    <span class="button-text">ลงทะเบียน</span>
-                    <div class="button-glow"></div>
-                </button>
+                <a href="#" class="neural-signup" id="signupLink">ลงทะเบียน</a>
             </div>
 
             <div class="success-neural" id="successMessage">
@@ -128,9 +114,13 @@
                 <h3 id="adminWelcome">สวัสดี, แอดมิน!</h3>
                 <p id="adminDetails">
                     รหัสนักศึกษา: <span id="displayStudentId"></span><br>
-                    เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง<br>
-                    <a href="#" id="displayRedirectLink" class="neural-link" target="_blank">ไปยังระบบ (Link)</a>
+                    เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง
                 </p>
+                <button type="button" id="adminRedirectButton" class="neural-button" style="margin-top: 20px;">
+                    <div class="button-bg"></div>
+                    <span class="button-text">ไปยังหน้าสำหรับ Admin</span>
+                    <div class="button-glow"></div>
+                </button>
                 <p>กำลังเข้าสู่พื้นที่ทำงาน...</p>
             </div>
         </div>
