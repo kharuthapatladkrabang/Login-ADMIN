@@ -2,7 +2,7 @@
 class AIAssistantLoginForm {
     constructor() {
         this.form = document.getElementById('loginForm');
-        this.emailInput = document.getElementById('email'); // ใช้ ID เดิม แต่หมายถึง Student ID
+        this.emailInput = document.getElementById('email'); 
         this.passwordInput = document.getElementById('password');
         this.passwordToggle = document.getElementById('passwordToggle');
         this.submitButton = this.form.querySelector('.neural-button');
@@ -13,11 +13,11 @@ class AIAssistantLoginForm {
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
-        this.currentMode = 'login'; // สถานะเริ่มต้น
+        this.currentMode = 'login'; 
         
         // *****************************************************************************************
-        // *** สำคัญ: ต้องใส่ URL Web App ที่ได้จากการ Deploy Google Apps Script ที่นี่ ***
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxZB0thNQVgCsEP1m5ZBzg0MIY5-_koqE8cAj0w5ufWV8eFaZEv5zITMx2myVh_s9cq/exec'; 
+        // *** URL Web App ที่คุณระบุมา ***
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzHcKp2KppyD66XuIBmKMUTh3jA0ztyzq7Tovm9yTAfqvvJXLAqe2mhaFKpx_5t6EfD/exec'; 
         // *****************************************************************************************
 
         this.init();
@@ -28,7 +28,7 @@ class AIAssistantLoginForm {
         this.setupPasswordToggle();
         this.setupSocialButtons();
         this.setupAIEffects();
-        this.updateFormMode('login'); // ตั้งค่า UI เริ่มต้นเป็น Login
+        this.updateFormMode('login'); 
     }
     
     bindEvents() {
@@ -44,7 +44,6 @@ class AIAssistantLoginForm {
             this.updateFormMode(newMode);
         });
         
-        // Add placeholder for label animations
         this.emailInput.setAttribute('placeholder', ' ');
         this.passwordInput.setAttribute('placeholder', ' ');
     }
@@ -57,17 +56,18 @@ class AIAssistantLoginForm {
         this.actionText.textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'เข้าร่วมเครือข่าย' : 'กลับไปที่ล็อกอิน';
         
-        // เคลียร์ค่าและข้อความ error
         this.emailInput.value = '';
         this.passwordInput.value = '';
         this.clearError('email');
         this.clearError('password');
         
-        // รีเซ็ตการแสดงผล
         this.emailInput.closest('.smart-field').classList.remove('error');
         this.passwordInput.closest('.smart-field').classList.remove('error');
     }
 
+    // ... (ฟังก์ชัน setupPasswordToggle, setupSocialButtons, setupAIEffects, triggerNeuralEffect, validateStudentId, validatePassword, showError, clearError ยังคงเดิม)
+    
+    // โค้ดที่เหลือจากข้างต้น...
     setupPasswordToggle() {
         this.passwordToggle.addEventListener('click', () => {
             const type = this.passwordInput.type === 'password' ? 'text' : 'password';
@@ -151,6 +151,7 @@ class AIAssistantLoginForm {
             errorElement.textContent = '';
         }, 200);
     }
+    // สิ้นสุดโค้ดที่คงเดิม
     
     async handleSubmit(e) {
         e.preventDefault();
@@ -165,10 +166,9 @@ class AIAssistantLoginForm {
         this.setLoading(true);
         
         const formData = new FormData();
-        // ส่ง action และข้อมูลที่จำเป็นไปให้ Apps Script
         formData.append('action', this.currentMode); 
-        formData.append('studentId', this.emailInput.value.trim()); // ใช้ studentId สำหรับการลงทะเบียน
-        formData.append('email', this.emailInput.value.trim()); // ใช้ 'email' field สำหรับ doLogin ใน Apps Script
+        formData.append('studentId', this.emailInput.value.trim()); 
+        formData.append('email', this.emailInput.value.trim()); 
         formData.append('password', this.passwordInput.value);
         
         try {
@@ -185,21 +185,20 @@ class AIAssistantLoginForm {
             
             if (result.success) {
                 if (this.currentMode === 'login') {
-                    // ล็อกอินสำเร็จ
+                    // *** เรียกใช้ฟังก์ชันแสดงผลและส่งข้อมูล Admin ไปแสดง ***
+                    this.updateSuccessScreen(result); 
                     this.showNeuralSuccess();
                     
                     setTimeout(() => {
-                        console.log(`Neural link established - accessing AI workspace at: ${result.redirectUrl}`);
-                        // ในการใช้งานจริง: window.location.href = result.redirectUrl;
+                        console.log(`Neural link established - Redirecting to: ${result.redirectUrl}`);
+                        // window.location.href = result.redirectUrl;
                     }, 3200);
                 } else {
-                    // ลงทะเบียนสำเร็จ: สลับกลับไปหน้าล็อกอินและแสดง Alert
                     alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้เลย');
                     this.updateFormMode('login');
                 }
                 
             } else {
-                // ล็อกอิน/ลงทะเบียนไม่สำเร็จ
                 this.showError('password', result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
             }
 
@@ -210,11 +209,25 @@ class AIAssistantLoginForm {
             this.setLoading(false);
         }
     }
+
+    /**
+     * ฟังก์ชันใหม่: รับข้อมูล Admin จาก Apps Script และแสดงผลบนหน้า Success
+     * @param {object} data - ข้อมูลผลลัพธ์จาก Apps Script ที่มี adminName, studentId, totalLogins, redirectUrl
+     */
+    updateSuccessScreen(data) {
+        document.getElementById('adminWelcome').textContent = `สวัสดี, ${data.adminName}!`;
+        document.getElementById('displayStudentId').textContent = data.studentId;
+        document.getElementById('displayTotalLogins').textContent = data.totalLogins;
+        
+        const redirectLink = document.getElementById('displayRedirectLink');
+        redirectLink.textContent = `ไปยังระบบ (Link)`;
+        redirectLink.href = data.redirectUrl;
+    }
     
     async handleSocialLogin(provider, button) {
+        // ... (โค้ดเดิม)
         console.log(`Initializing ${provider} connection...`);
         
-        // AI-enhanced loading state
         const originalHTML = button.innerHTML;
         button.style.pointerEvents = 'none';
         button.style.opacity = '0.7';
@@ -235,7 +248,6 @@ class AIAssistantLoginForm {
         try {
             await new Promise(resolve => setTimeout(resolve, 2000));
             console.log(`Redirecting to ${provider} neural interface...`);
-            // window.location.href = `/auth/${provider.toLowerCase().replace(' ', '-')}`;
         } catch (error) {
             console.error(`${provider} connection failed: ${error.message}`);
         } finally {
