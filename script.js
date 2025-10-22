@@ -1,22 +1,21 @@
-// AI Assistant Login Form JavaScript
+// Login Form JavaScript
 class AIAssistantLoginForm {
     constructor() {
         this.form = document.getElementById('loginForm');
         this.emailInput = document.getElementById('email'); 
         this.passwordInput = document.getElementById('password');
         this.passwordToggle = document.getElementById('passwordToggle');
-        this.submitButton = this.form.querySelector('.neural-button');
+        this.submitButton = this.form.querySelector('.neural-button:not(.register-button)'); // ปุ่ม Login หลัก
+        this.registerButton = document.querySelector('.register-button'); // ปุ่มลงทะเบียน
         this.successMessage = document.getElementById('successMessage');
-        this.socialButtons = document.querySelectorAll('.social-neural');
         
-        this.signupLink = document.querySelector('.neural-signup'); 
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
         this.currentMode = 'login'; 
         
         // *****************************************************************************************
-        // *** URL Web App ที่คุณระบุมา ***
+        // *** URL Web App ล่าสุดที่อัปเดตแล้ว ***
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzHcKp2KppyD66XuIBmKMUTh3jA0ztyzq7Tovm9yTAfqvvJXLAqe2mhaFKpx_5t6EfD/exec'; 
         // *****************************************************************************************
 
@@ -26,7 +25,7 @@ class AIAssistantLoginForm {
     init() {
         this.bindEvents();
         this.setupPasswordToggle();
-        this.setupSocialButtons();
+        // ลบ this.setupSocialButtons ออก
         this.setupAIEffects();
         this.updateFormMode('login'); 
     }
@@ -38,8 +37,8 @@ class AIAssistantLoginForm {
         this.emailInput.addEventListener('input', () => this.clearError('email'));
         this.passwordInput.addEventListener('input', () => this.clearError('password'));
         
-        this.signupLink.addEventListener('click', (e) => {
-            e.preventDefault();
+        // ผูก Event กับปุ่ม "ลงทะเบียน" และปุ่ม "กลับไปล็อกอิน"
+        this.registerButton.addEventListener('click', () => {
             const newMode = this.currentMode === 'login' ? 'register' : 'login';
             this.updateFormMode(newMode);
         });
@@ -50,12 +49,23 @@ class AIAssistantLoginForm {
     
     updateFormMode(mode) {
         this.currentMode = mode;
-        this.formHeader.textContent = mode === 'login' ? 'Neural Access' : 'การลงทะเบียนใหม่';
-        this.formSubHeader.textContent = mode === 'login' ? 'เชื่อมต่อสู่พื้นที่ทำงาน AI ของคุณ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
-        this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เริ่มการเชื่อมต่อ' : 'ลงทะเบียนและยืนยัน';
-        this.actionText.textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
-        this.signupLink.textContent = mode === 'login' ? 'เข้าร่วมเครือข่าย' : 'กลับไปที่ล็อกอิน';
         
+        // Update Header
+        this.formHeader.textContent = mode === 'login' ? 'ระบบเข้าสู่ระบบ' : 'การลงทะเบียนผู้ดูแลระบบ';
+        this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
+        
+        // Update Main Button (Login Button)
+        this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
+        
+        // Update Register Button (ปุ่มด้านล่าง)
+        this.actionText.textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'กลับไปที่หน้าหลัก ';
+        this.registerButton.querySelector('.button-text').textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปล็อกอิน';
+        
+        // ซ่อน/แสดงปุ่ม Login หลักเมื่อสลับโหมด (เพื่อให้ปุ่ม Register ด้านล่างทำหน้าที่เป็นปุ่ม Submit แทน)
+        this.submitButton.style.display = mode === 'login' ? 'flex' : 'none'; 
+        this.registerButton.style.display = 'flex'; // แสดงปุ่ม Register เสมอ (เปลี่ยนหน้าที่)
+        
+        // Clear inputs and errors
         this.emailInput.value = '';
         this.passwordInput.value = '';
         this.clearError('email');
@@ -65,24 +75,12 @@ class AIAssistantLoginForm {
         this.passwordInput.closest('.smart-field').classList.remove('error');
     }
 
-    // ... (ฟังก์ชัน setupPasswordToggle, setupSocialButtons, setupAIEffects, triggerNeuralEffect, validateStudentId, validatePassword, showError, clearError ยังคงเดิม)
-    
-    // โค้ดที่เหลือจากข้างต้น...
     setupPasswordToggle() {
         this.passwordToggle.addEventListener('click', () => {
             const type = this.passwordInput.type === 'password' ? 'text' : 'password';
             this.passwordInput.type = type;
             
             this.passwordToggle.classList.toggle('toggle-active', type === 'text');
-        });
-    }
-    
-    setupSocialButtons() {
-        this.socialButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const provider = button.querySelector('span').textContent.trim();
-                this.handleSocialLogin(provider, button);
-            });
         });
     }
     
@@ -151,11 +149,13 @@ class AIAssistantLoginForm {
             errorElement.textContent = '';
         }, 200);
     }
-    // สิ้นสุดโค้ดที่คงเดิม
     
     async handleSubmit(e) {
         e.preventDefault();
         
+        // ถ้าเป็นโหมดลงทะเบียน จะใช้ปุ่ม Register ด้านล่างเป็นปุ่ม Submit แทนปุ่มหลัก
+        const submitButton = this.currentMode === 'login' ? this.submitButton : this.registerButton;
+
         const isStudentIdValid = this.validateStudentId();
         const isPasswordValid = this.validatePassword();
         
@@ -163,12 +163,12 @@ class AIAssistantLoginForm {
             return;
         }
         
-        this.setLoading(true);
+        this.setLoading(true, submitButton);
         
         const formData = new FormData();
         formData.append('action', this.currentMode); 
         formData.append('studentId', this.emailInput.value.trim()); 
-        formData.append('email', this.emailInput.value.trim()); 
+        formData.append('email', this.emailInput.value.trim()); // ใช้ 'email' field สำหรับ doLogin ใน Apps Script
         formData.append('password', this.passwordInput.value);
         
         try {
@@ -185,12 +185,11 @@ class AIAssistantLoginForm {
             
             if (result.success) {
                 if (this.currentMode === 'login') {
-                    // *** เรียกใช้ฟังก์ชันแสดงผลและส่งข้อมูล Admin ไปแสดง ***
                     this.updateSuccessScreen(result); 
                     this.showNeuralSuccess();
                     
                     setTimeout(() => {
-                        console.log(`Neural link established - Redirecting to: ${result.redirectUrl}`);
+                        console.log(`Login successful - Redirecting to: ${result.redirectUrl}`);
                         // window.location.href = result.redirectUrl;
                     }, 3200);
                 } else {
@@ -204,16 +203,12 @@ class AIAssistantLoginForm {
 
         } catch (error) {
             console.error(`${this.currentMode} error:`, error);
-            this.showError('password', 'การเชื่อมต่อระบบประสาทล้มเหลว โปรดลองอีกครั้ง');
+            this.showError('password', 'การเชื่อมต่อระบบล้มเหลว โปรดลองอีกครั้ง');
         } finally {
-            this.setLoading(false);
+            this.setLoading(false, submitButton);
         }
     }
 
-    /**
-     * ฟังก์ชันใหม่: รับข้อมูล Admin จาก Apps Script และแสดงผลบนหน้า Success
-     * @param {object} data - ข้อมูลผลลัพธ์จาก Apps Script ที่มี adminName, studentId, totalLogins, redirectUrl
-     */
     updateSuccessScreen(data) {
         document.getElementById('adminWelcome').textContent = `สวัสดี, ${data.adminName}!`;
         document.getElementById('displayStudentId').textContent = data.studentId;
@@ -224,47 +219,12 @@ class AIAssistantLoginForm {
         redirectLink.href = data.redirectUrl;
     }
     
-    async handleSocialLogin(provider, button) {
-        // ... (โค้ดเดิม)
-        console.log(`Initializing ${provider} connection...`);
+    setLoading(loading, button = this.submitButton) {
+        // ใช้ button ที่ถูกส่งมา เพื่อให้รองรับปุ่ม Login และ Register
+        button.classList.toggle('loading', loading);
+        button.disabled = loading;
         
-        const originalHTML = button.innerHTML;
-        button.style.pointerEvents = 'none';
-        button.style.opacity = '0.7';
-        
-        const loadingHTML = `
-            <div class="social-bg"></div>
-            <div style="display: flex; gap: 2px;">
-                <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite;"></div>
-                <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite; animation-delay: 0.1s;"></div>
-                <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite; animation-delay: 0.2s;"></div>
-            </div>
-            <span>กำลังเชื่อมต่อ...</span>
-            <div class="social-glow"></div>
-        `;
-        
-        button.innerHTML = loadingHTML;
-        
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log(`Redirecting to ${provider} neural interface...`);
-        } catch (error) {
-            console.error(`${provider} connection failed: ${error.message}`);
-        } finally {
-            button.style.pointerEvents = 'auto';
-            button.style.opacity = '1';
-            button.innerHTML = originalHTML;
-        }
-    }
-    
-    setLoading(loading) {
-        this.submitButton.classList.toggle('loading', loading);
-        this.submitButton.disabled = loading;
-        
-        this.socialButtons.forEach(button => {
-            button.style.pointerEvents = loading ? 'none' : 'auto';
-            button.style.opacity = loading ? '0.5' : '1';
-        });
+        // ลบการจัดการ social buttons ออก
     }
     
     showNeuralSuccess() {
@@ -273,9 +233,7 @@ class AIAssistantLoginForm {
         
         setTimeout(() => {
             this.form.style.display = 'none';
-            document.querySelector('.neural-social').style.display = 'none';
             document.querySelector('.signup-section').style.display = 'none';
-            document.querySelector('.auth-separator').style.display = 'none';
             
             this.successMessage.classList.add('show');
             
