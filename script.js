@@ -7,8 +7,8 @@ class AIAssistantLoginForm {
         this.passwordInput = document.getElementById('password');
         this.passwordToggle = document.getElementById('passwordToggle');
         this.submitButton = this.form.querySelector('.neural-button'); 
-        this.signupLink = document.getElementById('signupLink');
-        this.adminRedirectButton = document.getElementById('adminRedirectButton');
+        this.signupLink = document.getElementById('signupLink'); 
+        this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
         this.successMessage = document.getElementById('successMessage');
         
         this.formHeader = document.querySelector('.login-header h1');
@@ -31,10 +31,10 @@ class AIAssistantLoginForm {
         this.backToLoginLink = document.getElementById('backToLoginLink');
         this.forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
         
-        this.tempStudentId = null; // เก็บ Student ID ชั่วคราวสำหรับการรีเซ็ต
+        this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzNGFqLH-uku2dYhNw_NN389wltN3djAYlPKfWVBgfYDmR5_WnUfjdbAZSK-ZATQUxH/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxykjGWTqDTBQok1gFkvOj4MzJwM8tCyURoBaFi0m_aLhaBvhUGOSUiFzCdB63MtmuS/exec'; 
 
         this.init();
     }
@@ -75,16 +75,6 @@ class AIAssistantLoginForm {
         this.forgotPasswordForm.addEventListener('submit', (e) => this.handleSendResetCode(e));
         this.resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
         
-        // Redirect Button
-        this.adminRedirectButton.addEventListener('click', () => {
-            if (this.redirectUrl) {
-                console.log(`Redirecting to Admin page: ${this.redirectUrl}`);
-                window.location.href = this.redirectUrl;
-            } else {
-                console.warn('Redirect URL not set. Please log in again.');
-            }
-        });
-        
         this.emailInput.setAttribute('placeholder', ' ');
         this.passwordInput.setAttribute('placeholder', ' ');
     }
@@ -92,7 +82,7 @@ class AIAssistantLoginForm {
     // UI/Mode Management
     showForgotPasswordStep1() {
         this.mainLoginCard.style.display = 'none';
-        this.forgotPasswordContainer.style.display = 'block';
+        this.forgotPasswordContainer.style.display = 'flex'; // แก้ไขการแสดงผล Modal
         this.resetPasswordStep2.style.display = 'none';
         this.forgotPasswordForm.style.display = 'block';
         this.forgotPasswordMessage.textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
@@ -109,10 +99,12 @@ class AIAssistantLoginForm {
     updateFormMode(mode) {
         this.currentMode = mode;
         
-        this.formHeader.textContent = mode === 'login' ? 'ระบบเข้าสู่ระบบ' : 'การลงทะเบียนผู้ดูแลระบบ';
+        // Update Header (ใช้คำว่า Admin)
+        this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
         this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
         this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
+        // Update Signup/Login Link Text
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
 
@@ -126,6 +118,18 @@ class AIAssistantLoginForm {
         this.emailInput.closest('.smart-field').classList.remove('error');
         this.passwordInput.closest('.smart-field').classList.remove('error');
     }
+
+    // *** แก้ไขปัญหาปุ่มดูรหัสผ่านไม่ทำงาน ***
+    setupPasswordToggle() {
+        this.passwordToggle.addEventListener('click', () => {
+            const isPassword = this.passwordInput.type === 'password';
+            this.passwordInput.type = isPassword ? 'text' : 'password';
+            
+            // Toggle icons based on new state
+            this.passwordToggle.classList.toggle('toggle-active', isPassword);
+        });
+    }
+    // ********************************************
 
     // Validation Helpers
     validateStudentId() {
@@ -154,25 +158,33 @@ class AIAssistantLoginForm {
 
     // Error Management
     showError(field, message) {
-        const inputId = field === 'resetEmail' ? 'resetEmail' : field;
-        const smartField = document.getElementById(inputId).closest('.smart-field');
-        const errorElement = document.getElementById(`${inputId}Error`);
+        const inputElement = document.getElementById(field);
+        if (!inputElement) return;
+
+        const smartField = inputElement.closest('.smart-field');
+        const errorElement = document.getElementById(`${field}Error`);
         
-        smartField.classList.add('error');
-        errorElement.textContent = message;
-        errorElement.classList.add('show');
+        if (smartField && errorElement) {
+             smartField.classList.add('error');
+             errorElement.textContent = message;
+             errorElement.classList.add('show');
+        }
     }
     
     clearError(field) {
-        const inputId = field === 'resetEmail' ? 'resetEmail' : field;
-        const smartField = document.getElementById(inputId).closest('.smart-field');
-        const errorElement = document.getElementById(`${inputId}Error`);
+        const inputElement = document.getElementById(field);
+        if (!inputElement) return;
         
-        smartField.classList.remove('error');
-        errorElement.classList.remove('show');
-        setTimeout(() => {
-            errorElement.textContent = '';
-        }, 200);
+        const smartField = inputElement.closest('.smart-field');
+        const errorElement = document.getElementById(`${field}Error`);
+        
+        if (smartField && errorElement) {
+            smartField.classList.remove('error');
+            errorElement.classList.remove('show');
+            setTimeout(() => {
+                errorElement.textContent = '';
+            }, 200);
+        }
     }
     
     clearForgotPasswordErrors() {
@@ -180,6 +192,32 @@ class AIAssistantLoginForm {
         this.clearError('resetCode');
         this.clearError('newPassword');
         this.clearError('confirmPassword');
+    }
+
+    // AIEffects/Loading
+    setupAIEffects() {
+        [this.emailInput, this.passwordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInput].forEach(input => {
+            if(input) {
+                input.addEventListener('focus', (e) => {
+                    this.triggerNeuralEffect(e.target.closest('.smart-field'));
+                });
+            }
+        });
+    }
+    
+    triggerNeuralEffect(field) {
+        const indicator = field ? field.querySelector('.ai-indicator') : null;
+        if(indicator) {
+            indicator.style.opacity = '1';
+            setTimeout(() => {
+                indicator.style.opacity = '';
+            }, 2000);
+        }
+    }
+
+    setLoading(loading, button = this.submitButton) {
+        button.classList.toggle('loading', loading);
+        button.disabled = loading;
     }
     
     // Core Form Submission
@@ -213,18 +251,23 @@ class AIAssistantLoginForm {
             
             if (result.success) {
                 if (this.currentMode === 'login') {
-                    this.updateSuccessScreen(result); 
-                    this.showNeuralSuccess();
+                    if (result.adminName) {
+                        this.updateSuccessScreen(result); 
+                        this.showNeuralSuccess();
+                    } else {
+                        this.showError('password', 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
+                    }
                 } else {
-                    alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้เลย');
+                    alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว');
                     this.updateFormMode('login');
                 }
             } else {
+                // *** แก้ไข: แสดงข้อความ Error จาก Apps Script ***
                 this.showError('password', result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
             }
         } catch (error) {
             console.error(`${this.currentMode} error:`, error);
-            this.showError('password', 'การเชื่อมต่อระบบล้มเหลว โปรดลองอีกครั้ง');
+            this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
         } finally {
             this.setLoading(false, submitButton);
         }
@@ -240,7 +283,6 @@ class AIAssistantLoginForm {
         const studentId = this.resetEmailInput.value.trim();
         this.tempStudentId = studentId;
 
-        // Simple Validation
         if (!studentId) {
             return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
         }
@@ -319,7 +361,7 @@ class AIAssistantLoginForm {
                 alert(result.message);
                 this.showLoginCard(); // กลับไปหน้า Login
             } else {
-                this.showError('confirmPassword', result.message); // แสดงข้อผิดพลาดสุดท้ายที่ตำแหน่งนี้
+                this.showError('confirmPassword', result.message); 
             }
         } catch (error) {
             this.showError('confirmPassword', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน');
@@ -330,24 +372,48 @@ class AIAssistantLoginForm {
     
     // Display Functions
     updateSuccessScreen(data) {
-        this.redirectUrl = data.redirectUrl; 
-        document.getElementById('adminWelcome').textContent = `สวัสดี, ${data.adminName}!`;
+        const adminName = data.adminName || 'Admin';
+        const links = data.redirectLinks || []; 
+
+        document.getElementById('adminWelcome').textContent = `สวัสดี, ${adminName}!`;
         document.getElementById('displayStudentId').textContent = data.studentId;
         document.getElementById('displayTotalLogins').textContent = data.totalLogins;
-    }
-    
-    setLoading(loading, button = this.submitButton) {
-        button.classList.toggle('loading', loading);
-        button.disabled = loading;
+
+        // สร้างปุ่มลิงก์ตามจำนวนที่ได้รับ
+        this.redirectButtonsContainer.innerHTML = '';
+        
+        if (links.length === 0) {
+            this.redirectButtonsContainer.innerHTML = '<p style="color: #ef4444; margin-top: 10px;">ไม่พบลิงก์สำหรับ Admin</p>';
+            return;
+        }
+        
+        links.forEach((link, index) => {
+            const buttonText = `ไปยังหน้าสำหรับ Admin (${index + 1})`;
+            const newButton = document.createElement('button');
+            newButton.className = 'neural-button';
+            newButton.type = 'button';
+            newButton.style.marginTop = '0px';
+            
+            newButton.innerHTML = `
+                <div class="button-bg"></div>
+                <span class="button-text">${buttonText}</span>
+                <div class="button-glow"></div>
+            `;
+
+            newButton.addEventListener('click', () => {
+                window.open(link, '_blank');
+            });
+            
+            this.redirectButtonsContainer.appendChild(newButton);
+        });
     }
     
     showNeuralSuccess() {
-        this.mainLoginCard.style.display = 'none'; // ซ่อน Main Login Card
-        this.forgotPasswordContainer.style.display = 'none'; // ซ่อน Forgot Password
+        this.mainLoginCard.style.display = 'none'; 
+        this.forgotPasswordContainer.style.display = 'none'; 
         
-        // Show success screen
         const loginContainer = document.querySelector('.login-container');
-        loginContainer.style.display = 'block'; // ให้ container หลักแสดงผล
+        loginContainer.style.display = 'block'; 
         document.querySelector('.signup-section').style.display = 'none';
         this.successMessage.classList.add('show');
     }
