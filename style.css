@@ -1,4 +1,4 @@
-/* AI Assistant Login Form - Complete & Self-Contained */
+/* Login Form - Complete & Self-Contained */
 
 * {
     margin: 0;
@@ -16,7 +16,6 @@ body {
     padding: 20px;
     line-height: 1.5;
     position: relative;
-    /* แก้ไข: ลบ overflow: hidden; เพื่อให้หน้าเว็บ scroll ได้ */
 }
 
 /* Neural Background */
@@ -122,62 +121,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.logo-core {
-    position: relative;
-    z-index: 3;
-    color: #3b82f6;
-    animation: coreRotate 8s linear infinite;
-}
-
-@keyframes coreRotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.logo-rings {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.ring {
-    position: absolute;
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 50%;
-    animation: ringPulse 3s ease-in-out infinite;
-}
-
-.ring-1 {
-    width: 60px;
-    height: 60px;
-    top: 10px;
-    left: 10px;
-    animation-delay: 0s;
-}
-
-.ring-2 {
-    width: 70px;
-    height: 70px;
-    top: 5px;
-    left: 5px;
-    animation-delay: 1s;
-}
-
-.ring-3 {
-    width: 80px;
-    height: 80px;
-    top: 0;
-    left: 0;
-    animation-delay: 2s;
-}
-
-@keyframes ringPulse {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.05); }
+    border-radius: 50%; /* เพื่อให้รูปภาพดูเป็นวงกลมหากต้องการ */
+    overflow: hidden;
 }
 
 .login-header h1 {
@@ -554,79 +499,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Neural Social */
-.neural-social {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 28px;
-}
-
-.social-neural {
-    flex: 1;
-    background: transparent;
-    color: #cbd5e1;
-    border: none;
-    border-radius: 10px;
-    padding: 12px 16px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-    min-height: 46px;
-    position: relative;
-    overflow: hidden;
-}
-
-.social-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-.social-neural:hover .social-bg {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(59, 130, 246, 0.4);
-}
-
-.social-neural span {
-    position: relative;
-    z-index: 2;
-}
-
-.social-neural svg {
-    position: relative;
-    z-index: 2;
-}
-
-.social-glow {
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    right: -1px;
-    bottom: -1px;
-    background: rgba(59, 130, 246, 0.2);
-    border-radius: 11px;
-    opacity: 0;
-    filter: blur(4px);
-    transition: opacity 0.2s ease;
-    z-index: 0;
-}
-
-.social-neural:hover .social-glow {
-    opacity: 1;
-}
-
 /* Signup Section */
 .signup-section {
     text-align: center;
@@ -806,19 +678,5 @@ body {
     .ai-logo {
         width: 60px;
         height: 60px;
-    }
-    
-    .ring-1 { width: 45px; height: 45px; top: 7.5px; left: 7.5px; }
-    .ring-2 { width: 52px; height: 52px; top: 4px; left: 4px; }
-    .ring-3 { width: 60px; height: 60px; top: 0; left: 0; }
-    
-    .form-options {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-    }
-    
-    .neural-social {
-        flex-direction: column;
     }
 }
