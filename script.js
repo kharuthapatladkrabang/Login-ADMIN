@@ -9,7 +9,7 @@ class AIAssistantLoginForm {
         this.submitButton = this.form.querySelector('.neural-button'); 
         this.signupLink = document.getElementById('signupLink'); 
         this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
-        this.successMessage = document.getElementById('successMessage'); // Success Card (div.login-card)
+        this.successMessage = document.getElementById('successMessage'); // Success Card
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
@@ -35,7 +35,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxykjGWTqDTBQok1gFkvOj4MzJwM8tCyURoBaFi0m_aLhaBvhUGOSUiFzCdB63MtmuS/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxhLuMAi1KTGZmdIuPexaC_sGOzr3r_4UdDuTob_0IUBEclR1WqC4SZkf-arzskz7Xe/exec'; 
 
         this.init();
     }
@@ -48,7 +48,7 @@ class AIAssistantLoginForm {
         this.updateFormMode('login'); 
     }
     
-    // NEW: โหลดข้อมูลที่จดจำไว้จาก localStorage
+    // โหลดข้อมูลที่จดจำไว้จาก localStorage
     loadRememberedCredentials() {
         const rememberedId = localStorage.getItem('admin_remember_id');
         const rememberedPass = localStorage.getItem('admin_remember_pass');
@@ -61,7 +61,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // NEW: บันทึกข้อมูลลง localStorage
+    // บันทึกข้อมูลลง localStorage
     saveCredentials() {
         const rememberCheckbox = document.getElementById('remember');
         if (rememberCheckbox && rememberCheckbox.checked) {
@@ -158,7 +158,6 @@ class AIAssistantLoginForm {
             const isPassword = this.passwordInput.type === 'password';
             this.passwordInput.type = isPassword ? 'text' : 'password';
             
-            // Toggle icons based on new state
             this.passwordToggle.classList.toggle('toggle-active', isPassword);
         });
     }
@@ -408,7 +407,7 @@ class AIAssistantLoginForm {
     // Display Functions
     updateSuccessScreen(data) {
         const adminName = data.adminName || 'Admin';
-        const links = data.redirectLinks || []; 
+        const links = data.redirectButtons || []; 
 
         document.getElementById('adminWelcome').textContent = `สวัสดี, ${adminName}!`;
         document.getElementById('displayStudentId').textContent = data.studentId;
@@ -422,8 +421,10 @@ class AIAssistantLoginForm {
             return;
         }
         
-        links.forEach((link, index) => {
-            const buttonText = `ไปยังหน้าสำหรับ Admin (${index + 1})`;
+        links.forEach((buttonData, index) => {
+            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจากหัวตาราง (ชีต2 แถว 1)
+            const link = buttonData.link;
+            
             const newButton = document.createElement('button');
             newButton.className = 'neural-button';
             newButton.type = 'button';
