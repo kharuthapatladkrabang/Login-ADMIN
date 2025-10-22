@@ -21,6 +21,7 @@ class AIAssistantLoginForm {
 
         // Forgot Password Elements
         this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        this.forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
         this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
         this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
         this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
@@ -52,12 +53,18 @@ class AIAssistantLoginForm {
     loadRememberedCredentials() {
         const rememberedId = localStorage.getItem('admin_remember_id');
         const rememberedPass = localStorage.getItem('admin_remember_pass');
+        const rememberCheckbox = document.getElementById('remember'); // Element Checkbox
 
         if (rememberedId && rememberedPass) {
+            // ตั้งค่าค่าลงใน Input Fields
             this.emailInput.value = rememberedId;
             this.passwordInput.value = rememberedPass;
-            const rememberCheckbox = document.getElementById('remember');
+            
+            // ติ๊ก Checkbox
             if (rememberCheckbox) rememberCheckbox.checked = true; 
+        } else {
+             // เคลียร์ Checkbox หากไม่มีข้อมูล
+             if (rememberCheckbox) rememberCheckbox.checked = false;
         }
     }
 
@@ -108,6 +115,7 @@ class AIAssistantLoginForm {
     
     // UI/Mode Management
     showForgotPasswordStep1() {
+        // ซ่อน Card อื่น
         this.mainLoginCard.style.display = 'none';
         this.successMessage.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
@@ -120,10 +128,13 @@ class AIAssistantLoginForm {
     }
 
     showLoginCard() {
-        this.mainLoginCard.style.display = 'block';
+        // ซ่อน Card อื่น
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         this.successMessage.style.display = 'none';
+        
+        // แสดง Login Card
+        this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
         this.updateFormMode('login');
     }
@@ -420,7 +431,7 @@ class AIAssistantLoginForm {
         }
         
         links.forEach((buttonData, index) => {
-            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจาก Apps Script (แถว 1)
+            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจาก Apps Script (ชีต 2 แถว 1)
             const link = buttonData.link;
             
             const newButton = document.createElement('button');
@@ -437,6 +448,11 @@ class AIAssistantLoginForm {
             newButton.addEventListener('click', () => {
                 window.open(link, '_blank');
             });
+            
+            // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px)
+            if (index > 0) {
+                newButton.style.marginTop = '5px'; 
+            }
             
             this.redirectButtonsContainer.appendChild(newButton);
         });
