@@ -11,6 +11,8 @@ class AIAssistantLoginForm {
         this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
         this.successMessage = document.getElementById('successMessage');
         
+        this.mainLoginCard = document.getElementById('mainLoginCard');
+        
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
@@ -20,10 +22,10 @@ class AIAssistantLoginForm {
         // Forgot Password Elements
         this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
         this.forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
-        this.mainLoginCard = document.getElementById('mainLoginCard');
+        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); 
+        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); 
         this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
         this.resetEmailInput = document.getElementById('resetEmail');
-        this.resetPasswordStep2 = document.getElementById('resetPasswordStep2');
         this.resetPasswordForm = document.getElementById('resetPasswordForm');
         this.resetCodeInput = document.getElementById('resetCode');
         this.newPasswordInput = document.getElementById('newPassword');
@@ -33,14 +35,16 @@ class AIAssistantLoginForm {
         
         this.tempStudentId = null; 
 
-        // URL Web App ล่าสุด
+        // *****************************************************************************************
+        // *** URL Web App ล่าสุดที่อัปเดตแล้ว ***
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxykjGWTqDTBQok1gFkvOj4MzJwM8tCyURoBaFi0m_aLhaBvhUGOSUiFzCdB63MtmuS/exec'; 
+        // *****************************************************************************************
 
         this.init();
     }
     
     init() {
-        this.loadRememberedCredentials(); // NEW: โหลดข้อมูลที่จดจำไว้
+        this.loadRememberedCredentials(); 
         this.bindEvents();
         this.setupPasswordToggle();
         this.setupAIEffects();
@@ -55,7 +59,7 @@ class AIAssistantLoginForm {
         if (rememberedId && rememberedPass) {
             this.emailInput.value = rememberedId;
             this.passwordInput.value = rememberedPass;
-            document.getElementById('remember').checked = true; // ติ๊กกล่อง
+            document.getElementById('remember').checked = true; 
         }
     }
 
@@ -107,17 +111,21 @@ class AIAssistantLoginForm {
     // UI/Mode Management
     showForgotPasswordStep1() {
         this.mainLoginCard.style.display = 'none';
-        this.forgotPasswordContainer.style.display = 'flex'; // แก้ไขการแสดงผล Modal
-        this.resetPasswordStep2.style.display = 'none';
-        this.forgotPasswordForm.style.display = 'block';
-        this.forgotPasswordMessage.textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
+        this.successMessage.style.display = 'none';
+        this.forgotPasswordCard1.style.display = 'block';
+        this.forgotPasswordCard2.style.display = 'none';
+        document.querySelector('.signup-section').style.display = 'none';
+        
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
     }
 
     showLoginCard() {
         this.mainLoginCard.style.display = 'block';
-        this.forgotPasswordContainer.style.display = 'none';
+        this.forgotPasswordCard1.style.display = 'none';
+        this.forgotPasswordCard2.style.display = 'none';
+        this.successMessage.style.display = 'none';
+        document.querySelector('.signup-section').style.display = 'block';
         this.updateFormMode('login');
     }
 
@@ -277,11 +285,11 @@ class AIAssistantLoginForm {
             
             if (result.success) {
                 if (this.currentMode === 'login') {
-                    this.saveCredentials(); // NEW: บันทึกข้อมูลเมื่อล็อกอินสำเร็จ
+                    this.saveCredentials(); // บันทึกข้อมูลเมื่อล็อกอินสำเร็จ
                     
                     if (result.adminName) {
                         this.updateSuccessScreen(result); 
-                        this.showNeuralSuccess(); // หน้า Success ควรขึ้น
+                        this.showNeuralSuccess(); // แสดงหน้า Success
                     } else {
                         this.showError('password', 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
@@ -332,8 +340,8 @@ class AIAssistantLoginForm {
 
             if (result.success) {
                 this.forgotPasswordMessage.textContent = result.message;
-                this.resetPasswordStep2.style.display = 'block';
-                this.forgotPasswordForm.style.display = 'none';
+                this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
+                this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
             } else {
                 this.showError('resetEmail', result.message);
             }
@@ -437,12 +445,15 @@ class AIAssistantLoginForm {
     }
     
     showNeuralSuccess() {
+        // ซ่อน Login/Forgot Cards ทั้งหมด
         this.mainLoginCard.style.display = 'none'; 
-        this.forgotPasswordContainer.style.display = 'none'; 
+        this.forgotPasswordCard1.style.display = 'none';
+        this.forgotPasswordCard2.style.display = 'none';
         
-        // NEW: Show only the success card by hiding everything else in the container
+        // แสดง Success Card
         document.querySelector('.signup-section').style.display = 'none';
         this.successMessage.classList.add('show');
+        this.successMessage.style.display = 'block'; // แก้ไขเพื่อให้แน่ใจว่าแสดงผล
     }
 }
 
