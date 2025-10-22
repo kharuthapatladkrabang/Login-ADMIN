@@ -21,7 +21,6 @@ class AIAssistantLoginForm {
 
         // Forgot Password Elements
         this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        this.forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
         this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
         this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
         this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
@@ -42,7 +41,7 @@ class AIAssistantLoginForm {
     }
     
     init() {
-        this.loadRememberedCredentials(); 
+        this.loadRememberedCredentials(); // เรียกใช้การโหลดค่าทันทีที่เริ่มต้น
         this.bindEvents();
         this.setupPasswordToggle();
         this.setupAIEffects();
@@ -53,18 +52,26 @@ class AIAssistantLoginForm {
     loadRememberedCredentials() {
         const rememberedId = localStorage.getItem('admin_remember_id');
         const rememberedPass = localStorage.getItem('admin_remember_pass');
-        const rememberCheckbox = document.getElementById('remember'); // Element Checkbox
+        const rememberCheckbox = document.getElementById('remember');
 
         if (rememberedId && rememberedPass) {
-            // ตั้งค่าค่าลงใน Input Fields
             this.emailInput.value = rememberedId;
             this.passwordInput.value = rememberedPass;
             
-            // ติ๊ก Checkbox
-            if (rememberCheckbox) rememberCheckbox.checked = true; 
+            if (rememberCheckbox) {
+                rememberCheckbox.checked = true; 
+            }
+            
+            // ทำให้ Label ลอยขึ้น (Focus Effect) เพื่อแสดงว่ามีข้อมูลแล้ว
+            this.emailInput.closest('.smart-field').classList.add('has-value');
+            this.passwordInput.closest('.smart-field').classList.add('has-value');
+
         } else {
-             // เคลียร์ Checkbox หากไม่มีข้อมูล
-             if (rememberCheckbox) rememberCheckbox.checked = false;
+             if (rememberCheckbox) {
+                rememberCheckbox.checked = false;
+             }
+             this.emailInput.closest('.smart-field').classList.remove('has-value');
+             this.passwordInput.closest('.smart-field').classList.remove('has-value');
         }
     }
 
@@ -72,9 +79,11 @@ class AIAssistantLoginForm {
     saveCredentials() {
         const rememberCheckbox = document.getElementById('remember');
         if (rememberCheckbox && rememberCheckbox.checked) {
+            // ต้องบันทึกเฉพาะเมื่อ Login สำเร็จเท่านั้น
             localStorage.setItem('admin_remember_id', this.emailInput.value.trim());
             localStorage.setItem('admin_remember_pass', this.passwordInput.value);
         } else {
+            // ลบออกจาก localStorage ถ้าผู้ใช้ไม่ได้ติ๊ก
             localStorage.removeItem('admin_remember_id');
             localStorage.removeItem('admin_remember_pass');
         }
@@ -86,6 +95,18 @@ class AIAssistantLoginForm {
         this.passwordInput.addEventListener('blur', () => this.validatePassword());
         this.emailInput.addEventListener('input', () => this.clearError('email'));
         this.passwordInput.addEventListener('input', () => this.clearError('password'));
+        
+        // เพิ่ม Event สำหรับจัดการสถานะ .has-value เมื่อมีการพิมพ์
+        [this.emailInput, this.passwordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                const smartField = input.closest('.smart-field');
+                if (input.value.length > 0) {
+                    smartField.classList.add('has-value');
+                } else {
+                    smartField.classList.remove('has-value');
+                }
+            });
+        });
         
         // Register/Login Switch
         this.signupLink.addEventListener('click', (e) => {
@@ -115,25 +136,22 @@ class AIAssistantLoginForm {
     
     // UI/Mode Management
     showForgotPasswordStep1() {
-        // ซ่อน Card อื่น
         this.mainLoginCard.style.display = 'none';
         this.successMessage.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         document.querySelector('.signup-section').style.display = 'none';
         
-        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
+        this.forgotPasswordCard1.style.display = 'block'; 
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
     }
 
     showLoginCard() {
-        // ซ่อน Card อื่น
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         this.successMessage.style.display = 'none';
         
-        // แสดง Login Card
         this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
         this.updateFormMode('login');
@@ -142,12 +160,10 @@ class AIAssistantLoginForm {
     updateFormMode(mode) {
         this.currentMode = mode;
         
-        // Update Header (ใช้คำว่า Admin)
         this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
         this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
         this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
-        // Update Signup/Login Link Text
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
 
@@ -159,8 +175,8 @@ class AIAssistantLoginForm {
         this.clearError('email');
         this.clearError('password');
         
-        this.emailInput.closest('.smart-field').classList.remove('error');
-        this.passwordInput.closest('.smart-field').classList.remove('error');
+        this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
+        this.passwordInput.closest('.smart-field').classList.remove('error', 'has-value');
     }
 
     setupPasswordToggle() {
@@ -292,11 +308,12 @@ class AIAssistantLoginForm {
             
             if (result.success) {
                 if (this.currentMode === 'login') {
-                    this.saveCredentials(); // บันทึกข้อมูลเมื่อล็อกอินสำเร็จ
+                    // *** แก้ไข: เรียก saveCredentials() ที่นี่เมื่อ Login สำเร็จ ***
+                    this.saveCredentials(); 
                     
                     if (result.adminName) {
                         this.updateSuccessScreen(result); 
-                        this.showNeuralSuccess(); // แสดงหน้า Success
+                        this.showNeuralSuccess(); 
                     } else {
                         this.showError('password', 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
@@ -305,7 +322,6 @@ class AIAssistantLoginForm {
                     this.updateFormMode('login');
                 }
             } else {
-                // แสดงข้อความ Error จาก Apps Script
                 this.showError('password', result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
             }
         } catch (error) {
@@ -437,7 +453,6 @@ class AIAssistantLoginForm {
             const newButton = document.createElement('button');
             newButton.className = 'neural-button';
             newButton.type = 'button';
-            newButton.style.marginTop = '0px';
             
             newButton.innerHTML = `
                 <div class="button-bg"></div>
@@ -449,11 +464,7 @@ class AIAssistantLoginForm {
                 window.open(link, '_blank');
             });
             
-            // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px)
-            if (index > 0) {
-                newButton.style.marginTop = '5px'; 
-            }
-            
+            // *** ไม่ต้องกำหนด margin-top ตรงนี้แล้ว เพราะใช้ CSS gap ใน index.html แทน ***
             this.redirectButtonsContainer.appendChild(newButton);
         });
     }
