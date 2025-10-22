@@ -5,19 +5,19 @@ class AIAssistantLoginForm {
         this.emailInput = document.getElementById('email'); 
         this.passwordInput = document.getElementById('password');
         this.passwordToggle = document.getElementById('passwordToggle');
-        this.submitButton = this.form.querySelector('.neural-button:not(.register-button)'); // ปุ่ม Login หลัก
-        this.registerButton = document.querySelector('.register-button'); // ปุ่มลงทะเบียน
+        this.submitButton = this.form.querySelector('.neural-button'); // ปุ่ม Login หลัก
+        this.signupLink = document.getElementById('signupLink'); // ลิงก์ลงทะเบียน
+        this.adminRedirectButton = document.getElementById('adminRedirectButton'); // ปุ่ม Redirect Admin
         this.successMessage = document.getElementById('successMessage');
         
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
         this.currentMode = 'login'; 
-        
-        // *****************************************************************************************
-        // *** URL Web App ล่าสุดที่อัปเดตแล้ว ***
+        this.redirectUrl = null; // ตัวแปรสำหรับเก็บ URL ที่จะ Redirect
+
+        // URL Web App ล่าสุด
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzHcKp2KppyD66XuIBmKMUTh3jA0ztyzq7Tovm9yTAfqvvJXLAqe2mhaFKpx_5t6EfD/exec'; 
-        // *****************************************************************************************
 
         this.init();
     }
@@ -25,7 +25,6 @@ class AIAssistantLoginForm {
     init() {
         this.bindEvents();
         this.setupPasswordToggle();
-        // ลบ this.setupSocialButtons ออก
         this.setupAIEffects();
         this.updateFormMode('login'); 
     }
@@ -37,10 +36,21 @@ class AIAssistantLoginForm {
         this.emailInput.addEventListener('input', () => this.clearError('email'));
         this.passwordInput.addEventListener('input', () => this.clearError('password'));
         
-        // ผูก Event กับปุ่ม "ลงทะเบียน" และปุ่ม "กลับไปล็อกอิน"
-        this.registerButton.addEventListener('click', () => {
+        // ผูก Event กับลิงก์ "ลงทะเบียน" / "กลับไปล็อกอิน"
+        this.signupLink.addEventListener('click', (e) => {
+            e.preventDefault();
             const newMode = this.currentMode === 'login' ? 'register' : 'login';
             this.updateFormMode(newMode);
+        });
+        
+        // ผูก Event กับปุ่ม "ไปยังหน้าสำหรับ Admin"
+        this.adminRedirectButton.addEventListener('click', () => {
+            if (this.redirectUrl) {
+                console.log(`Redirecting to Admin page: ${this.redirectUrl}`);
+                window.location.href = this.redirectUrl;
+            } else {
+                console.warn('Redirect URL not set. Please log in again.');
+            }
         });
         
         this.emailInput.setAttribute('placeholder', ' ');
@@ -54,17 +64,15 @@ class AIAssistantLoginForm {
         this.formHeader.textContent = mode === 'login' ? 'ระบบเข้าสู่ระบบ' : 'การลงทะเบียนผู้ดูแลระบบ';
         this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
         
-        // Update Main Button (Login Button)
+        // Update Main Button (Submit Button)
         this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
-        // Update Register Button (ปุ่มด้านล่าง)
-        this.actionText.textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'กลับไปที่หน้าหลัก ';
-        this.registerButton.querySelector('.button-text').textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปล็อกอิน';
-        
-        // ซ่อน/แสดงปุ่ม Login หลักเมื่อสลับโหมด (เพื่อให้ปุ่ม Register ด้านล่างทำหน้าที่เป็นปุ่ม Submit แทน)
-        this.submitButton.style.display = mode === 'login' ? 'flex' : 'none'; 
-        this.registerButton.style.display = 'flex'; // แสดงปุ่ม Register เสมอ (เปลี่ยนหน้าที่)
-        
+        // Update Signup/Login Link Text
+        document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
+        this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
+
+        this.submitButton.style.display = 'flex'; // ปุ่มหลักแสดงเสมอ
+
         // Clear inputs and errors
         this.emailInput.value = '';
         this.passwordInput.value = '';
@@ -153,8 +161,7 @@ class AIAssistantLoginForm {
     async handleSubmit(e) {
         e.preventDefault();
         
-        // ถ้าเป็นโหมดลงทะเบียน จะใช้ปุ่ม Register ด้านล่างเป็นปุ่ม Submit แทนปุ่มหลัก
-        const submitButton = this.currentMode === 'login' ? this.submitButton : this.registerButton;
+        const submitButton = this.submitButton;
 
         const isStudentIdValid = this.validateStudentId();
         const isPasswordValid = this.validatePassword();
@@ -168,7 +175,7 @@ class AIAssistantLoginForm {
         const formData = new FormData();
         formData.append('action', this.currentMode); 
         formData.append('studentId', this.emailInput.value.trim()); 
-        formData.append('email', this.emailInput.value.trim()); // ใช้ 'email' field สำหรับ doLogin ใน Apps Script
+        formData.append('email', this.emailInput.value.trim()); 
         formData.append('password', this.passwordInput.value);
         
         try {
@@ -187,11 +194,6 @@ class AIAssistantLoginForm {
                 if (this.currentMode === 'login') {
                     this.updateSuccessScreen(result); 
                     this.showNeuralSuccess();
-                    
-                    setTimeout(() => {
-                        console.log(`Login successful - Redirecting to: ${result.redirectUrl}`);
-                        // window.location.href = result.redirectUrl;
-                    }, 3200);
                 } else {
                     alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้เลย');
                     this.updateFormMode('login');
@@ -209,22 +211,20 @@ class AIAssistantLoginForm {
         }
     }
 
+    /**
+     * อัปเดตข้อมูลบนหน้า Success และเก็บ URL สำหรับปุ่ม Redirect
+     */
     updateSuccessScreen(data) {
+        this.redirectUrl = data.redirectUrl; // เก็บ URL ในคลาส
+        
         document.getElementById('adminWelcome').textContent = `สวัสดี, ${data.adminName}!`;
         document.getElementById('displayStudentId').textContent = data.studentId;
         document.getElementById('displayTotalLogins').textContent = data.totalLogins;
-        
-        const redirectLink = document.getElementById('displayRedirectLink');
-        redirectLink.textContent = `ไปยังระบบ (Link)`;
-        redirectLink.href = data.redirectUrl;
     }
     
     setLoading(loading, button = this.submitButton) {
-        // ใช้ button ที่ถูกส่งมา เพื่อให้รองรับปุ่ม Login และ Register
         button.classList.toggle('loading', loading);
         button.disabled = loading;
-        
-        // ลบการจัดการ social buttons ออก
     }
     
     showNeuralSuccess() {
