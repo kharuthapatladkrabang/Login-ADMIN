@@ -16,7 +16,7 @@ body {
     padding: 20px;
     line-height: 1.5;
     position: relative;
-    overflow: hidden;
+    /* แก้ไข: ลบ overflow: hidden; เพื่อให้หน้าเว็บ scroll ได้ */
 }
 
 /* Neural Background */
