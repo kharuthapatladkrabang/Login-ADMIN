@@ -17,7 +17,7 @@ class AIAssistantLoginForm {
         
         // *****************************************************************************************
         // *** สำคัญ: ต้องใส่ URL Web App ที่ได้จากการ Deploy Google Apps Script ที่นี่ ***
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzzIqLDr-zN8F1114kETbsA5Ni3vgcqqKEPP1h6HmV_EiJUfjlCkM84_icLAOF_szgC/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby2c1ZLInxUSdP-YvFPpioDp_GNwZF0JK5dUsWYjioMQOwLUc-A3yYBvnBW5qvM_1s5/exec'; 
         // *****************************************************************************************
 
         this.init();
