@@ -35,7 +35,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxhLuMAi1KTGZmdIuPexaC_sGOzr3r_4UdDuTob_0IUBEclR1WqC4SZkf-arzskz7Xe/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx0erdnXHChLGZ0YbDS6clv-v8cogzTnz5u6Y59euxA-guced_-mSH8_yc3YD_E8rof/exec'; 
 
         this.init();
     }
@@ -152,7 +152,6 @@ class AIAssistantLoginForm {
         this.passwordInput.closest('.smart-field').classList.remove('error');
     }
 
-    // *** แก้ไขปัญหาปุ่มดูรหัสผ่านไม่ทำงาน ***
     setupPasswordToggle() {
         this.passwordToggle.addEventListener('click', () => {
             const isPassword = this.passwordInput.type === 'password';
@@ -161,7 +160,6 @@ class AIAssistantLoginForm {
             this.passwordToggle.classList.toggle('toggle-active', isPassword);
         });
     }
-    // ********************************************
 
     // Validation Helpers
     validateStudentId() {
@@ -422,7 +420,7 @@ class AIAssistantLoginForm {
         }
         
         links.forEach((buttonData, index) => {
-            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจากหัวตาราง (ชีต2 แถว 1)
+            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจาก Apps Script (แถว 1)
             const link = buttonData.link;
             
             const newButton = document.createElement('button');
