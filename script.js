@@ -9,9 +9,9 @@ class AIAssistantLoginForm {
         this.submitButton = this.form.querySelector('.neural-button'); 
         this.signupLink = document.getElementById('signupLink'); 
         this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
-        this.successMessage = document.getElementById('successMessage');
+        this.successMessage = document.getElementById('successMessage'); // Success Card (div.login-card)
         
-        this.mainLoginCard = document.getElementById('mainLoginCard');
+        this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
@@ -21,9 +21,8 @@ class AIAssistantLoginForm {
 
         // Forgot Password Elements
         this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        this.forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
-        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); 
-        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); 
+        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
+        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
         this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
         this.resetEmailInput = document.getElementById('resetEmail');
         this.resetPasswordForm = document.getElementById('resetPasswordForm');
@@ -35,10 +34,8 @@ class AIAssistantLoginForm {
         
         this.tempStudentId = null; 
 
-        // *****************************************************************************************
-        // *** URL Web App ล่าสุดที่อัปเดตแล้ว ***
+        // URL Web App ล่าสุด
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxykjGWTqDTBQok1gFkvOj4MzJwM8tCyURoBaFi0m_aLhaBvhUGOSUiFzCdB63MtmuS/exec'; 
-        // *****************************************************************************************
 
         this.init();
     }
@@ -59,14 +56,15 @@ class AIAssistantLoginForm {
         if (rememberedId && rememberedPass) {
             this.emailInput.value = rememberedId;
             this.passwordInput.value = rememberedPass;
-            document.getElementById('remember').checked = true; 
+            const rememberCheckbox = document.getElementById('remember');
+            if (rememberCheckbox) rememberCheckbox.checked = true; 
         }
     }
 
     // NEW: บันทึกข้อมูลลง localStorage
     saveCredentials() {
         const rememberCheckbox = document.getElementById('remember');
-        if (rememberCheckbox.checked) {
+        if (rememberCheckbox && rememberCheckbox.checked) {
             localStorage.setItem('admin_remember_id', this.emailInput.value.trim());
             localStorage.setItem('admin_remember_pass', this.passwordInput.value);
         } else {
@@ -112,9 +110,10 @@ class AIAssistantLoginForm {
     showForgotPasswordStep1() {
         this.mainLoginCard.style.display = 'none';
         this.successMessage.style.display = 'none';
-        this.forgotPasswordCard1.style.display = 'block';
         this.forgotPasswordCard2.style.display = 'none';
         document.querySelector('.signup-section').style.display = 'none';
+        
+        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
@@ -453,7 +452,7 @@ class AIAssistantLoginForm {
         // แสดง Success Card
         document.querySelector('.signup-section').style.display = 'none';
         this.successMessage.classList.add('show');
-        this.successMessage.style.display = 'block'; // แก้ไขเพื่อให้แน่ใจว่าแสดงผล
+        this.successMessage.style.display = 'block'; 
     }
 }
 
