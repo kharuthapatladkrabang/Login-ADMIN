@@ -1,92 +1,29 @@
 // AI Assistant Login Form JavaScript
 class AIAssistantLoginForm {
     constructor() {
-        this.form = document.getElementById('loginForm');
-        this.emailInput = document.getElementById('email');
-        this.passwordInput = document.getElementById('password');
-        this.passwordToggle = document.getElementById('passwordToggle');
-        this.submitButton = this.form.querySelector('.neural-button');
-        this.successMessage = document.getElementById('successMessage');
-        this.socialButtons = document.querySelectorAll('.social-neural');
-        
+        // ... โค้ดเดิม ...
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxgkeBD6kOIpymzJgDV_ijkmj5XQvHkU_bsjmAuJ__JVdsEvXg3o7ujx4h_bF8FH_c5/exec'; // *** ใส่ URL Web App ที่ได้จากขั้นตอนที่ 1 ที่นี่ ***
         this.init();
     }
     
-    init() {
-        this.bindEvents();
-        this.setupPasswordToggle();
-        this.setupSocialButtons();
-        this.setupAIEffects();
-    }
-    
-    bindEvents() {
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        this.emailInput.addEventListener('blur', () => this.validateEmail());
-        this.passwordInput.addEventListener('blur', () => this.validatePassword());
-        this.emailInput.addEventListener('input', () => this.clearError('email'));
-        this.passwordInput.addEventListener('input', () => this.clearError('password'));
-        
-        // Add placeholder for label animations
-        this.emailInput.setAttribute('placeholder', ' ');
-        this.passwordInput.setAttribute('placeholder', ' ');
-    }
-    
-    setupPasswordToggle() {
-        this.passwordToggle.addEventListener('click', () => {
-            const type = this.passwordInput.type === 'password' ? 'text' : 'password';
-            this.passwordInput.type = type;
-            
-            this.passwordToggle.classList.toggle('toggle-active', type === 'text');
-        });
-    }
-    
-    setupSocialButtons() {
-        this.socialButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const provider = button.querySelector('span').textContent.trim();
-                this.handleSocialLogin(provider, button);
-            });
-        });
-    }
-    
-    setupAIEffects() {
-        // Add neural connection effect on input focus
-        [this.emailInput, this.passwordInput].forEach(input => {
-            input.addEventListener('focus', (e) => {
-                this.triggerNeuralEffect(e.target.closest('.smart-field'));
-            });
-        });
-    }
-    
-    triggerNeuralEffect(field) {
-        // Add subtle AI processing effect
-        const indicator = field.querySelector('.ai-indicator');
-        indicator.style.opacity = '1';
-        
-        setTimeout(() => {
-            indicator.style.opacity = '';
-        }, 2000);
-    }
+    // ... โค้ดเดิม (init, bindEvents, setupPasswordToggle, setupSocialButtons, setupAIEffects, triggerNeuralEffect) ...
     
     validateEmail() {
-        const email = this.emailInput.value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
-        if (!email) {
-            this.showError('email', 'Neural access requires email address');
+        // ... โค้ดเดิม: ตรวจสอบ Email ...
+        // ในระบบจริงนี้ เราจะใช้ "รหัสนักศึกษา" เป็น Email/Username
+        const studentId = this.emailInput.value.trim();
+        if (!studentId) {
+            this.showError('email', 'Neural access requires Student ID'); // เปลี่ยนข้อความ
             return false;
         }
         
-        if (!emailRegex.test(email)) {
-            this.showError('email', 'Invalid email format detected');
-            return false;
-        }
-        
+        // เราจะไม่ตรวจสอบ regex email แต่จะถือว่าเป็น Student ID
         this.clearError('email');
         return true;
     }
     
     validatePassword() {
+        // ... โค้ดเดิม: ตรวจสอบ Password ...
         const password = this.passwordInput.value;
         
         if (!password) {
@@ -103,30 +40,12 @@ class AIAssistantLoginForm {
         return true;
     }
     
-    showError(field, message) {
-        const smartField = document.getElementById(field).closest('.smart-field');
-        const errorElement = document.getElementById(`${field}Error`);
-        
-        smartField.classList.add('error');
-        errorElement.textContent = message;
-        errorElement.classList.add('show');
-    }
-    
-    clearError(field) {
-        const smartField = document.getElementById(field).closest('.smart-field');
-        const errorElement = document.getElementById(`${field}Error`);
-        
-        smartField.classList.remove('error');
-        errorElement.classList.remove('show');
-        setTimeout(() => {
-            errorElement.textContent = '';
-        }, 200);
-    }
+    // ... โค้ดเดิม (showError, clearError) ...
     
     async handleSubmit(e) {
         e.preventDefault();
         
-        const isEmailValid = this.validateEmail();
+        const isEmailValid = this.validateEmail(); // ในที่นี้คือ Student ID
         const isPasswordValid = this.validatePassword();
         
         if (!isEmailValid || !isPasswordValid) {
@@ -135,86 +54,46 @@ class AIAssistantLoginForm {
         
         this.setLoading(true);
         
+        const formData = new FormData();
+        formData.append('email', this.emailInput.value.trim()); // จะส่งเป็น Student ID ไปที่ GAS
+        formData.append('password', this.passwordInput.value);
+        
         try {
-            // Simulate AI authentication processing
-            await new Promise(resolve => setTimeout(resolve, 2500));
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                body: formData 
+            });
             
-            // Show neural success
-            this.showNeuralSuccess();
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // ล็อกอินสำเร็จ
+                this.showNeuralSuccess();
+                
+                // จำลองการ Redirect ไปยังหน้าที่ Admin ควรจะไป
+                setTimeout(() => {
+                    console.log(`Neural link established - accessing AI workspace at: ${result.redirectUrl}`);
+                    // ในการใช้งานจริง: window.location.href = result.redirectUrl;
+                }, 3200);
+                
+            } else {
+                // ล็อกอินไม่สำเร็จ: แสดงข้อความ error ที่ส่งกลับมาจาก Apps Script
+                this.showError('password', result.message || 'Login failed. Please check your credentials.');
+            }
+
         } catch (error) {
+            console.error('Login error:', error);
             this.showError('password', 'Neural connection failed. Please retry.');
         } finally {
             this.setLoading(false);
         }
     }
     
-    async handleSocialLogin(provider, button) {
-        console.log(`Initializing ${provider} connection...`);
-        
-        // AI-enhanced loading state
-        const originalHTML = button.innerHTML;
-        button.style.pointerEvents = 'none';
-        button.style.opacity = '0.7';
-        
-        const loadingHTML = `
-            <div class="social-bg"></div>
-            <div style="display: flex; gap: 2px;">
-                <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite;"></div>
-                <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite; animation-delay: 0.1s;"></div>
-                <div style="width: 3px; height: 12px; background: currentColor; border-radius: 1px; animation: neuralSpinner 1.2s ease-in-out infinite; animation-delay: 0.2s;"></div>
-            </div>
-            <span>Connecting...</span>
-            <div class="social-glow"></div>
-        `;
-        
-        button.innerHTML = loadingHTML;
-        
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log(`Redirecting to ${provider} neural interface...`);
-            // window.location.href = `/auth/${provider.toLowerCase().replace(' ', '-')}`;
-        } catch (error) {
-            console.error(`${provider} connection failed: ${error.message}`);
-        } finally {
-            button.style.pointerEvents = 'auto';
-            button.style.opacity = '1';
-            button.innerHTML = originalHTML;
-        }
-    }
-    
-    setLoading(loading) {
-        this.submitButton.classList.toggle('loading', loading);
-        this.submitButton.disabled = loading;
-        
-        // Disable social buttons during neural processing
-        this.socialButtons.forEach(button => {
-            button.style.pointerEvents = loading ? 'none' : 'auto';
-            button.style.opacity = loading ? '0.5' : '1';
-        });
-    }
-    
-    showNeuralSuccess() {
-        // Hide form with neural transition
-        this.form.style.transform = 'scale(0.95)';
-        this.form.style.opacity = '0';
-        
-        setTimeout(() => {
-            this.form.style.display = 'none';
-            document.querySelector('.neural-social').style.display = 'none';
-            document.querySelector('.signup-section').style.display = 'none';
-            document.querySelector('.auth-separator').style.display = 'none';
-            
-            // Show neural success
-            this.successMessage.classList.add('show');
-            
-        }, 300);
-        
-        // Redirect after neural connection established
-        setTimeout(() => {
-            console.log('Neural link established - accessing AI workspace...');
-            // window.location.href = '/ai-dashboard';
-        }, 3200);
-    }
+    // ... โค้ดเดิม (handleSocialLogin, setLoading, showNeuralSuccess) ...
 }
 
 // Initialize the neural form when DOM is loaded
