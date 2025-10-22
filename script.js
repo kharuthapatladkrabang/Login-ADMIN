@@ -40,10 +40,35 @@ class AIAssistantLoginForm {
     }
     
     init() {
+        this.loadRememberedCredentials(); // NEW: โหลดข้อมูลที่จดจำไว้
         this.bindEvents();
         this.setupPasswordToggle();
         this.setupAIEffects();
         this.updateFormMode('login'); 
+    }
+    
+    // NEW: โหลดข้อมูลที่จดจำไว้จาก localStorage
+    loadRememberedCredentials() {
+        const rememberedId = localStorage.getItem('admin_remember_id');
+        const rememberedPass = localStorage.getItem('admin_remember_pass');
+
+        if (rememberedId && rememberedPass) {
+            this.emailInput.value = rememberedId;
+            this.passwordInput.value = rememberedPass;
+            document.getElementById('remember').checked = true; // ติ๊กกล่อง
+        }
+    }
+
+    // NEW: บันทึกข้อมูลลง localStorage
+    saveCredentials() {
+        const rememberCheckbox = document.getElementById('remember');
+        if (rememberCheckbox.checked) {
+            localStorage.setItem('admin_remember_id', this.emailInput.value.trim());
+            localStorage.setItem('admin_remember_pass', this.passwordInput.value);
+        } else {
+            localStorage.removeItem('admin_remember_id');
+            localStorage.removeItem('admin_remember_pass');
+        }
     }
     
     bindEvents() {
@@ -110,6 +135,7 @@ class AIAssistantLoginForm {
 
         this.submitButton.style.display = 'flex'; 
 
+        // Clear inputs and errors
         this.emailInput.value = '';
         this.passwordInput.value = '';
         this.clearError('email');
@@ -251,9 +277,11 @@ class AIAssistantLoginForm {
             
             if (result.success) {
                 if (this.currentMode === 'login') {
+                    this.saveCredentials(); // NEW: บันทึกข้อมูลเมื่อล็อกอินสำเร็จ
+                    
                     if (result.adminName) {
                         this.updateSuccessScreen(result); 
-                        this.showNeuralSuccess();
+                        this.showNeuralSuccess(); // หน้า Success ควรขึ้น
                     } else {
                         this.showError('password', 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
@@ -262,7 +290,7 @@ class AIAssistantLoginForm {
                     this.updateFormMode('login');
                 }
             } else {
-                // *** แก้ไข: แสดงข้อความ Error จาก Apps Script ***
+                // แสดงข้อความ Error จาก Apps Script
                 this.showError('password', result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
             }
         } catch (error) {
@@ -412,8 +440,7 @@ class AIAssistantLoginForm {
         this.mainLoginCard.style.display = 'none'; 
         this.forgotPasswordContainer.style.display = 'none'; 
         
-        const loginContainer = document.querySelector('.login-container');
-        loginContainer.style.display = 'block'; 
+        // NEW: Show only the success card by hiding everything else in the container
         document.querySelector('.signup-section').style.display = 'none';
         this.successMessage.classList.add('show');
     }
