@@ -1,741 +1,579 @@
-/* Login Form - Complete & Self-Contained */
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
-    background: #0a0a0f; /* Default: Dark Background */
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    line-height: 1.5;
-    position: relative;
-    transition: background 0.3s ease; /* เพิ่ม transition */
-}
-
-/* Neural Background */
-.neural-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-}
-
-.neural-node {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: #3b82f6;
-    border-radius: 50%;
-    opacity: 0.6;
-    animation: neuralPulse 4s ease-in-out infinite;
-}
-
-.neural-node:nth-child(1) {
-    top: 20%;
-    left: 15%;
-    animation-delay: 0s;
-}
-
-.neural-node:nth-child(2) {
-    top: 60%;
-    left: 80%;
-    animation-delay: 1s;
-}
-
-.neural-node:nth-child(3) {
-    top: 80%;
-    left: 20%;
-    animation-delay: 2s;
-}
-
-.neural-node:nth-child(4) {
-    top: 30%;
-    left: 70%;
-    animation-delay: 3s;
-}
-
-.neural-node:nth-child(5) {
-    top: 10%;
-    left: 60%;
-    animation-delay: 4s;
-}
-
-@keyframes neuralPulse {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.5); }
-}
-
-.login-container {
-    width: 100%;
-    max-width: 420px;
-    position: relative;
-    z-index: 1;
-}
-
-.login-card {
-    background: rgba(15, 15, 20, 0.95); /* Default: Dark Card */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 20px;
-    padding: 40px 32px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease; /* เพิ่ม transition */
-}
-
-.ai-glow {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-    animation: aiGlow 6s ease-in-out infinite;
-    pointer-events: none;
-}
-
-@keyframes aiGlow {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(180deg) scale(1.1); }
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 36px;
-}
-
-.ai-logo {
-    position: relative;
-    width: 120px; /* ขยายโลโก้ใหญ่ขึ้น */
-    height: 120px; /* ขยายโลโก้ใหญ่ขึ้น */
-    margin: 0 auto 10px; /* ปรับให้ใกล้กับหัวข้อมากขึ้น */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.login-header h1 {
-    color: #f8fafc;
-    font-size: 2rem; /* ปรับขนาดตัวอักษรใหญ่ขึ้นตามโลโก้ */
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
-}
-
-.login-header p {
-    color: #94a3b8;
-    font-size: 14px;
-    font-weight: 400;
-}
-
-/* --- การแก้ไขสำหรับ Modal ลืมรหัสผ่าน --- */
-/* ปรับสไตล์ Modal เพื่อให้ข้อความสีขาวเมื่อแสดง */
-#forgotPasswordContainer .login-header h2 {
-    color: #f8fafc !important; 
-}
-#forgotPasswordContainer .login-header p {
-    color: #94a3b8 !important; 
-}
-/* -------------------------------------- */
-
-
-/* Smart Fields */
-.smart-field {
-    position: relative;
-    margin-bottom: 28px;
-}
-
-.field-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.smart-field input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    padding: 16px 50px 16px 16px;
-    color: #f8fafc; /* Default: White Text */
-    font-size: 15px;
-    font-weight: 400;
-    outline: none;
-    position: relative;
-    z-index: 2;
-    font-family: inherit;
-}
-
-.smart-field input::placeholder {
-    color: transparent;
-}
-
-.smart-field label {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #64748b;
-    font-size: 15px;
-    font-weight: 400;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    z-index: 3;
-    background: rgba(15, 15, 20, 0.8); /* Default: Dark Background for Label */
-    padding: 0 4px;
-}
-
-.smart-field input:focus + label,
-.smart-field input:not(:placeholder-shown) + label,
-.smart-field.has-value label { /* เพิ่ม has-value เพื่อให้ค่าที่โหลดจาก JS Label ลอย */
-    top: 0;
-    font-size: 12px;
-    font-weight: 500;
-    color: #3b82f6;
-    transform: translateY(-50%);
-}
-
-.smart-field input:focus ~ .field-background {
-    border-color: #3b82f6;
-    background: rgba(30, 41, 59, 0.8);
-    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
-}
-
-.ai-indicator {
-    position: absolute;
-    right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 6px;
-    height: 6px;
-    z-index: 4;
-}
-
-.ai-pulse {
-    width: 100%;
-    height: 100%;
-    background: #3b82f6;
-    border-radius: 50%;
-    opacity: 0;
-    animation: aiIndicator 2s ease-in-out infinite;
-}
-
-.smart-field input:focus ~ .ai-indicator .ai-pulse {
-    opacity: 1;
-}
-
-@keyframes aiIndicator {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.5); opacity: 1; }
-}
-
-.field-completion {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-    width: 0%;
-    transition: width 0.5s ease;
-    border-radius: 0 0 12px 12px;
-}
-
-.smart-field input:valid ~ .field-completion {
-    width: 100%;
-}
-
-/* Password Toggle */
-.smart-field:has(.smart-toggle) input {
-    padding-right: 90px;
-}
-
-.smart-toggle {
-    position: absolute;
-    right: 50px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #64748b;
-    padding: 6px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    z-index: 4;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.smart-toggle:hover {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
-}
-
-.toggle-hide {
-    display: none;
-}
-
-.smart-toggle.toggle-active .toggle-show {
-    display: none;
-}
-
-.smart-toggle.toggle-active .toggle-hide {
-    display: block;
-}
-
-/* Form Options */
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.smart-checkbox {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 14px;
-    color: #cbd5e1;
-    font-weight: 500;
-}
-
-.smart-checkbox input[type="checkbox"] {
-    display: none;
-}
-
-.checkbox-ai {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.checkbox-core {
-    width: 100%;
-    height: 100%;
-    border: 1.5px solid rgba(59, 130, 246, 0.4);
-    border-radius: 4px;
-    background: rgba(30, 41, 59, 0.5);
-    transition: all 0.3s ease;
-    position: absolute;
-}
-
-.smart-checkbox input[type="checkbox"]:checked + .checkbox-ai .checkbox-core {
-    background: #3b82f6;
-    border-color: #3b82f6;
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-}
-
-.neural-link {
-    color: #3b82f6;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.neural-link::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: #3b82f6;
-    transition: width 0.3s ease;
-}
-
-.neural-link:hover::after {
-    width: 100%;
-}
-
-.neural-link:hover {
-    color: #60a5fa;
-}
-
-/* Neural Button */
-.neural-button {
-    width: 100%;
-    background: transparent;
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    padding: 0;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-    position: relative;
-    margin-bottom: 28px;
-    overflow: hidden;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.button-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.neural-button:hover .button-bg {
-    background: linear-gradient(135deg, #2563eb, #7c3aed);
-    transform: scale(1.02);
-}
-
-.neural-button:active .button-bg {
-    transform: scale(0.98);
-}
-
-.button-text {
-    position: relative;
-    z-index: 2;
-    transition: opacity 0.2s ease;
-}
-
-.button-loader {
-    position: absolute;
-    z-index: 2;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.neural-spinner {
-    display: flex;
-    gap: 4px;
-}
-
-.spinner-segment {
-    width: 4px;
-    height: 16px;
-    background: #ffffff;
-    border-radius: 2px;
-    animation: neuralSpinner 1.2s ease-in-out infinite;
-}
-
-.spinner-segment:nth-child(2) { animation-delay: 0.1s; }
-.spinner-segment:nth-child(3) { animation-delay: 0.2s; }
-
-@keyframes neuralSpinner {
-    0%, 80%, 100% { transform: scaleY(0.5); opacity: 0.5; }
-    40% { transform: scaleY(1); opacity: 1; }
-}
-
-.neural-button.loading .button-text {
-    opacity: 0;
-}
-
-.neural-button.loading .button-loader {
-    opacity: 1;
-}
-
-.button-glow {
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-    border-radius: 14px;
-    opacity: 0;
-    filter: blur(8px);
-    transition: opacity 0.3s ease;
-    z-index: -1;
-}
-
-.neural-button:hover .button-glow {
-    opacity: 0.6;
-}
-
-/* Auth Separator */
-.auth-separator {
-    display: flex;
-    align-items: center;
-    margin: 28px 0;
-    gap: 16px;
-}
-
-.separator-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
-}
-
-.separator-text {
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Signup Section */
-.signup-section {
-    text-align: center;
-    font-size: 14px;
-    color: #64748b;
-}
-
-.neural-signup {
-    color: #3b82f6;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.neural-signup::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: #3b82f6;
-    transition: width 0.3s ease;
-}
-
-.neural-signup:hover::after {
-    width: 100%;
-}
-
-.neural-signup:hover {
-    color: #60a5fa;
-}
-
-/* Error States */
-.error-message {
-    color: #ef4444;
-    font-size: 12px;
-    font-weight: 500;
-    margin-top: 6px;
-    opacity: 0;
-    transform: translateY(-4px);
-    transition: all 0.2s ease;
-    position: relative;
-    z-index: 5;
-}
-
-.error-message.show {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.smart-field.error .field-background {
-    border-color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-}
-
-.smart-field.error label {
-    color: #ef4444;
-}
-
-.smart-field.error .field-completion {
-    background: #ef4444;
-}
-
-/* Success Neural */
-.success-neural {
-    display: none;
-    text-align: center;
-    padding: 40px 20px;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.4s ease;
-}
-
-.success-neural.show {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.success-core {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.success-rings {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.success-ring {
-    position: absolute;
-    border: 2px solid #10b981;
-    border-radius: 50%;
-    animation: successRing 1s ease-out forwards;
-}
-
-.success-ring:nth-child(1) {
-    width: 60px;
-    height: 60px;
-    top: 10px;
-    left: 10px;
-    animation-delay: 0s;
-}
-
-.success-ring:nth-child(2) {
-    width: 70px;
-    height: 70px;
-    top: 5px;
-    left: 5px;
-    animation-delay: 0.2s;
-}
-
-.success-ring:nth-child(3) {
-    width: 80px;
-    height: 80px;
-    top: 0;
-    left: 0;
-    animation-delay: 0.4s;
-}
-
-@keyframes successRing {
-    0% { opacity: 0; transform: scale(0); }
-    50% { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 0.7; transform: scale(1); }
-}
-
-.success-core svg {
-    color: #10b981;
-    position: relative;
-    z-index: 2;
-    animation: successCheck 0.6s ease-out 0.6s forwards;
-    opacity: 0;
-}
-
-@keyframes successCheck {
-    0% { opacity: 0; transform: scale(0); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-.success-neural h3 {
-    color: #f8fafc;
-    font-size: 1.375rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.success-neural p {
-    color: #94a3b8;
-    font-size: 14px;
-}
-
-/* --- LIGHT MODE / REGISTER STYLES (สำหรับโหมดลงทะเบียน) --- */
-body.register-mode {
-    background: #f8fafc; /* พื้นหลังขาว */
-}
-body.register-mode .login-card {
-    background: #ffffff; /* Card ขาว */
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
-.register-mode .ai-glow {
-    background: radial-gradient(circle, rgba(0, 0, 0, 0.05) 0%, transparent 70%);
-}
-.register-mode .login-header h1 {
-    color: #000000; /* หัวข้อดำ */
-}
-.register-mode .login-header p {
-    color: #475569; /* คำบรรยายดำ */
-}
-.register-mode .smart-field input {
-    color: #1e293b; /* Text Input ดำ */
-}
-.register-mode .smart-field .field-background {
-    background: rgba(240, 240, 245, 0.8); /* Field BG อ่อน */
-    border-color: rgba(0, 0, 0, 0.15); /* Border อ่อน */
-}
-.register-mode .smart-field label {
-    background: rgba(255, 255, 255, 0.8); /* Background Label ขาว */
-    color: #475569; /* Label Text ดำ */
-}
-.register-mode .smart-field input:focus + label,
-.register-mode .smart-field input:not(:placeholder-shown) + label,
-.register-mode .smart-field.has-value label {
-    color: #3b82f6; /* Label Text Focus น้ำเงิน */
-}
-.register-mode .smart-field input:focus ~ .field-background {
-    background: rgba(240, 240, 245, 0.8); /* Field Background อ่อน */
-    border-color: #3b82f6;
-}
-.register-mode .smart-field.has-value .field-background {
-     background: rgba(240, 240, 245, 0.8);
-}
-.register-mode .signup-section span {
-    color: #475569;
-}
-
-.register-mode .smart-checkbox {
-    color: #475569;
-}
-.register-mode .checkbox-core {
-    border-color: rgba(0, 0, 0, 0.2);
-    background: rgba(240, 240, 245, 0.8);
-}
-.register-mode .neural-link {
-    color: #1e293b; /* ลืมรหัสผ่านใน Light Mode */
-}
-/* -------------------------------------- */
-
-
-/* Mobile Responsive */
-@media (max-width: 480px) {
-    body {
-        padding: 16px;
+// Login Form JavaScript
+class AIAssistantLoginForm {
+    constructor() {
+        // Main Login Elements
+        this.form = document.getElementById('loginForm');
+        this.emailInput = document.getElementById('email'); 
+        this.passwordInput = document.getElementById('password');
+        this.passwordToggle = document.getElementById('passwordToggle');
+        this.submitButton = this.form.querySelector('.neural-button'); 
+        this.signupLink = document.getElementById('signupLink'); 
+        this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
+        this.successMessage = document.getElementById('successMessage'); // Success Card
+        
+        this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
+        
+        // iFrame Elements
+        this.contentView = document.getElementById('contentView');
+        this.contentFrame = document.getElementById('contentFrame');
+        this.contentTitle = document.getElementById('contentTitleDisplay'); // FIX: ใช้ ID ที่ถูกต้อง
+        
+        // โลโก้ URLs
+        this.LOGIN_LOGO = 'https://img5.pic.in.th/file/secure-sv1/Asset-401.png';
+        this.REGISTER_LOGO = 'https://img2.pic.in.th/pic/Asset-101.png';
+        this.logoImage = document.getElementById('mainLogoContainer').querySelector('img');
+        
+        this.formHeader = document.querySelector('.login-header h1');
+        this.formSubHeader = document.querySelector('.login-header p');
+        this.actionText = document.querySelector('.signup-section span');
+        this.currentMode = 'login'; 
+        this.redirectUrl = null; 
+
+        // Forgot Password Elements
+        this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
+        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
+        this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
+        this.resetEmailInput = document.getElementById('resetEmail');
+        this.resetPasswordForm = document.getElementById('resetPasswordForm');
+        this.resetCodeInput = document.getElementById('resetCode');
+        this.newPasswordInput = document.getElementById('newPassword');
+        this.confirmPasswordInputReset = document.getElementById('confirmPasswordReset'); // Rename ID for clarity
+        this.backToLoginLink = document.getElementById('backToLoginLink');
+        this.forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
+        
+        this.tempStudentId = null; 
+
+        // URL Web App ล่าสุด
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx0erdnXHChLGZ0YbDS6clv-v8cogzTnz5u6Y59euxA-guced_-mSH8_yc3YD_E8rof/exec'; 
+
+        this.init();
+        
+        // ทำให้ฟังก์ชันนี้ถูกเรียกใช้ได้จาก onclick ใน HTML
+        window.showSuccessMenu = this.showNeuralSuccess.bind(this); 
     }
     
-    .login-card {
-        padding: 32px 24px;
-        border-radius: 16px;
+    init() {
+        this.loadRememberedCredentials(); 
+        this.bindEvents();
+        this.setupPasswordToggle();
+        this.setupAIEffects();
+        this.updateFormMode('login'); 
     }
     
-    .login-header h1 {
-        font-size: 1.5rem;
+    // โหลดข้อมูลที่จดจำไว้จาก localStorage
+    loadRememberedCredentials() {
+        const rememberedId = localStorage.getItem('admin_remember_id');
+        const rememberedPass = localStorage.getItem('admin_remember_pass');
+        const rememberCheckbox = document.getElementById('remember');
+
+        if (rememberedId && rememberedPass) {
+            this.emailInput.value = rememberedId;
+            this.passwordInput.value = rememberedPass;
+            
+            if (rememberCheckbox) rememberCheckbox.checked = true; 
+            
+            this.forceLabelFloat(this.emailInput);
+            this.forceLabelFloat(this.passwordInput);
+        } else {
+             if (rememberCheckbox) rememberCheckbox.checked = false;
+             this.emailInput.value = '';
+             this.passwordInput.value = '';
+             this.forceLabelFloat(this.emailInput, false);
+             this.forceLabelFloat(this.passwordInput, false);
+        }
+    }
+
+    // บันทึกข้อมูลลง localStorage
+    saveCredentials() {
+        const rememberCheckbox = document.getElementById('remember');
+        if (rememberCheckbox && rememberCheckbox.checked) {
+            localStorage.setItem('admin_remember_id', this.emailInput.value.trim());
+            localStorage.setItem('admin_remember_pass', this.passwordInput.value);
+        } else {
+            localStorage.removeItem('admin_remember_id');
+            localStorage.removeItem('admin_remember_pass');
+        }
     }
     
-    .ai-logo {
-        width: 80px; /* ปรับขนาดโลโก้ใหญ่ขึ้นสำหรับมือถือ */
-        height: 80px; /* ปรับขนาดโลโก้ใหญ่ขึ้นสำหรับมือถือ */
+    // Helper: บังคับให้ Label ลอยขึ้น
+    forceLabelFloat(inputElement, hasValue = true) {
+        const smartField = inputElement.closest('.smart-field');
+        if (smartField) {
+            if (hasValue && inputElement.value.length > 0) {
+                 smartField.classList.add('has-value');
+            } else {
+                 smartField.classList.remove('has-value');
+            }
+        }
+    }
+
+    bindEvents() {
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        this.emailInput.addEventListener('blur', () => this.validateStudentId());
+        this.passwordInput.addEventListener('blur', () => this.validatePassword());
+        
+        // Event input เพื่อจัดการ CSS Label
+        [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                this.clearError(input.id);
+                this.forceLabelFloat(input, input.value.length > 0);
+            });
+            input.addEventListener('blur', () => {
+                this.forceLabelFloat(input, input.value.length > 0);
+            });
+        });
+        
+        // Register/Login Switch
+        this.signupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            const newMode = this.currentMode === 'login' ? 'register' : 'login';
+            this.updateFormMode(newMode);
+        });
+        
+        // Forgot Password Links
+        this.forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showForgotPasswordStep1();
+        });
+
+        this.backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showLoginCard();
+        });
+
+        // Forgot Password Forms Submission
+        this.forgotPasswordForm.addEventListener('submit', (e) => this.handleSendResetCode(e));
+        this.resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
+        
+        this.emailInput.setAttribute('placeholder', ' ');
+        this.passwordInput.setAttribute('placeholder', ' ');
+    }
+    
+    // UI/Mode Management
+    showForgotPasswordStep1() {
+        this.mainLoginCard.style.display = 'none';
+        this.successMessage.style.display = 'none';
+        this.forgotPasswordCard2.style.display = 'none';
+        document.querySelector('.signup-section').style.display = 'none';
+        this.contentView.style.display = 'none'; 
+        
+        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
+        
+        this.clearForgotPasswordErrors();
+        this.resetEmailInput.value = '';
+        
+        document.body.classList.remove('register-mode'); // Force Dark Mode
+    }
+
+    showLoginCard() {
+        this.forgotPasswordCard1.style.display = 'none';
+        this.forgotPasswordCard2.style.display = 'none';
+        this.successMessage.style.display = 'none';
+        this.contentView.style.display = 'none'; 
+        
+        this.mainLoginCard.style.display = 'block';
+        document.querySelector('.signup-section').style.display = 'block';
+        this.updateFormMode('login');
+    }
+
+    updateFormMode(mode) {
+        this.currentMode = mode;
+        
+        // สลับ Style และโลโก้
+        if (mode === 'register') {
+            document.body.classList.add('register-mode');
+            this.logoImage.src = this.REGISTER_LOGO;
+            this.confirmPasswordInput.style.display = 'block'; // แสดงช่องยืนยันรหัสผ่าน
+        } else {
+            document.body.classList.remove('register-mode');
+            this.logoImage.src = this.LOGIN_LOGO;
+            this.confirmPasswordInput.style.display = 'none'; // ซ่อนช่องยืนยันรหัสผ่าน
+        }
+        
+        // Update Header (ใช้คำว่า Admin)
+        this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
+        this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
+        this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
+        
+        document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
+        this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
+
+        this.submitButton.style.display = 'flex'; 
+
+        // Clear inputs and errors
+        this.emailInput.value = '';
+        this.passwordInput.value = '';
+        this.clearError('email');
+        this.clearError('password');
+        this.clearError('confirmPassword');
+        
+        // เคลียร์สถานะ CSS Label และโหลดค่าที่จดจำไว้
+        this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
+        this.passwordInput.closest('.smart-field').classList.remove('error', 'has-value');
+        const confirmField = this.confirmPasswordInput.closest('.smart-field');
+        if (confirmField) confirmField.classList.remove('error', 'has-value');
+
+        this.loadRememberedCredentials();
+    }
+
+    setupPasswordToggle() {
+        this.passwordToggle.addEventListener('click', () => {
+            const isPassword = this.passwordInput.type === 'password';
+            this.passwordInput.type = isPassword ? 'text' : 'password';
+            
+            this.passwordToggle.classList.toggle('toggle-active', isPassword);
+        });
+    }
+
+    // Validation Helpers
+    validateStudentId() {
+        const studentId = this.emailInput.value.trim();
+        if (!studentId) {
+            this.showError('email', 'จำเป็นต้องระบุรหัสนักศึกษา');
+            return false;
+        }
+        this.clearError('email');
+        return true;
+    }
+    
+    validatePassword() {
+        const password = this.passwordInput.value;
+        if (!password) {
+            this.showError('password', 'ต้องใช้รหัสความปลอดภัย');
+            return false;
+        }
+        if (password.length < 6) {
+            this.showError('password', 'รหัสความปลอดภัยต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+            return false;
+        }
+        this.clearError('password');
+        return true;
+    }
+    
+    // NEW: Validation สำหรับโหมดลงทะเบียน
+    validateRegistration() {
+        let isValid = true;
+        
+        // 1. Validate Student ID (ใช้ ID 'email' สำหรับ error)
+        if (!this.validateStudentId()) isValid = false;
+        
+        // 2. Validate Password (ใช้ ID 'password' สำหรับ error)
+        if (!this.validatePassword()) isValid = false;
+        
+        // 3. Validate Confirm Password (ใช้ ID 'confirmPassword' สำหรับ error)
+        const password = this.passwordInput.value;
+        const confirmPassword = this.confirmPasswordInput.value;
+
+        if (this.currentMode === 'register') {
+            if (!confirmPassword) {
+                 this.showError('confirmPassword', 'จำเป็นต้องยืนยันรหัสผ่าน');
+                 isValid = false;
+            } else if (password !== confirmPassword) {
+                 this.showError('confirmPassword', 'รหัสผ่านไม่ตรงกัน');
+                 isValid = false;
+            } else {
+                 this.clearError('confirmPassword');
+            }
+        }
+        
+        return isValid;
+    }
+
+    // Error Management
+    showError(field, message) {
+        // *** FIX: การกำหนด ID สำหรับ Error Targeting ***
+        let targetFieldId = field;
+        
+        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('สิทธิ์')) {
+            targetFieldId = 'email';
+        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง')) {
+            targetFieldId = 'password';
+        }
+        // ในหน้า Reset Password Error จะแสดงที่ช่องยืนยันรหัสผ่าน (confirmPasswordReset)
+
+        const inputElement = document.getElementById(targetFieldId);
+        if (!inputElement) return;
+
+        const smartField = inputElement.closest('.smart-field');
+        const errorElement = document.getElementById(`${targetFieldId}Error`);
+        
+        if (smartField && errorElement) {
+             smartField.classList.add('error');
+             errorElement.textContent = message;
+             errorElement.classList.add('show');
+        }
+    }
+    
+    clearError(field) {
+        const inputElement = document.getElementById(field);
+        if (!inputElement) return;
+        
+        const smartField = inputElement.closest('.smart-field');
+        const errorElement = document.getElementById(`${field}Error`);
+        
+        if (smartField && errorElement) {
+            smartField.classList.remove('error');
+            errorElement.classList.remove('show');
+            setTimeout(() => {
+                errorElement.textContent = '';
+            }, 200);
+        }
+    }
+    
+    clearForgotPasswordErrors() {
+        this.clearError('resetEmail');
+        this.clearError('resetCode');
+        this.clearError('newPassword');
+        this.clearError('confirmPasswordReset');
+    }
+
+    // AIEffects/Loading (คงเดิม)
+    setupAIEffects() {
+        [this.emailInput, this.passwordInput, this.confirmPasswordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
+            if(input) {
+                input.addEventListener('focus', (e) => {
+                    this.triggerNeuralEffect(e.target.closest('.smart-field'));
+                });
+            }
+        });
+    }
+    
+    triggerNeuralEffect(field) {
+        const indicator = field ? field.querySelector('.ai-indicator') : null;
+        if(indicator) {
+            indicator.style.opacity = '1';
+            setTimeout(() => {
+                indicator.style.opacity = '';
+            }, 2000);
+        }
+    }
+
+    setLoading(loading, button = this.submitButton) {
+        button.classList.toggle('loading', loading);
+        button.disabled = loading;
+    }
+    
+    // Core Form Submission
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        // *** FIX: ใช้ validateRegistration สำหรับโหมด Register ***
+        if (this.currentMode === 'register' && !this.validateRegistration()) {
+            return;
+        } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
+            return;
+        }
+
+        const submitButton = this.submitButton;
+        this.setLoading(true, submitButton);
+        
+        const formData = new FormData();
+        formData.append('action', this.currentMode); 
+        formData.append('studentId', this.emailInput.value.trim()); 
+        formData.append('email', this.emailInput.value.trim()); 
+        formData.append('password', this.passwordInput.value);
+        
+        try {
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                body: formData 
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                if (this.currentMode === 'login') {
+                    this.saveCredentials(); // บันทึกข้อมูลเมื่อล็อกอินสำเร็จ
+                    
+                    if (result.adminName) {
+                        this.updateSuccessScreen(result); 
+                        this.showNeuralSuccess(); // แสดงหน้า Success
+                    } else {
+                        this.showError('password', 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
+                    }
+                } else {
+                    alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว');
+                    this.updateFormMode('login');
+                }
+            } else {
+                // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
+                let targetField = 'password';
+                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ลงทะเบียนไว้แล้ว') || result.message.includes('สิทธิ์')) {
+                    targetField = 'email';
+                }
+                
+                this.showError(targetField, result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
+            }
+        } catch (error) {
+            console.error(`${this.currentMode} error:`, error);
+            this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
+        } finally {
+            this.setLoading(false, submitButton);
+        }
+    }
+
+    // -----------------------------------------------------------
+    // --- Forgot Password Handlers (มีการเปลี่ยน ID) ---
+    // -----------------------------------------------------------
+
+    async handleSendResetCode(e) {
+        e.preventDefault();
+        const submitButton = document.getElementById('sendResetCodeButton');
+        const studentId = this.resetEmailInput.value.trim();
+        this.tempStudentId = studentId;
+
+        if (!studentId) {
+            return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
+        }
+        this.clearError('resetEmail');
+
+        this.setLoading(true, submitButton);
+
+        const formData = new FormData();
+        formData.append('action', 'forgot_password');
+        formData.append('studentId', studentId);
+
+        try {
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                this.forgotPasswordMessage.textContent = result.message;
+                this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
+                this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
+            } else {
+                this.showError('resetEmail', result.message);
+            }
+        } catch (error) {
+            this.showError('resetEmail', 'เกิดข้อผิดพลาดในการส่งรหัสรีเซ็ต');
+        } finally {
+            this.setLoading(false, submitButton);
+        }
+    }
+
+    async handleResetPassword(e) {
+        e.preventDefault();
+        const submitButton = document.getElementById('confirmResetButton');
+        const resetCode = this.resetCodeInput.value.trim();
+        const newPassword = this.newPasswordInput.value;
+        const confirmPassword = this.confirmPasswordInputReset.value; // ใช้ ID ที่ถูกต้อง
+        
+        let isValid = true;
+        this.clearForgotPasswordErrors();
+
+        if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
+            this.showError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
+            isValid = false;
+        }
+        if (newPassword.length < 6) {
+            this.showError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
+            isValid = false;
+        }
+        if (newPassword !== confirmPassword) {
+            this.showError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); // ใช้ ID ที่ถูกต้อง
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        this.setLoading(true, submitButton);
+
+        const formData = new FormData();
+        formData.append('action', 'reset_password');
+        formData.append('studentId', this.tempStudentId);
+        formData.append('resetCode', resetCode);
+        formData.append('newPassword', newPassword);
+
+        try {
+            const response = await fetch(this.WEB_APP_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                this.showLoginCard(); // กลับไปหน้า Login
+            } else {
+                this.showError('confirmPasswordReset', result.message); // ใช้ ID ที่ถูกต้อง
+            }
+        } catch (error) {
+            this.showError('confirmPasswordReset', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน'); // ใช้ ID ที่ถูกต้อง
+        } finally {
+            this.setLoading(false, submitButton);
+        }
+    }
+    
+    // Display Functions
+    updateSuccessScreen(data) {
+        const adminName = data.adminName || 'Admin';
+        const links = data.redirectButtons || []; 
+
+        document.getElementById('adminWelcome').textContent = `สวัสดี, ${adminName}!`;
+        document.getElementById('displayStudentId').textContent = data.studentId;
+        document.getElementById('displayTotalLogins').textContent = data.totalLogins;
+
+        // สร้างปุ่มลิงก์ตามจำนวนที่ได้รับ
+        this.redirectButtonsContainer.innerHTML = '';
+        
+        if (links.length === 0) {
+            this.redirectButtonsContainer.innerHTML = '<p style="color: #ef4444; margin-top: 10px;">ไม่พบลิงก์สำหรับ Admin</p>';
+            return;
+        }
+        
+        links.forEach((buttonData, index) => {
+            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจาก Apps Script (ชีต 2 แถว 1)
+            const link = buttonData.link;
+            
+            const newButton = document.createElement('button');
+            newButton.className = 'neural-button';
+            newButton.type = 'button';
+            newButton.style.marginTop = '0px';
+            
+            newButton.innerHTML = `
+                <div class="button-bg"></div>
+                <span class="button-text">${buttonText}</span>
+                <div class="button-glow"></div>
+            `;
+
+            newButton.addEventListener('click', () => {
+                // เปิดแท็บใหม่ (หน้าเว็บปลายทางแสดงผลเหมือนเดิม)
+                window.open(link, '_blank');
+            });
+            
+            // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px)
+            if (index > 0) {
+                newButton.style.marginTop = '5px'; 
+            }
+            
+            this.redirectButtonsContainer.appendChild(newButton);
+        });
+    }
+    
+    showNeuralSuccess() {
+        // ซ่อน Login/Forgot Cards ทั้งหมด
+        this.mainLoginCard.style.display = 'none'; 
+        this.forgotPasswordCard1.style.display = 'none';
+        this.forgotPasswordCard2.style.display = 'none';
+        
+        // แสดง Success Card
+        document.querySelector('.signup-section').style.display = 'none';
+        this.successMessage.classList.add('show');
+        this.successMessage.style.display = 'block'; 
+        
+        // ซ่อน iframe container ที่ไม่ได้ใช้
+        this.contentView.style.display = 'none'; 
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    new AIAssistantLoginForm();
+});
