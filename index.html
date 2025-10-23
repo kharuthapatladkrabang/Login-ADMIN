@@ -3,8 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>เข้าสู่ระบบ Admin</title>
+    <title>ระบบเข้าสู่ระบบ Admin</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS เพิ่มเติมสำหรับการจัดการ iFrame */
+        .content-view-container {
+            width: 100%;
+            max-width: 1000px; /* ขยายความกว้างสำหรับหน้าคอนเทนต์ */
+            height: 90vh; /* ความสูงเกือบเต็มจอ */
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+        #contentFrame {
+            flex-grow: 1;
+            width: 100%;
+            border: 1px solid #3b82f633;
+            border-radius: 10px;
+            background: #15151a;
+        }
+        #contentHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            color: #f8fafc;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="neural-background">
@@ -25,7 +52,7 @@
                     <img src="https://img5.pic.in.th/file/secure-sv1/Asset-401.png" alt="Admin Logo" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <h1>เข้าสู่ระบบ Admin</h1> 
-                <p>เฉพาะผู้ที่ได้รับอนุญาตให้เป็น Admin เท่านั้น!!</p>
+                <p>เข้าสู่ระบบผู้ดูแลระบบ</p>
             </div>
             
             <form class="login-form" id="loginForm" novalidate>
@@ -183,6 +210,18 @@
                 </div>
             <p style="margin-top: 20px;">กำลังเข้าสู่พื้นที่ทำงาน...</p>
         </div>
+    </div>
+
+    <div class="content-view-container" id="contentView" style="display:none;">
+        <div id="contentHeader">
+            <h3 id="contentTitle">หน้าสำหรับ Admin</h3>
+            <button class="neural-button" style="width: 120px; margin: 0;" onclick="location.reload()">
+                <div class="button-bg"></div>
+                <span class="button-text">ออกจากระบบ</span>
+                <div class="button-glow"></div>
+            </button>
+        </div>
+        <iframe id="contentFrame" src="about:blank"></iframe>
     </div>
 
     <script src="../../shared/js/form-utils.js"></script>
