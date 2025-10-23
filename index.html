@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>เข้าสู่ระบบ Admin</title>
+    <title>ระบบเข้าสู่ระบบ Admin</title>
     
     <link rel="icon" type="image/png" href="https://img2.pic.in.th/pic/012.1-LOGO---1.png">
     
     <link rel="stylesheet" href="style.css">
     <style>
-        /* CSS เพิ่มเติมสำหรับการจัดการ iFrame (ส่วนนี้จะถูกซ่อนแต่โครงสร้างยังคงอยู่) */
+        /* CSS เพิ่มเติมสำหรับการจัดการ iFrame */
+        /* FIX: กำหนดโครงสร้างใหม่ให้เป็น Modal ขนาดเดียวกับ Login Card */
         .content-view-container {
             width: 100%;
-            max-width: 1000px;
-            height: 90vh;
-            display: flex;
+            max-width: 420px; /* ใช้ความกว้างเดียวกับ Login Card */
+            height: 95vh; 
+            position: absolute; /* ใช้ absolute เพื่อซ้อนทับแต่ถูกจัดกึ่งกลางด้วย body flex */
+            z-index: 10;
+            display: none; 
             flex-direction: column;
-            position: relative;
-            z-index: 1;
+            
+            /* ใช้ transform เพื่อจัดกึ่งกลางใน body (ซึ่งถูก set display: flex) */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); 
         }
+
         #contentFrame {
             flex-grow: 1;
             width: 100%;
-            border: 1px solid #3b82f633;
+            border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 10px;
             background: #15151a;
         }
@@ -30,12 +37,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 5px 0 10px 0;
             color: #f8fafc;
-            margin-bottom: 10px;
         }
-        #mainContainerWrapper {
-            position: relative;
+        .menu-button-small {
+            width: 120px;
+            margin-left: 10px;
+        }
+        #contentTitleDisplay {
+            margin: 0;
+            font-size: 1.1rem;
         }
     </style>
 </head>
@@ -70,7 +81,7 @@
                         <div class="ai-pulse"></div>
                     </div>
                     <div class="field-completion"></div>
-                    <span class="error-message" id="emailError"></span> 
+                    <span class="error-message" id="emailError"></span>
                 </div>
 
                 <div class="smart-field" data-field="password">
@@ -89,19 +100,9 @@
                         <div class="ai-pulse"></div>
                     </div>
                     <div class="field-completion"></div>
-                    <span class="error-message" id="passwordError"></span> 
+                    <span class="error-message" id="passwordError"></span>
                 </div>
-                
-                <div class="smart-field" data-field="confirmPassword" id="confirmPasswordField" style="display: none;"> 
-                    <div class="field-background"></div>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off">
-                    <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
-                    <div class="ai-indicator">
-                        <div class="ai-pulse"></div>
-                    </div>
-                    <div class="field-completion"></div>
-                    <span class="error-message" id="confirmPasswordError"></span>
-                </div>
+
                 <div class="form-options">
                     <label class="smart-checkbox">
                         <input type="checkbox" id="remember" name="remember">
@@ -129,7 +130,7 @@
                     <div class="button-glow"></div>
                 </button>
             </form>
-            
+
             <div class="auth-separator" style="display: none;"></div>
             <div class="neural-social" style="display: none;"></div>
 
@@ -138,7 +139,7 @@
                 <a href="#" class="neural-signup" id="signupLink">ลงทะเบียน</a>
             </div>
         </div>
-        
+
         <div class="login-card" id="forgotPasswordCard1" style="display:none;">
             <div class="ai-glow"></div>
             <div class="login-header">
@@ -147,7 +148,7 @@
             </div>
             
             <form id="forgotPasswordForm" novalidate>
-                <div class="smart-field" data-field="resetEmail" id="fp_email_field">
+                <div class="smart-field" data-field="resetEmail">
                     <div class="field-background"></div>
                     <input type="text" id="resetEmail" name="studentId" required autocomplete="off"> 
                     <label for="resetEmail">รหัสนักศึกษา</label> 
@@ -190,10 +191,10 @@
                 
                 <div class="smart-field" data-field="confirmPassword">
                     <div class="field-background"></div>
-                    <input type="password" id="confirmPasswordReset" name="confirmPassword" required autocomplete="off"> 
-                    <label for="confirmPasswordReset">ยืนยันรหัสผ่านใหม่</label> 
+                    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off"> 
+                    <label for="confirmPassword">ยืนยันรหัสผ่านใหม่</label> 
                     <div class="field-completion"></div>
-                    <span class="error-message" id="confirmPasswordResetError"></span>
+                    <span class="error-message" id="confirmPasswordError"></span>
                 </div>
 
                 <button type="submit" class="neural-button" id="confirmResetButton">
@@ -230,12 +231,19 @@
 
     <div class="content-view-container" id="contentView" style="display:none;">
         <div id="contentHeader">
-            <h3 id="contentTitle">หน้าสำหรับ Admin</h3>
-            <button class="neural-button" style="width: 120px; margin: 0;" onclick="location.reload()">
-                <div class="button-bg"></div>
-                <span class="button-text">ออกจากระบบ</span>
-                <div class="button-glow"></div>
-            </button>
+            <h3 id="contentTitleDisplay">หน้าสำหรับ Admin</h3>
+            <div>
+                <button class="neural-button menu-button-small" onclick="showSuccessMenu()">
+                    <div class="button-bg"></div>
+                    <span class="button-text">กลับหน้าหลัก</span>
+                    <div class="button-glow"></div>
+                </button>
+                <button class="neural-button menu-button-small" onclick="location.reload()">
+                    <div class="button-bg"></div>
+                    <span class="button-text">ออกจากระบบ</span>
+                    <div class="button-glow"></div>
+                </button>
+            </div>
         </div>
         <iframe id="contentFrame" src="about:blank"></iframe>
     </div>
