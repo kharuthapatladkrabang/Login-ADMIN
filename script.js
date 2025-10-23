@@ -12,7 +12,6 @@ class AIAssistantLoginForm {
         this.successMessage = document.getElementById('successMessage'); // Success Card
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
-        this.mainContainerWrapper = document.getElementById('mainContainerWrapper'); // Wrapper 
         
         // iFrame Elements
         this.contentView = document.getElementById('contentView');
@@ -500,24 +499,31 @@ class AIAssistantLoginForm {
         this.successMessage.classList.add('show');
         this.successMessage.style.display = 'block'; 
         
-        // *** FIX: ซ่อน ContentView เมื่อแสดง Success Card ***
-        this.contentView.style.display = 'none';
-        this.mainContainerWrapper.style.display = 'flex'; // แสดง Login Container เพื่อให้ Success Card อยู่กึ่งกลาง
+        this.contentView.style.display = 'none'; // ซ่อน iframe
     }
-
+    
     // NEW FUNCTION: แสดง iframe
     showContentIframe(url, title) {
-        this.mainContainerWrapper.style.display = 'none'; // ซ่อน Container ที่มี Card ต่างๆ (Login/Success)
-        this.successMessage.style.display = 'none'; // ซ่อน Success Card ด้วย
+        // ซ่อน Card ทั้งหมด
+        this.mainLoginCard.style.display = 'none';
+        this.successMessage.style.display = 'none';
         
-        this.contentFrame.src = url; // โหลด URL เข้า iframe
-        this.contentTitle.textContent = title; // ตั้งชื่อหัวข้อ
+        // ซ่อนแถบ Sign Up
+        document.querySelector('.signup-section').style.display = 'none'; 
         
-        this.contentView.style.display = 'flex'; // แสดง iframe Container
+        // โหลด URL เข้า iframe
+        this.contentFrame.src = url; 
+        this.contentTitle.textContent = title; 
         
-        // OPTIONAL: หากต้องการให้ iframe ขยายเต็มจอเบราว์เซอร์
+        // แสดง iframe Container
+        this.contentView.style.display = 'flex'; 
+
+        // ปรับ Body Layout ให้รองรับ iframe ขนาดใหญ่
         document.body.style.justifyContent = 'flex-start'; 
         document.body.style.alignItems = 'flex-start';
+        
+        // ทำให้ mainContainerWrapper หายไปจากการจัดกึ่งกลาง
+        this.mainContainerWrapper.style.display = 'none';
     }
 }
 
