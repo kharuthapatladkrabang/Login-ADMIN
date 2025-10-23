@@ -661,7 +661,7 @@ body {
     font-size: 14px;
 }
 
-/* --- LIGHT MODE / REGISTER STYLES --- */
+/* --- LIGHT MODE / REGISTER STYLES (สำหรับโหมดลงทะเบียน) --- */
 body.register-mode {
     background: #f8fafc; /* พื้นหลังขาว */
 }
@@ -683,7 +683,8 @@ body.register-mode .login-card {
     color: #1e293b; /* Text Input ดำ */
 }
 .register-mode .smart-field .field-background {
-    background: rgba(240, 240, 245, 0.8);
+    background: rgba(240, 240, 245, 0.8); /* Field BG อ่อน */
+    border-color: rgba(0, 0, 0, 0.15); /* Border อ่อน */
 }
 .register-mode .smart-field label {
     background: rgba(255, 255, 255, 0.8); /* Background Label ขาว */
@@ -711,6 +712,9 @@ body.register-mode .login-card {
 .register-mode .checkbox-core {
     border-color: rgba(0, 0, 0, 0.2);
     background: rgba(240, 240, 245, 0.8);
+}
+.register-mode .neural-link {
+    color: #1e293b; /* ลืมรหัสผ่านใน Light Mode */
 }
 /* -------------------------------------- */
 
