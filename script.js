@@ -9,8 +9,9 @@ class AIAssistantLoginForm {
         this.submitButton = this.form.querySelector('.neural-button'); 
         this.signupLink = document.getElementById('signupLink'); 
         this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
-        this.successMessage = document.getElementById('successMessage'); 
-        this.mainLoginCard = document.getElementById('mainLoginCard'); 
+        this.successMessage = document.getElementById('successMessage'); // Success Card
+        
+        this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         this.mainContainerWrapper = document.getElementById('mainContainerWrapper'); // Wrapper 
         
         // iFrame Elements
@@ -22,11 +23,12 @@ class AIAssistantLoginForm {
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
         this.currentMode = 'login'; 
-        
+        this.redirectUrl = null; 
+
         // Forgot Password Elements
         this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); 
-        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); 
+        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
+        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
         this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
         this.resetEmailInput = document.getElementById('resetEmail');
         this.resetPasswordForm = document.getElementById('resetPasswordForm');
@@ -149,7 +151,7 @@ class AIAssistantLoginForm {
         document.querySelector('.signup-section').style.display = 'none';
         this.contentView.style.display = 'none'; // ซ่อน iframe
         
-        this.forgotPasswordCard1.style.display = 'block'; 
+        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
@@ -184,10 +186,10 @@ class AIAssistantLoginForm {
         this.clearError('email');
         this.clearError('password');
         
+        // เคลียร์สถานะ CSS Label และโหลดค่าที่จดจำไว้
         this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
         this.passwordInput.closest('.smart-field').classList.remove('error', 'has-value');
         
-        // โหลดค่าที่จดจำไว้ซ้ำอีกครั้ง (เพื่อให้แสดงผลหลังจาก clear แล้ว)
         this.loadRememberedCredentials();
     }
 
@@ -486,7 +488,7 @@ class AIAssistantLoginForm {
             this.redirectButtonsContainer.appendChild(newButton);
         });
     }
-
+    
     showNeuralSuccess() {
         // ซ่อน Login/Forgot Cards ทั้งหมด
         this.mainLoginCard.style.display = 'none'; 
@@ -498,18 +500,24 @@ class AIAssistantLoginForm {
         this.successMessage.classList.add('show');
         this.successMessage.style.display = 'block'; 
         
-        this.mainContainerWrapper.style.display = 'flex'; // ให้ Container หลักยังจัดกึ่งกลาง
-        this.contentView.style.display = 'none'; // ซ่อน iframe
+        // *** FIX: ซ่อน ContentView เมื่อแสดง Success Card ***
+        this.contentView.style.display = 'none';
+        this.mainContainerWrapper.style.display = 'flex'; // แสดง Login Container เพื่อให้ Success Card อยู่กึ่งกลาง
     }
-    
+
     // NEW FUNCTION: แสดง iframe
     showContentIframe(url, title) {
-        this.mainContainerWrapper.style.display = 'none'; // ซ่อน Container ที่มี Card ต่างๆ
+        this.mainContainerWrapper.style.display = 'none'; // ซ่อน Container ที่มี Card ต่างๆ (Login/Success)
+        this.successMessage.style.display = 'none'; // ซ่อน Success Card ด้วย
         
         this.contentFrame.src = url; // โหลด URL เข้า iframe
         this.contentTitle.textContent = title; // ตั้งชื่อหัวข้อ
         
         this.contentView.style.display = 'flex'; // แสดง iframe Container
+        
+        // OPTIONAL: หากต้องการให้ iframe ขยายเต็มจอเบราว์เซอร์
+        document.body.style.justifyContent = 'flex-start'; 
+        document.body.style.alignItems = 'flex-start';
     }
 }
 
