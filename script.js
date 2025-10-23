@@ -13,14 +13,14 @@ class AIAssistantLoginForm {
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
-        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
+        // iFrame Elements
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitle');
         
-        // โลโก้ URLs
-        this.LOGIN_LOGO = 'https://img5.pic.in.th/file/secure-sv1/Asset-401.png';
-        this.REGISTER_LOGO = 'https://img2.pic.in.th/pic/Asset-101.png';
+        // โลโก้ URLs (อัปเดตแล้ว)
+        this.LOGIN_LOGO = 'https://img5.pic.in.th/file/secure-sv1/Asset-401.png'; // โลโก้ Login (ดำ)
+        this.REGISTER_LOGO = 'https://img2.pic.in.th/pic/Asset-101.png'; // โลโก้ Register (ขาว/น้ำเงิน)
         this.logoImage = document.getElementById('mainLogoContainer').querySelector('img');
         
         this.formHeader = document.querySelector('.login-header h1');
@@ -155,12 +155,12 @@ class AIAssistantLoginForm {
         document.querySelector('.signup-section').style.display = 'none';
         this.contentView.style.display = 'none'; 
         
-        this.forgotPasswordCard1.style.display = 'block'; 
+        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
         
-        document.body.classList.remove('register-mode'); // มั่นใจว่าเป็น Dark Mode เสมอสำหรับ Forgot Password
+        document.body.classList.remove('register-mode'); // Force Dark Mode
     }
 
     showLoginCard() {
@@ -492,7 +492,7 @@ class AIAssistantLoginForm {
             `;
 
             newButton.addEventListener('click', () => {
-                // *** FIX: กลับไปใช้ window.open(link, '_blank') เพื่อเปิดแท็บใหม่ (ตามที่ต้องการ) ***
+                // เปิดแท็บใหม่ (หน้าเว็บปลายทางแสดงผลเหมือนเดิม)
                 window.open(link, '_blank');
             });
             
