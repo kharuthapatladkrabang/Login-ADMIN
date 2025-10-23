@@ -117,7 +117,7 @@ body {
     position: relative;
     width: 120px; /* ขยายโลโก้ใหญ่ขึ้น */
     height: 120px; /* ขยายโลโก้ใหญ่ขึ้น */
-    margin: 0 auto 24px;
+    margin: 0 auto 10px; /* ปรับให้ใกล้กับหัวข้อมากขึ้น */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -160,7 +160,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(30, 41, 59, 0.5);
+    background: rgba(15, 15, 20, 0.95); /* ใช้สีเดียวกับ Card เพื่อให้เกิดความสม่ำเสมอในการสลับสี */
     border: 1px solid rgba(59, 130, 246, 0.2);
     border-radius: 12px;
     transition: all 0.3s ease;
@@ -669,6 +669,42 @@ body {
     color: #94a3b8;
     font-size: 14px;
 }
+
+/* --- LIGHT MODE / REGISTER STYLES --- */
+.register-mode body {
+    background: #f8fafc !important; /* พื้นหลังขาว */
+}
+.register-mode .login-card {
+    background: #ffffff !important; /* Card ขาว */
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+.register-mode .ai-glow {
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.05) 0%, transparent 70%) !important;
+}
+.register-mode .login-header h1 {
+    color: #000000 !important; /* หัวข้อดำ */
+}
+.register-mode .login-header p {
+    color: #475569 !important; /* คำบรรยายดำ */
+}
+.register-mode .smart-field input {
+    color: #1e293b !important; /* Text Input ดำ */
+}
+.register-mode .smart-field label {
+    background: rgba(255, 255, 255, 0.8) !important; /* Background Label ขาว */
+}
+.register-mode .smart-field input:focus ~ .field-background,
+.register-mode .smart-field input:not(:placeholder-shown) ~ .field-background,
+.register-mode .smart-field.has-value .field-background {
+    background: rgba(240, 240, 245, 0.8) !important; /* Field Background อ่อน */
+    border-color: #3b82f6 !important;
+}
+.register-mode .signup-section span {
+    color: #475569 !important;
+}
+/* -------------------------------------- */
+
 
 /* Mobile Responsive */
 @media (max-width: 480px) {
