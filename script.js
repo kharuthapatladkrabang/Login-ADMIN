@@ -9,21 +9,24 @@ class AIAssistantLoginForm {
         this.submitButton = this.form.querySelector('.neural-button'); 
         this.signupLink = document.getElementById('signupLink'); 
         this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
-        this.successMessage = document.getElementById('successMessage'); // Success Card
+        this.successMessage = document.getElementById('successMessage'); 
+        this.mainLoginCard = document.getElementById('mainLoginCard'); 
+        this.mainContainerWrapper = document.getElementById('mainContainerWrapper'); // Wrapper 
         
-        this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
+        // iFrame Elements
+        this.contentView = document.getElementById('contentView');
+        this.contentFrame = document.getElementById('contentFrame');
+        this.contentTitle = document.getElementById('contentTitle');
         
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
         this.currentMode = 'login'; 
-        this.redirectUrl = null; 
-
+        
         // Forgot Password Elements
         this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        this.forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
-        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
-        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
+        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); 
+        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); 
         this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
         this.resetEmailInput = document.getElementById('resetEmail');
         this.resetPasswordForm = document.getElementById('resetPasswordForm');
@@ -56,33 +59,35 @@ class AIAssistantLoginForm {
         const rememberCheckbox = document.getElementById('remember');
 
         if (rememberedId && rememberedPass) {
-            // ตั้งค่าค่าลงใน Input Fields (Email/ID)
             this.emailInput.value = rememberedId;
+            this.passwordInput.value = rememberedPass;
             
-            // *** FIX: การตั้งค่ารหัสผ่านทำได้ยากกว่า
-            // เราตั้งค่า Value ในช่องรหัสผ่านตรงๆ
-            this.passwordInput.value = rememberedPass; 
+            if (rememberCheckbox) rememberCheckbox.checked = true; 
             
-            if (rememberCheckbox) {
-                rememberCheckbox.checked = true; 
-            }
-            
-            // เรียกใช้ฟังก์ชันเพื่อบังคับให้ Label ลอยขึ้น
             this.forceLabelFloat(this.emailInput);
             this.forceLabelFloat(this.passwordInput);
-
         } else {
-             if (rememberCheckbox) {
-                rememberCheckbox.checked = false;
-             }
+             if (rememberCheckbox) rememberCheckbox.checked = false;
              this.emailInput.value = '';
              this.passwordInput.value = '';
              this.forceLabelFloat(this.emailInput, false);
              this.forceLabelFloat(this.passwordInput, false);
         }
     }
+
+    // บันทึกข้อมูลลง localStorage
+    saveCredentials() {
+        const rememberCheckbox = document.getElementById('remember');
+        if (rememberCheckbox && rememberCheckbox.checked) {
+            localStorage.setItem('admin_remember_id', this.emailInput.value.trim());
+            localStorage.setItem('admin_remember_pass', this.passwordInput.value);
+        } else {
+            localStorage.removeItem('admin_remember_id');
+            localStorage.removeItem('admin_remember_pass');
+        }
+    }
     
-    // NEW Helper: บังคับให้ Label ลอยขึ้น (เพื่อแก้ปัญหา Smart Field CSS)
+    // NEW Helper: บังคับให้ Label ลอยขึ้น
     forceLabelFloat(inputElement, hasValue = true) {
         const smartField = inputElement.closest('.smart-field');
         if (smartField) {
@@ -94,21 +99,6 @@ class AIAssistantLoginForm {
         }
     }
 
-
-    // บันทึกข้อมูลลง localStorage
-    saveCredentials() {
-        const rememberCheckbox = document.getElementById('remember');
-        if (rememberCheckbox && rememberCheckbox.checked) {
-            // ต้องบันทึกเฉพาะเมื่อ Login สำเร็จเท่านั้น
-            localStorage.setItem('admin_remember_id', this.emailInput.value.trim());
-            localStorage.setItem('admin_remember_pass', this.passwordInput.value);
-        } else {
-            // ลบออกจาก localStorage ถ้าผู้ใช้ไม่ได้ติ๊ก
-            localStorage.removeItem('admin_remember_id');
-            localStorage.removeItem('admin_remember_pass');
-        }
-    }
-    
     bindEvents() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         this.emailInput.addEventListener('blur', () => this.validateStudentId());
@@ -124,7 +114,6 @@ class AIAssistantLoginForm {
                 this.forceLabelFloat(input, input.value.length > 0);
             });
         });
-
         
         // Register/Login Switch
         this.signupLink.addEventListener('click', (e) => {
@@ -158,8 +147,9 @@ class AIAssistantLoginForm {
         this.successMessage.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         document.querySelector('.signup-section').style.display = 'none';
+        this.contentView.style.display = 'none'; // ซ่อน iframe
         
-        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
+        this.forgotPasswordCard1.style.display = 'block'; 
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
@@ -169,6 +159,7 @@ class AIAssistantLoginForm {
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         this.successMessage.style.display = 'none';
+        this.contentView.style.display = 'none'; // ซ่อน iframe
         
         this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
@@ -178,12 +169,10 @@ class AIAssistantLoginForm {
     updateFormMode(mode) {
         this.currentMode = mode;
         
-        // Update Header (ใช้คำว่า Admin)
         this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
-        this.formSubHeader.textContent = mode === 'login' ? 'เฉพาะผู้ที่ได้รับอนุญาตให้เป็น Admin เท่านั้น!!' : 'สร้างบัญชี เฉพาะผู้ที่ได้รับอนุญาตให้เป็น Admin เท่านั้น!!';
+        this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
         this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
-        // Update Signup/Login Link Text
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
 
@@ -195,7 +184,6 @@ class AIAssistantLoginForm {
         this.clearError('email');
         this.clearError('password');
         
-        // เคลียร์สถานะ CSS Label
         this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
         this.passwordInput.closest('.smart-field').classList.remove('error', 'has-value');
         
@@ -226,7 +214,7 @@ class AIAssistantLoginForm {
     validatePassword() {
         const password = this.passwordInput.value;
         if (!password) {
-            this.showError('password', 'ต้องใช้รหัสผ่าน');
+            this.showError('password', 'ต้องใช้รหัสความปลอดภัย');
             return false;
         }
         if (password.length < 6) {
@@ -486,10 +474,11 @@ class AIAssistantLoginForm {
             `;
 
             newButton.addEventListener('click', () => {
-                window.open(link, '_blank');
+                // *** FIX: เรียกฟังก์ชันเพื่อแสดง iframe แทนการ Redirect ***
+                this.showContentIframe(link, buttonText);
             });
             
-            // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px ที่ตั้งไว้ใน HTML)
+            // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px)
             if (index > 0) {
                 newButton.style.marginTop = '5px'; 
             }
@@ -497,7 +486,7 @@ class AIAssistantLoginForm {
             this.redirectButtonsContainer.appendChild(newButton);
         });
     }
-    
+
     showNeuralSuccess() {
         // ซ่อน Login/Forgot Cards ทั้งหมด
         this.mainLoginCard.style.display = 'none'; 
@@ -508,6 +497,19 @@ class AIAssistantLoginForm {
         document.querySelector('.signup-section').style.display = 'none';
         this.successMessage.classList.add('show');
         this.successMessage.style.display = 'block'; 
+        
+        this.mainContainerWrapper.style.display = 'flex'; // ให้ Container หลักยังจัดกึ่งกลาง
+        this.contentView.style.display = 'none'; // ซ่อน iframe
+    }
+    
+    // NEW FUNCTION: แสดง iframe
+    showContentIframe(url, title) {
+        this.mainContainerWrapper.style.display = 'none'; // ซ่อน Container ที่มี Card ต่างๆ
+        
+        this.contentFrame.src = url; // โหลด URL เข้า iframe
+        this.contentTitle.textContent = title; // ตั้งชื่อหัวข้อ
+        
+        this.contentView.style.display = 'flex'; // แสดง iframe Container
     }
 }
 
