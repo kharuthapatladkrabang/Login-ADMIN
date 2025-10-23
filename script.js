@@ -13,21 +13,21 @@ class AIAssistantLoginForm {
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
-        // iFrame Elements
-        this.contentView = document.getElementById('contentView');
-        this.contentFrame = document.getElementById('contentFrame');
-        this.contentTitle = document.getElementById('contentTitle');
+        // โลโก้ URLs
+        this.LOGIN_LOGO = 'https://img5.pic.in.th/file/secure-sv1/Asset-401.png';
+        this.REGISTER_LOGO = 'https://img2.pic.in.th/pic/Asset-101.png';
+        
+        this.logoImage = document.getElementById('mainLogoContainer').querySelector('img');
         
         this.formHeader = document.querySelector('.login-header h1');
         this.formSubHeader = document.querySelector('.login-header p');
         this.actionText = document.querySelector('.signup-section span');
         this.currentMode = 'login'; 
-        this.redirectUrl = null; 
 
         // Forgot Password Elements
         this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
-        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
+        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); 
+        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); 
         this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
         this.resetEmailInput = document.getElementById('resetEmail');
         this.resetPasswordForm = document.getElementById('resetPasswordForm');
@@ -148,19 +148,19 @@ class AIAssistantLoginForm {
         this.successMessage.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         document.querySelector('.signup-section').style.display = 'none';
-        this.contentView.style.display = 'none'; 
         
         this.forgotPasswordCard1.style.display = 'block'; 
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
+        
+        document.body.classList.remove('register-mode'); // มั่นใจว่าเป็น Dark Mode
     }
 
     showLoginCard() {
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         this.successMessage.style.display = 'none';
-        this.contentView.style.display = 'none'; 
         
         this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
@@ -170,10 +170,21 @@ class AIAssistantLoginForm {
     updateFormMode(mode) {
         this.currentMode = mode;
         
+        // สลับ Style
+        if (mode === 'register') {
+            document.body.classList.add('register-mode');
+            this.logoImage.src = this.REGISTER_LOGO;
+        } else {
+            document.body.classList.remove('register-mode');
+            this.logoImage.src = this.LOGIN_LOGO;
+        }
+        
+        // Update Header (ใช้คำว่า Admin)
         this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
         this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
         this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
+        // Update Signup/Login Link Text
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
 
@@ -189,7 +200,10 @@ class AIAssistantLoginForm {
         this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
         this.passwordInput.closest('.smart-field').classList.remove('error', 'has-value');
         
-        this.loadRememberedCredentials();
+        // โหลดค่าที่จดจำไว้ซ้ำ (เฉพาะโหมด Login เท่านั้น)
+        if (mode === 'login') {
+            this.loadRememberedCredentials();
+        }
     }
 
     setupPasswordToggle() {
@@ -475,7 +489,7 @@ class AIAssistantLoginForm {
             `;
 
             newButton.addEventListener('click', () => {
-                // *** กลับไปใช้ window.open(link, '_blank') เพื่อเปิดแท็บใหม่ ***
+                // เปิดแท็บใหม่ (หน้าเว็บปลายทางแสดงผลเหมือนเดิม)
                 window.open(link, '_blank');
             });
             
