@@ -13,7 +13,7 @@ class AIAssistantLoginForm {
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
-        // iFrame Elements
+        // iFrame Elements (ถูกเก็บไว้แต่จะไม่มีการเรียกใช้)
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitle');
@@ -88,7 +88,7 @@ class AIAssistantLoginForm {
         }
     }
     
-    // NEW Helper: บังคับให้ Label ลอยขึ้น
+    // Helper: บังคับให้ Label ลอยขึ้น
     forceLabelFloat(inputElement, hasValue = true) {
         const smartField = inputElement.closest('.smart-field');
         if (smartField) {
@@ -148,9 +148,9 @@ class AIAssistantLoginForm {
         this.successMessage.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         document.querySelector('.signup-section').style.display = 'none';
-        this.contentView.style.display = 'none'; // ซ่อน iframe
+        this.contentView.style.display = 'none'; 
         
-        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
+        this.forgotPasswordCard1.style.display = 'block'; 
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
@@ -160,7 +160,7 @@ class AIAssistantLoginForm {
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         this.successMessage.style.display = 'none';
-        this.contentView.style.display = 'none'; // ซ่อน iframe
+        this.contentView.style.display = 'none'; 
         
         this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
@@ -475,8 +475,8 @@ class AIAssistantLoginForm {
             `;
 
             newButton.addEventListener('click', () => {
-                // *** FIX: เรียกฟังก์ชันเพื่อแสดง iframe แทนการ Redirect ***
-                this.showContentIframe(link, buttonText);
+                // *** FIX: กลับไปใช้ window.open(link, '_blank') เพื่อเปิดแท็บใหม่ ***
+                window.open(link, '_blank');
             });
             
             // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px)
@@ -499,31 +499,8 @@ class AIAssistantLoginForm {
         this.successMessage.classList.add('show');
         this.successMessage.style.display = 'block'; 
         
-        this.contentView.style.display = 'none'; // ซ่อน iframe
-    }
-    
-    // NEW FUNCTION: แสดง iframe
-    showContentIframe(url, title) {
-        // ซ่อน Card ทั้งหมด
-        this.mainLoginCard.style.display = 'none';
-        this.successMessage.style.display = 'none';
-        
-        // ซ่อนแถบ Sign Up
-        document.querySelector('.signup-section').style.display = 'none'; 
-        
-        // โหลด URL เข้า iframe
-        this.contentFrame.src = url; 
-        this.contentTitle.textContent = title; 
-        
-        // แสดง iframe Container
-        this.contentView.style.display = 'flex'; 
-
-        // ปรับ Body Layout ให้รองรับ iframe ขนาดใหญ่
-        document.body.style.justifyContent = 'flex-start'; 
-        document.body.style.alignItems = 'flex-start';
-        
-        // ทำให้ mainContainerWrapper หายไปจากการจัดกึ่งกลาง
-        this.mainContainerWrapper.style.display = 'none';
+        // ซ่อน iframe container ที่ไม่ได้ใช้
+        this.contentView.style.display = 'none'; 
     }
 }
 
