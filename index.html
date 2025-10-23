@@ -9,33 +9,38 @@
     
     <link rel="stylesheet" href="style.css">
     <style>
-        /* CSS เพิ่มเติมสำหรับการจัดการ iFrame (ส่วนนี้จะถูกซ่อนแต่โครงสร้างยังคงอยู่) */
+        /* CSS เพิ่มเติมสำหรับการจัดการ iFrame */
         .content-view-container {
             width: 100%;
-            max-width: 1000px;
-            height: 90vh;
-            display: flex;
+            height: 100vh; /* ให้เต็มความสูงของหน้าจอ */
+            display: none; /* ซ่อนเริ่มต้น */
             flex-direction: column;
-            position: relative;
-            z-index: 1;
+            position: fixed; /* ให้อยู่เหนือทุกอย่าง */
+            top: 0;
+            left: 0;
+            z-index: 9999;
+            background: #0a0a0f; /* พื้นหลังสีเข้ม */
+            padding: 10px;
+            box-sizing: border-box;
         }
         #contentFrame {
             flex-grow: 1;
             width: 100%;
-            border: 1px solid #3b82f633;
-            border-radius: 10px;
+            border: none; /* ลบขอบ */
+            border-radius: 5px;
             background: #15151a;
         }
         #contentHeader {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 5px 0 10px 0;
             color: #f8fafc;
-            margin-bottom: 10px;
         }
-        #mainContainerWrapper {
-            position: relative;
+        /* Style สำหรับปุ่มเมนูเล็กๆ */
+        .menu-button-small {
+            width: 120px;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -55,10 +60,10 @@
             
             <div class="login-header">
                 <div class="ai-logo" id="mainLogoContainer">
-                    <img src="https://img5.pic.in.th/file/secure-sv1/Asset-401.png" alt="Admin Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                    <img src="https://img5.pic.in.th/file/secure-sv1/Asset-401.png" alt="Admin Logo" id="logoImage" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
-                <h1>เข้าสู่ระบบ Admin</h1> 
-                <p>เข้าสู่ระบบผู้ดูแลระบบ</p>
+                <h1 id="headerTitle">เข้าสู่ระบบ Admin</h1> 
+                <p id="headerSubtitle">เข้าสู่ระบบผู้ดูแลระบบ</p>
             </div>
             
             <form class="login-form" id="loginForm" novalidate>
@@ -220,12 +225,19 @@
 
     <div class="content-view-container" id="contentView" style="display:none;">
         <div id="contentHeader">
-            <h3 id="contentTitle">หน้าสำหรับ Admin</h3>
-            <button class="neural-button" style="width: 120px; margin: 0;" onclick="location.reload()">
-                <div class="button-bg"></div>
-                <span class="button-text">ออกจากระบบ</span>
-                <div class="button-glow"></div>
-            </button>
+            <h3 id="contentTitleDisplay">หน้าสำหรับ Admin</h3>
+            <div>
+                <button class="neural-button menu-button-small" onclick="showSuccessMenu()">
+                    <div class="button-bg"></div>
+                    <span class="button-text">กลับหน้าหลัก</span>
+                    <div class="button-glow"></div>
+                </button>
+                <button class="neural-button menu-button-small" onclick="location.reload()">
+                    <div class="button-bg"></div>
+                    <span class="button-text">ออกจากระบบ</span>
+                    <div class="button-glow"></div>
+                </button>
+            </div>
         </div>
         <iframe id="contentFrame" src="about:blank"></iframe>
     </div>
