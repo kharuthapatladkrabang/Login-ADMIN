@@ -13,7 +13,7 @@ class AIAssistantLoginForm {
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
-        // iFrame Elements (ถูกเก็บไว้แต่จะไม่มีการเรียกใช้)
+        // iFrame Elements
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitle');
@@ -475,7 +475,7 @@ class AIAssistantLoginForm {
             `;
 
             newButton.addEventListener('click', () => {
-                // *** FIX: กลับไปใช้ window.open(link, '_blank') เพื่อเปิดแท็บใหม่ ***
+                // *** กลับไปใช้ window.open(link, '_blank') เพื่อเปิดแท็บใหม่ ***
                 window.open(link, '_blank');
             });
             
