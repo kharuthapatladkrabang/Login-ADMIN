@@ -343,21 +343,10 @@ body {
     position: absolute;
 }
 
-.checkbox-ai svg {
-    color: transparent;
-    transition: color 0.3s ease;
-    position: relative;
-    z-index: 1;
-}
-
 .smart-checkbox input[type="checkbox"]:checked + .checkbox-ai .checkbox-core {
     background: #3b82f6;
     border-color: #3b82f6;
     box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-}
-
-.smart-checkbox input[type="checkbox"]:checked + .checkbox-ai svg {
-    color: #ffffff;
 }
 
 .neural-link {
@@ -676,7 +665,7 @@ body {
 body.register-mode {
     background: #f8fafc; /* พื้นหลังขาว */
 }
-.register-mode .login-card {
+body.register-mode .login-card {
     background: #ffffff; /* Card ขาว */
     border-color: rgba(0, 0, 0, 0.1);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
@@ -692,6 +681,9 @@ body.register-mode {
 }
 .register-mode .smart-field input {
     color: #1e293b; /* Text Input ดำ */
+}
+.register-mode .smart-field .field-background {
+    background: rgba(240, 240, 245, 0.8);
 }
 .register-mode .smart-field label {
     background: rgba(255, 255, 255, 0.8); /* Background Label ขาว */
