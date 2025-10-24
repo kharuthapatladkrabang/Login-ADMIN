@@ -17,7 +17,7 @@ class AIAssistantLoginForm {
         this.confirmPasswordInput = document.getElementById('confirmPassword'); 
         this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
 
-        // iFrame Elements
+        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitleDisplay'); 
@@ -287,18 +287,28 @@ class AIAssistantLoginForm {
 
     // Error Management
     showError(field, message) {
-        // *** FIX: การกำหนด ID สำหรับ Error Targeting ***
+        // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
         let targetFieldId = field;
         
-        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('สิทธิ์') || field === 'email') {
+        // --- 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS) ---
+        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์')) {
             targetFieldId = 'email';
-        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
+        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง')) {
             targetFieldId = 'password';
-        } else if (field === 'confirmPasswordReset') {
-             targetFieldId = 'confirmPasswordReset'; // สำหรับหน้า Forgot Step 2
-        } else if (field === 'confirmPassword') {
-             targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
         }
+        // --- 2. ตรวจสอบ Error จากหน้า Reset Password (Step 2) ---
+        else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
+            targetFieldId = 'resetCode';
+        } else if (field === 'newPassword') {
+            targetFieldId = 'newPassword';
+        } else if (field === 'confirmPasswordReset' || message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
+            targetFieldId = 'confirmPasswordReset';
+        }
+        // --- 3. ตรวจสอบ Error จากหน้า Register (Client-side) ---
+        else if (field === 'confirmPassword') {
+            targetFieldId = 'confirmPassword';
+        }
+
 
         const inputElement = document.getElementById(targetFieldId);
         if (!inputElement) return;
@@ -338,7 +348,6 @@ class AIAssistantLoginForm {
 
     // AIEffects/Loading (คงเดิม)
     setupAIEffects() {
-        // ต้องตรวจสอบ confirmPasswordInput ก่อนใช้
         const inputsToTrack = [this.emailInput, this.passwordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset];
         if (this.confirmPasswordInput) inputsToTrack.push(this.confirmPasswordInput); 
 
@@ -428,7 +437,7 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers (คงเดิม) ---
+    // --- Forgot Password Handlers (มีการเปลี่ยน ID) ---
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
@@ -480,6 +489,7 @@ class AIAssistantLoginForm {
         let isValid = true;
         this.clearForgotPasswordErrors();
 
+        // ** การตรวจสอบ Client-side **
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
             this.showError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
@@ -515,7 +525,12 @@ class AIAssistantLoginForm {
                 alert(result.message);
                 this.showLoginCard(); // กลับไปหน้า Login
             } else {
-                this.showError('confirmPasswordReset', result.message); 
+                // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
+                let targetField = 'confirmPasswordReset';
+                if (result.message.includes('รหัสรีเซ็ต') || result.message.includes('หมดอายุ')) {
+                    targetField = 'resetCode';
+                }
+                this.showError(targetField, result.message); 
             }
         } catch (error) {
             this.showError('confirmPasswordReset', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน'); 
