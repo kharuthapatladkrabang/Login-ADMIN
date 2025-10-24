@@ -45,7 +45,8 @@ class AIAssistantLoginForm {
         this.newPasswordInput = document.getElementById('newPassword');
         this.confirmPasswordInputReset = document.getElementById('confirmPasswordReset'); // Reset Confirm Pass ID
         this.backToLoginLink = document.getElementById('backToLoginLink');
-        this.forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
+        this.resetStep1Message = document.getElementById('resetStep1Message'); // Step 1 Subtitle/Message
+        this.resetStep2Message = document.getElementById('resetStep2Message'); // Step 2 Subtitle/Message
         this.newPasswordToggle = document.getElementById('newPasswordToggle'); // Reset New Pass Toggle ID
         this.confirmPasswordResetToggle = document.getElementById('confirmPasswordResetToggle'); // Reset Confirm Pass Toggle ID
         
@@ -167,7 +168,7 @@ class AIAssistantLoginForm {
         this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
         
         // FIX: ตั้งค่าข้อความเริ่มต้น
-        document.getElementById('resetStep1Message').textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
+        this.resetStep1Message.textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
@@ -325,8 +326,8 @@ class AIAssistantLoginForm {
         let targetFieldId = field;
         
         // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
-        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
-            targetFieldId = 'email';
+        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email' || field === 'resetEmail') {
+            targetFieldId = (field === 'resetEmail' || field === 'email') ? field : 'email'; // Target resetEmail ใน Step 1
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
         } else if (field === 'confirmPasswordReset' || message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
@@ -481,7 +482,7 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers (คงเดิม) ---
+    // --- Forgot Password Handlers (มีการเปลี่ยน ID) ---
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
@@ -515,6 +516,7 @@ class AIAssistantLoginForm {
                 this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
                 this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
             } else {
+                // *** FIX: แสดง Error ใน input field ของ Step 1 ***
                 this.showError('resetEmail', result.message);
             }
         } catch (error) {
