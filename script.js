@@ -18,7 +18,7 @@ class AIAssistantLoginForm {
         this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
         this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // Register Toggle ID
 
-        // iFrame Elements
+        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitleDisplay'); 
@@ -52,7 +52,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxibE8XOFIqQes0IuyaXcFUf4bQbd4i-q2Fyr1VF7xrJiTBIjbOzUlaUZQOGlUYUYLf/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; // *** URL ล่าสุด ***
 
         this.init();
     }
@@ -121,7 +121,8 @@ class AIAssistantLoginForm {
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     this.clearError(input.id);
+                     // *** FIX: ล้าง Error เฉพาะช่องที่กำลังพิมพ์เท่านั้น ***
+                     this.clearError(input.id); 
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -130,14 +131,14 @@ class AIAssistantLoginForm {
             }
         });
         
-        // Register/Login Switch
+        // Register/Login Switch (คงเดิม)
         this.signupLink.addEventListener('click', (e) => {
             e.preventDefault();
             const newMode = this.currentMode === 'login' ? 'register' : 'login';
             this.updateFormMode(newMode);
         });
         
-        // Forgot Password Links
+        // Forgot Password Links (คงเดิม)
         this.forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
             this.showForgotPasswordStep1();
@@ -148,7 +149,7 @@ class AIAssistantLoginForm {
             this.showLoginCard();
         });
 
-        // Forgot Password Forms Submission
+        // Forgot Password Forms Submission (คงเดิม)
         this.forgotPasswordForm.addEventListener('submit', (e) => this.handleSendResetCode(e));
         this.resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
         
@@ -156,7 +157,7 @@ class AIAssistantLoginForm {
         this.passwordInput.setAttribute('placeholder', ' ');
     }
     
-    // UI/Mode Management
+    // UI/Mode Management (คงเดิม)
     showForgotPasswordStep1() {
         this.mainLoginCard.style.display = 'none';
         this.successMessage.style.display = 'none';
@@ -202,7 +203,7 @@ class AIAssistantLoginForm {
         // Update Header (ใช้คำว่า Admin)
         this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
         this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
-        this.submitButton.querySelector('span').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'; // FIX: ใช้ span แทน button-text
+        this.submitButton.querySelector('span').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
@@ -262,7 +263,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // Validation Helpers
+    // Validation Helpers (คงเดิม)
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
@@ -321,7 +322,8 @@ class AIAssistantLoginForm {
         // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
         let targetFieldId = field;
         
-        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
+        // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
+        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
             targetFieldId = 'email';
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
@@ -341,7 +343,7 @@ class AIAssistantLoginForm {
         const errorElement = document.getElementById(`${targetFieldId}Error`);
         
         if (smartField && errorElement) {
-             // เคลียร์ error เก่าก่อนแสดงอันใหม่
+             // เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
              this.clearAllErrorsInForm(smartField.form); 
 
              smartField.classList.add('error');
@@ -462,7 +464,7 @@ class AIAssistantLoginForm {
             } else {
                 // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
                 let targetField = 'password';
-                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ลงทะเบียนไว้แล้ว') || result.message.includes('สิทธิ์')) {
+                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
                     targetField = 'email';
                 }
                 
