@@ -13,11 +13,11 @@ class AIAssistantLoginForm {
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
-        // NEW INPUTS: ต้องมั่นใจว่าหา element เจอ
+        // NEW INPUTS: ต้องประกาศ Input Field ที่ถูกเพิ่มใน Login Form
         this.confirmPasswordInput = document.getElementById('confirmPassword'); 
-        this.confirmPasswordField = document.getElementById('confirmPasswordField'); 
-        
-        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
+        this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
+
+        // iFrame Elements
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitleDisplay'); 
@@ -85,7 +85,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // บันทึกข้อมูลลง localStorage (คงเดิม)
+    // บันทึกข้อมูลลง localStorage
     saveCredentials() {
         const rememberCheckbox = document.getElementById('remember');
         if (rememberCheckbox && rememberCheckbox.checked) {
@@ -97,7 +97,7 @@ class AIAssistantLoginForm {
         }
     }
     
-    // Helper: บังคับให้ Label ลอยขึ้น (คงเดิม)
+    // Helper: บังคับให้ Label ลอยขึ้น
     forceLabelFloat(inputElement, hasValue = true) {
         const smartField = inputElement.closest('.smart-field');
         if (smartField) {
@@ -116,7 +116,7 @@ class AIAssistantLoginForm {
         
         // Event input เพื่อจัดการ CSS Label
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
-            if (input) { // เช็ค input confirmPasswordInput เพราะมันอาจเป็น null ในโหมด Login
+            if (input) { 
                  input.addEventListener('input', () => {
                      this.clearError(input.id);
                      this.forceLabelFloat(input, input.value.length > 0);
@@ -211,7 +211,7 @@ class AIAssistantLoginForm {
         this.passwordInput.value = '';
         this.clearError('email');
         this.clearError('password');
-        this.clearError('confirmPassword');
+        this.clearError('confirmPassword'); // เคลียร์ช่องยืนยันรหัสผ่าน (ถ้ามี)
         
         // เคลียร์สถานะ CSS Label และโหลดค่าที่จดจำไว้
         this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
@@ -287,7 +287,7 @@ class AIAssistantLoginForm {
 
     // Error Management
     showError(field, message) {
-        // *** FIX: ปรับปรุงการหา ID สำหรับ Error Targeting ให้แม่นยำขึ้น ***
+        // *** FIX: การกำหนด ID สำหรับ Error Targeting ***
         let targetFieldId = field;
         
         if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('สิทธิ์') || field === 'email') {
@@ -428,7 +428,7 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers (มีการเปลี่ยน ID) ---
+    // --- Forgot Password Handlers (คงเดิม) ---
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
@@ -475,7 +475,7 @@ class AIAssistantLoginForm {
         const submitButton = document.getElementById('confirmResetButton');
         const resetCode = this.resetCodeInput.value.trim();
         const newPassword = this.newPasswordInput.value;
-        const confirmPassword = this.confirmPasswordInputReset.value; // ใช้ ID ที่ถูกต้อง
+        const confirmPassword = this.confirmPasswordInputReset.value; 
         
         let isValid = true;
         this.clearForgotPasswordErrors();
@@ -489,7 +489,7 @@ class AIAssistantLoginForm {
             isValid = false;
         }
         if (newPassword !== confirmPassword) {
-            this.showError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); // ใช้ ID ที่ถูกต้อง
+            this.showError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
             isValid = false;
         }
 
@@ -515,10 +515,10 @@ class AIAssistantLoginForm {
                 alert(result.message);
                 this.showLoginCard(); // กลับไปหน้า Login
             } else {
-                this.showError('confirmPasswordReset', result.message); // ใช้ ID ที่ถูกต้อง
+                this.showError('confirmPasswordReset', result.message); 
             }
         } catch (error) {
-            this.showError('confirmPasswordReset', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน'); // ใช้ ID ที่ถูกต้อง
+            this.showError('confirmPasswordReset', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน'); 
         } finally {
             this.setLoading(false, submitButton);
         }
