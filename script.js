@@ -16,8 +16,9 @@ class AIAssistantLoginForm {
         // NEW INPUTS: ต้องประกาศ Input Field ที่ถูกเพิ่มใน Login Form
         this.confirmPasswordInput = document.getElementById('confirmPassword'); 
         this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
+        this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // NEW TOGGLE ID
 
-        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
+        // iFrame Elements
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitleDisplay'); 
@@ -45,6 +46,7 @@ class AIAssistantLoginForm {
         this.confirmPasswordInputReset = document.getElementById('confirmPasswordReset'); // Reset Confirm Pass ID
         this.backToLoginLink = document.getElementById('backToLoginLink');
         this.forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
+        this.confirmPasswordResetToggle = document.getElementById('confirmPasswordResetToggle'); // Reset Toggle ID
         
         this.tempStudentId = null; 
 
@@ -126,25 +128,6 @@ class AIAssistantLoginForm {
                  });
             }
         });
-        
-        // *** FIX: ผูก Event Toggle กับช่องยืนยันรหัสผ่านในฟอร์มหลัก ***
-        const confirmToggle = document.getElementById('confirmPasswordToggle');
-        if (confirmToggle) {
-             confirmToggle.addEventListener('click', () => {
-                 const isPassword = this.confirmPasswordInput.type === 'password';
-                 this.confirmPasswordInput.type = isPassword ? 'text' : 'password';
-                 confirmToggle.classList.toggle('toggle-active', isPassword);
-             });
-        }
-        // *** FIX: ผูก Event Toggle กับช่องยืนยันรหัสผ่านใน Reset Form ***
-        const resetConfirmToggle = document.getElementById('confirmPasswordResetToggle');
-        if (resetConfirmToggle) {
-             resetConfirmToggle.addEventListener('click', () => {
-                 const isPassword = this.confirmPasswordInputReset.type === 'password';
-                 this.confirmPasswordInputReset.type = isPassword ? 'text' : 'password';
-                 resetConfirmToggle.classList.toggle('toggle-active', isPassword);
-             });
-        }
         
         // Register/Login Switch
         this.signupLink.addEventListener('click', (e) => {
@@ -242,12 +225,33 @@ class AIAssistantLoginForm {
     }
 
     setupPasswordToggle() {
+        // Toggle สำหรับช่องรหัสผ่านหลัก
         this.passwordToggle.addEventListener('click', () => {
             const isPassword = this.passwordInput.type === 'password';
             this.passwordInput.type = isPassword ? 'text' : 'password';
             
             this.passwordToggle.classList.toggle('toggle-active', isPassword);
         });
+        
+        // Toggle สำหรับช่องยืนยันรหัสผ่าน (Register)
+        const confirmToggle = document.getElementById('confirmPasswordToggle');
+        if (confirmToggle) {
+             confirmToggle.addEventListener('click', () => {
+                 const isPassword = this.confirmPasswordInput.type === 'password';
+                 this.confirmPasswordInput.type = isPassword ? 'text' : 'password';
+                 confirmToggle.classList.toggle('toggle-active', isPassword);
+             });
+        }
+        
+        // Toggle สำหรับช่องยืนยันรหัสผ่าน (Reset Password)
+        const resetConfirmToggle = document.getElementById('confirmPasswordResetToggle');
+        if (resetConfirmToggle) {
+             resetConfirmToggle.addEventListener('click', () => {
+                 const isPassword = this.confirmPasswordInputReset.type === 'password';
+                 this.confirmPasswordInputReset.type = isPassword ? 'text' : 'password';
+                 resetConfirmToggle.classList.toggle('toggle-active', isPassword);
+             });
+        }
     }
 
     // Validation Helpers
@@ -552,7 +556,7 @@ class AIAssistantLoginForm {
         }
     }
     
-    // Display Functions
+    // Display Functions (คงเดิม)
     updateSuccessScreen(data) {
         const adminName = data.adminName || 'Admin';
         const links = data.redirectButtons || []; 
