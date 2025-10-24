@@ -53,7 +53,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; // *** URL ล่าสุด ***
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; 
 
         this.init();
     }
@@ -115,14 +115,13 @@ class AIAssistantLoginForm {
 
     bindEvents() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        this.emailInput.addEventListener('blur', () => this.validateStudentId());
-        this.passwordInput.addEventListener('blur', () => this.validatePassword());
         
-        // Event input เพื่อจัดการ CSS Label
+        // Event input และ blur สำหรับฟอร์มหลักและฟอร์ม Register/Login
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     this.clearError(input.id);
+                     // *** FIX: Clear Error เฉพาะช่องที่พิมพ์ เพื่อรักษา Error อื่นๆ ไว้ ***
+                     this.clearError(input.id); 
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -131,6 +130,20 @@ class AIAssistantLoginForm {
             }
         });
         
+        // Event input และ blur สำหรับฟอร์ม Forgot Password (Step 1 และ Step 2)
+        [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
+            if (input) { 
+                 input.addEventListener('input', () => {
+                     // *** FIX: Clear Error เฉพาะช่องที่พิมพ์ (สำหรับ Reset Form) ***
+                     this.clearError(input.id);
+                     this.forceLabelFloat(input, input.value.length > 0);
+                 });
+                 input.addEventListener('blur', () => {
+                     this.forceLabelFloat(input, input.value.length > 0);
+                 });
+            }
+        });
+
         // Register/Login Switch
         this.signupLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -266,7 +279,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // Validation Helpers
+    // Validation Helpers (คงเดิม)
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
@@ -326,8 +339,8 @@ class AIAssistantLoginForm {
         let targetFieldId = field;
         
         // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
-        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email' || field === 'resetEmail') {
-            targetFieldId = (field === 'resetEmail' || field === 'email') ? field : 'email'; // Target resetEmail ใน Step 1
+        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
+            targetFieldId = 'email';
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
         } else if (field === 'confirmPasswordReset' || message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
@@ -336,6 +349,8 @@ class AIAssistantLoginForm {
              targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
         } else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
             targetFieldId = 'resetCode';
+        } else if (field === 'resetEmail') {
+             targetFieldId = 'resetEmail';
         }
 
 
@@ -494,6 +509,7 @@ class AIAssistantLoginForm {
         if (!studentId) {
             return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
         }
+        // FIX: ล้าง Error เฉพาะ Client-side ก่อนส่ง Server
         this.clearError('resetEmail');
 
         this.setLoading(true, submitButton);
@@ -511,10 +527,16 @@ class AIAssistantLoginForm {
             const result = await response.json();
 
             if (result.success) {
-                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 2 ***
-                document.getElementById('resetStep2Message').textContent = result.message; 
+                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 1 ***
+                this.resetStep1Message.textContent = result.message; 
                 this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
                 this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
+                
+                // Clear inputs ใน Step 2
+                this.resetCodeInput.value = '';
+                this.newPasswordInput.value = '';
+                this.confirmPasswordInputReset.value = '';
+
             } else {
                 // *** FIX: แสดง Error ใน input field ของ Step 1 ***
                 this.showError('resetEmail', result.message);
