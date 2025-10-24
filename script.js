@@ -16,9 +16,9 @@ class AIAssistantLoginForm {
         // NEW INPUTS: ต้องประกาศ Input Field ที่ถูกเพิ่มใน Login Form
         this.confirmPasswordInput = document.getElementById('confirmPassword'); 
         this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
-        this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // Register Toggle ID 
-        
-        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
+        this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // Register Toggle ID
+
+        // iFrame Elements
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitleDisplay'); 
@@ -52,7 +52,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxibE8XOFIqQes0IuyaXcFUf4bQbd4i-q2Fyr1VF7xrJiTBIjbOzUlaUZQOGlUYUYLf/exec'; // ** อัปเดต URL ใหม่ตามที่ผู้ใช้ร้องขอ **
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx0erdnXHChLGZ0YbDS6clv-v8cogzTnz5u6Y59euxA-guced_-mSH8_yc3YD_E8rof/exec'; 
 
         this.init();
     }
@@ -88,7 +88,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // บันทึกข้อมูลลง localStorage (คงเดิม)
+    // บันทึกข้อมูลลง localStorage
     saveCredentials() {
         const rememberCheckbox = document.getElementById('remember');
         if (rememberCheckbox && rememberCheckbox.checked) {
@@ -100,7 +100,7 @@ class AIAssistantLoginForm {
         }
     }
     
-    // Helper: บังคับให้ Label ลอยขึ้น (คงเดิม)
+    // Helper: บังคับให้ Label ลอยขึ้น
     forceLabelFloat(inputElement, hasValue = true) {
         const smartField = inputElement.closest('.smart-field');
         if (smartField) {
@@ -156,7 +156,7 @@ class AIAssistantLoginForm {
         this.passwordInput.setAttribute('placeholder', ' ');
     }
     
-    // UI/Mode Management (คงเดิม)
+    // UI/Mode Management
     showForgotPasswordStep1() {
         this.mainLoginCard.style.display = 'none';
         this.successMessage.style.display = 'none';
@@ -225,7 +225,6 @@ class AIAssistantLoginForm {
         this.loadRememberedCredentials();
     }
 
-    // *** FIX: แยก Logic Password Toggle ไปอยู่ในฟังก์ชัน setupPasswordToggle() ***
     setupPasswordToggle() {
         // 1. ช่องรหัสผ่านหลัก
         this.passwordToggle.addEventListener('click', () => {
@@ -235,11 +234,12 @@ class AIAssistantLoginForm {
         });
         
         // 2. ช่องยืนยันรหัสผ่าน (Register Form)
-        if (this.confirmPasswordToggle && this.confirmPasswordInput) {
-             this.confirmPasswordToggle.addEventListener('click', () => {
+        const confirmToggle = document.getElementById('confirmPasswordToggle');
+        if (confirmToggle && this.confirmPasswordInput) {
+             confirmToggle.addEventListener('click', () => {
                  const isPassword = this.confirmPasswordInput.type === 'password';
                  this.confirmPasswordInput.type = isPassword ? 'text' : 'password';
-                 this.confirmPasswordToggle.classList.toggle('toggle-active', isPassword);
+                 confirmToggle.classList.toggle('toggle-active', isPassword);
              });
         }
         
