@@ -13,10 +13,10 @@ class AIAssistantLoginForm {
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
-        // NEW INPUT: ต้องประกาศ Input Field ที่ถูกเพิ่มใน Login Form
+        // NEW INPUTS: ต้องมั่นใจว่าหา element เจอ
         this.confirmPasswordInput = document.getElementById('confirmPassword'); 
-        this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
-
+        this.confirmPasswordField = document.getElementById('confirmPasswordField'); 
+        
         // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
@@ -85,7 +85,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // บันทึกข้อมูลลง localStorage
+    // บันทึกข้อมูลลง localStorage (คงเดิม)
     saveCredentials() {
         const rememberCheckbox = document.getElementById('remember');
         if (rememberCheckbox && rememberCheckbox.checked) {
@@ -97,7 +97,7 @@ class AIAssistantLoginForm {
         }
     }
     
-    // Helper: บังคับให้ Label ลอยขึ้น
+    // Helper: บังคับให้ Label ลอยขึ้น (คงเดิม)
     forceLabelFloat(inputElement, hasValue = true) {
         const smartField = inputElement.closest('.smart-field');
         if (smartField) {
@@ -211,7 +211,7 @@ class AIAssistantLoginForm {
         this.passwordInput.value = '';
         this.clearError('email');
         this.clearError('password');
-        this.clearError('confirmPassword'); // เคลียร์ช่องยืนยันรหัสผ่าน (ถ้ามี)
+        this.clearError('confirmPassword');
         
         // เคลียร์สถานะ CSS Label และโหลดค่าที่จดจำไว้
         this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
@@ -256,7 +256,7 @@ class AIAssistantLoginForm {
         return true;
     }
     
-    // NEW: Validation สำหรับโหมดลงทะเบียน
+    // Validation สำหรับโหมดลงทะเบียน
     validateRegistration() {
         let isValid = true;
         
@@ -338,7 +338,11 @@ class AIAssistantLoginForm {
 
     // AIEffects/Loading (คงเดิม)
     setupAIEffects() {
-        [this.emailInput, this.passwordInput, this.confirmPasswordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
+        // ต้องตรวจสอบ confirmPasswordInput ก่อนใช้
+        const inputsToTrack = [this.emailInput, this.passwordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset];
+        if (this.confirmPasswordInput) inputsToTrack.push(this.confirmPasswordInput); 
+
+        inputsToTrack.forEach(input => {
             if(input) {
                 input.addEventListener('focus', (e) => {
                     this.triggerNeuralEffect(e.target.closest('.smart-field'));
