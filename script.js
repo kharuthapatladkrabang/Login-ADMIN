@@ -116,11 +116,11 @@ class AIAssistantLoginForm {
     bindEvents() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         
-        // Event input เพื่อจัดการ CSS Label สำหรับฟอร์มหลัก (Login/Register)
+        // Event input สำหรับฟอร์มหลักและ Register
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     this.clearError(input.id); // เคลียร์ Error เมื่อพิมพ์
+                     this.clearError(input.id);
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -130,11 +130,10 @@ class AIAssistantLoginForm {
         });
         
         // Event input และ blur สำหรับฟอร์ม Forgot Password (Step 1 และ Step 2)
-        // *** FIX: ลบ this.clearError ออกจาก input Event เพื่อให้ Error ค้างอยู่ ***
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // ไม่มีการ clearError(input.id) ที่นี่!
+                     // *** FIX: ลบ this.clearError(input.id) ออกจาก input Event (คงอยู่) ***
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -142,16 +141,15 @@ class AIAssistantLoginForm {
                  });
             }
         });
-        // *** End FIX ***
 
-        // Register/Login Switch
+        // Register/Login Switch (คงเดิม)
         this.signupLink.addEventListener('click', (e) => {
             e.preventDefault();
             const newMode = this.currentMode === 'login' ? 'register' : 'login';
             this.updateFormMode(newMode);
         });
         
-        // Forgot Password Links
+        // Forgot Password Links (คงเดิม)
         this.forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
             this.showForgotPasswordStep1();
@@ -162,7 +160,7 @@ class AIAssistantLoginForm {
             this.showLoginCard();
         });
 
-        // Forgot Password Forms Submission
+        // Forgot Password Forms Submission (คงเดิม)
         this.forgotPasswordForm.addEventListener('submit', (e) => this.handleSendResetCode(e));
         this.resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
         
@@ -345,7 +343,7 @@ class AIAssistantLoginForm {
              targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
         } else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
             targetFieldId = 'resetCode';
-        } else if (field === 'resetEmail') {
+        } else if (field === 'resetEmail' || message.includes('ไม่พบบัญชี') || message.includes('กรอกรหัสนักศึกษา')) {
              targetFieldId = 'resetEmail'; // สำหรับหน้า Forgot Step 1
         }
 
@@ -492,7 +490,7 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers (Step 1 & 2) ---
+    // --- Forgot Password Handlers ---
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
@@ -504,6 +502,7 @@ class AIAssistantLoginForm {
         if (!studentId) {
             return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
         }
+        // FIX: ล้าง Error เฉพาะ Client-side ก่อนส่ง Server
         this.clearError('resetEmail');
 
         this.setLoading(true, submitButton);
