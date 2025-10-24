@@ -115,12 +115,14 @@ class AIAssistantLoginForm {
 
     bindEvents() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        this.emailInput.addEventListener('blur', () => this.validateStudentId());
+        this.passwordInput.addEventListener('blur', () => this.validatePassword());
         
-        // Event input และ blur สำหรับฟอร์มหลักและฟอร์ม Register/Login
+        // Event input สำหรับฟอร์มหลักและ Register
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // *** FIX: Clear Error เฉพาะช่องที่พิมพ์ เพื่อรักษา Error อื่นๆ ไว้ ***
+                     // FIX: ล้าง Error เฉพาะช่องที่กำลังพิมพ์ เพื่อรักษา Error อื่นๆ ไว้
                      this.clearError(input.id); 
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
@@ -134,7 +136,7 @@ class AIAssistantLoginForm {
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // *** FIX: Clear Error เฉพาะช่องที่พิมพ์ (สำหรับ Reset Form) ***
+                     // FIX: Clear Error เฉพาะช่องที่กำลังพิมพ์ (สำหรับ Reset Form)
                      this.clearError(input.id);
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
@@ -144,14 +146,14 @@ class AIAssistantLoginForm {
             }
         });
 
-        // Register/Login Switch
+        // Register/Login Switch (คงเดิม)
         this.signupLink.addEventListener('click', (e) => {
             e.preventDefault();
             const newMode = this.currentMode === 'login' ? 'register' : 'login';
             this.updateFormMode(newMode);
         });
         
-        // Forgot Password Links
+        // Forgot Password Links (คงเดิม)
         this.forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
             this.showForgotPasswordStep1();
@@ -162,7 +164,7 @@ class AIAssistantLoginForm {
             this.showLoginCard();
         });
 
-        // Forgot Password Forms Submission
+        // Forgot Password Forms Submission (คงเดิม)
         this.forgotPasswordForm.addEventListener('submit', (e) => this.handleSendResetCode(e));
         this.resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
         
@@ -279,7 +281,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // Validation Helpers (คงเดิม)
+    // Validation Helpers
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
@@ -349,8 +351,8 @@ class AIAssistantLoginForm {
              targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
         } else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
             targetFieldId = 'resetCode';
-        } else if (field === 'resetEmail') {
-             targetFieldId = 'resetEmail';
+        } else if (field === 'resetEmail' || message.includes('ไม่พบบัญชี') || message.includes('กรอกรหัสนักศึกษา')) {
+             targetFieldId = 'resetEmail'; // สำหรับหน้า Forgot Step 1
         }
 
 
@@ -497,7 +499,7 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers (มีการเปลี่ยน ID) ---
+    // --- Forgot Password Handlers (คงเดิม) ---
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
@@ -506,10 +508,10 @@ class AIAssistantLoginForm {
         const studentId = this.resetEmailInput.value.trim();
         this.tempStudentId = studentId;
 
+        // *** FIX: ตรวจสอบ Client-side validation ก่อนส่ง Server ***
         if (!studentId) {
             return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
         }
-        // FIX: ล้าง Error เฉพาะ Client-side ก่อนส่ง Server
         this.clearError('resetEmail');
 
         this.setLoading(true, submitButton);
@@ -527,8 +529,8 @@ class AIAssistantLoginForm {
             const result = await response.json();
 
             if (result.success) {
-                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 1 ***
-                this.resetStep1Message.textContent = result.message; 
+                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 1 (แล้วย้ายไป Step 2) ***
+                this.resetStep2Message.textContent = result.message; 
                 this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
                 this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
                 
@@ -558,7 +560,6 @@ class AIAssistantLoginForm {
         let isValid = true;
         this.clearForgotPasswordErrors();
 
-        // ** การตรวจสอบ Client-side **
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
             this.showError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
