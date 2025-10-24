@@ -12,7 +12,7 @@
         /* CSS เพิ่มเติมสำหรับการจัดการ iFrame */
         .content-view-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 420px; /* ใช้ความกว้างเดียวกับ Login Card */
             height: 95vh; 
             position: absolute;
             z-index: 10;
@@ -44,9 +44,6 @@
         #contentTitleDisplay {
             margin: 0;
             font-size: 1.1rem;
-        }
-        #mainContainerWrapper {
-            position: relative;
         }
     </style>
 </head>
@@ -102,7 +99,7 @@
                     <div class="field-completion"></div>
                     <span class="error-message" id="passwordError"></span>
                 </div>
-                
+
                 <div class="smart-field" data-field="confirmPassword" id="confirmPasswordField" style="display: none;"> 
                     <div class="field-background"></div>
                     <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off">
@@ -113,6 +110,8 @@
                     <div class="field-completion"></div>
                     <span class="error-message" id="confirmPasswordError"></span>
                 </div>
+
+
                 <div class="form-options">
                     <label class="smart-checkbox">
                         <input type="checkbox" id="remember" name="remember">
