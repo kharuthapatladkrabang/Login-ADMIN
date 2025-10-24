@@ -53,7 +53,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; // *** URL ล่าสุด ***
 
         this.init();
     }
@@ -133,7 +133,7 @@ class AIAssistantLoginForm {
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // *** FIX: ลบ this.clearError(input.id) ออกจาก input Event (คงอยู่) ***
+                     // *** FIX: ไม่มี this.clearError ที่นี่ เพื่อให้ Error ค้างอยู่ ***
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -500,6 +500,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = studentId;
 
         if (!studentId) {
+            // Client-side validation
             return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
         }
         // FIX: ล้าง Error เฉพาะ Client-side ก่อนส่ง Server
