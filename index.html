@@ -10,17 +10,14 @@
     <link rel="stylesheet" href="style.css">
     <style>
         /* CSS เพิ่มเติมสำหรับการจัดการ iFrame */
-        /* FIX: กำหนดโครงสร้างใหม่ให้เป็น Modal ขนาดเดียวกับ Login Card */
         .content-view-container {
             width: 100%;
-            max-width: 420px; /* ใช้ความกว้างเดียวกับ Login Card */
+            max-width: 420px;
             height: 95vh; 
-            position: absolute; /* ใช้ absolute เพื่อซ้อนทับแต่ถูกจัดกึ่งกลางด้วย body flex */
+            position: absolute;
             z-index: 10;
             display: none; 
             flex-direction: column;
-            
-            /* ใช้ transform เพื่อจัดกึ่งกลางใน body (ซึ่งถูก set display: flex) */
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%); 
@@ -47,6 +44,9 @@
         #contentTitleDisplay {
             margin: 0;
             font-size: 1.1rem;
+        }
+        #mainContainerWrapper {
+            position: relative;
         }
     </style>
 </head>
@@ -102,7 +102,17 @@
                     <div class="field-completion"></div>
                     <span class="error-message" id="passwordError"></span>
                 </div>
-
+                
+                <div class="smart-field" data-field="confirmPassword" id="confirmPasswordField" style="display: none;"> 
+                    <div class="field-background"></div>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off">
+                    <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+                    <div class="ai-indicator">
+                        <div class="ai-pulse"></div>
+                    </div>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="confirmPasswordError"></span>
+                </div>
                 <div class="form-options">
                     <label class="smart-checkbox">
                         <input type="checkbox" id="remember" name="remember">
@@ -189,12 +199,12 @@
                     <span class="error-message" id="newPasswordError"></span>
                 </div>
                 
-                <div class="smart-field" data-field="confirmPassword">
+                <div class="smart-field" data-field="confirmPasswordReset">
                     <div class="field-background"></div>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off"> 
-                    <label for="confirmPassword">ยืนยันรหัสผ่านใหม่</label> 
+                    <input type="password" id="confirmPasswordReset" name="confirmPasswordReset" required autocomplete="off"> 
+                    <label for="confirmPasswordReset">ยืนยันรหัสผ่านใหม่</label> 
                     <div class="field-completion"></div>
-                    <span class="error-message" id="confirmPasswordError"></span>
+                    <span class="error-message" id="confirmPasswordResetError"></span>
                 </div>
 
                 <button type="submit" class="neural-button" id="confirmResetButton">
@@ -232,18 +242,11 @@
     <div class="content-view-container" id="contentView" style="display:none;">
         <div id="contentHeader">
             <h3 id="contentTitleDisplay">หน้าสำหรับ Admin</h3>
-            <div>
-                <button class="neural-button menu-button-small" onclick="showSuccessMenu()">
-                    <div class="button-bg"></div>
-                    <span class="button-text">กลับหน้าหลัก</span>
-                    <div class="button-glow"></div>
-                </button>
-                <button class="neural-button menu-button-small" onclick="location.reload()">
-                    <div class="button-bg"></div>
-                    <span class="button-text">ออกจากระบบ</span>
-                    <div class="button-glow"></div>
-                </button>
-            </div>
+            <button class="neural-button" style="width: 120px; margin: 0;" onclick="location.reload()">
+                <div class="button-bg"></div>
+                <span class="button-text">ออกจากระบบ</span>
+                <div class="button-glow"></div>
+            </button>
         </div>
         <iframe id="contentFrame" src="about:blank"></iframe>
     </div>
