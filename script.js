@@ -13,10 +13,14 @@ class AIAssistantLoginForm {
         
         this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
         
-        // iFrame Elements
+        // NEW INPUT: ต้องประกาศ Input Field ที่ถูกเพิ่มใน Login Form
+        this.confirmPasswordInput = document.getElementById('confirmPassword'); 
+        this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
+
+        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
-        this.contentTitle = document.getElementById('contentTitleDisplay'); // FIX: ใช้ ID ที่ถูกต้อง
+        this.contentTitle = document.getElementById('contentTitleDisplay'); 
         
         // โลโก้ URLs
         this.LOGIN_LOGO = 'https://img5.pic.in.th/file/secure-sv1/Asset-401.png';
@@ -38,7 +42,7 @@ class AIAssistantLoginForm {
         this.resetPasswordForm = document.getElementById('resetPasswordForm');
         this.resetCodeInput = document.getElementById('resetCode');
         this.newPasswordInput = document.getElementById('newPassword');
-        this.confirmPasswordInputReset = document.getElementById('confirmPasswordReset'); // Rename ID for clarity
+        this.confirmPasswordInputReset = document.getElementById('confirmPasswordReset'); // Reset Confirm Pass ID
         this.backToLoginLink = document.getElementById('backToLoginLink');
         this.forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
         
@@ -48,9 +52,6 @@ class AIAssistantLoginForm {
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx0erdnXHChLGZ0YbDS6clv-v8cogzTnz5u6Y59euxA-guced_-mSH8_yc3YD_E8rof/exec'; 
 
         this.init();
-        
-        // ทำให้ฟังก์ชันนี้ถูกเรียกใช้ได้จาก onclick ใน HTML
-        window.showSuccessMenu = this.showNeuralSuccess.bind(this); 
     }
     
     init() {
@@ -115,13 +116,15 @@ class AIAssistantLoginForm {
         
         // Event input เพื่อจัดการ CSS Label
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
-            input.addEventListener('input', () => {
-                this.clearError(input.id);
-                this.forceLabelFloat(input, input.value.length > 0);
-            });
-            input.addEventListener('blur', () => {
-                this.forceLabelFloat(input, input.value.length > 0);
-            });
+            if (input) { // เช็ค input confirmPasswordInput เพราะมันอาจเป็น null ในโหมด Login
+                 input.addEventListener('input', () => {
+                     this.clearError(input.id);
+                     this.forceLabelFloat(input, input.value.length > 0);
+                 });
+                 input.addEventListener('blur', () => {
+                     this.forceLabelFloat(input, input.value.length > 0);
+                 });
+            }
         });
         
         // Register/Login Switch
@@ -184,11 +187,13 @@ class AIAssistantLoginForm {
         if (mode === 'register') {
             document.body.classList.add('register-mode');
             this.logoImage.src = this.REGISTER_LOGO;
-            this.confirmPasswordInput.style.display = 'block'; // แสดงช่องยืนยันรหัสผ่าน
+            // แสดงช่องยืนยันรหัสผ่าน
+            if (this.confirmPasswordField) this.confirmPasswordField.style.display = 'block';
         } else {
             document.body.classList.remove('register-mode');
             this.logoImage.src = this.LOGIN_LOGO;
-            this.confirmPasswordInput.style.display = 'none'; // ซ่อนช่องยืนยันรหัสผ่าน
+            // ซ่อนช่องยืนยันรหัสผ่าน
+            if (this.confirmPasswordField) this.confirmPasswordField.style.display = 'none';
         }
         
         // Update Header (ใช้คำว่า Admin)
@@ -206,12 +211,12 @@ class AIAssistantLoginForm {
         this.passwordInput.value = '';
         this.clearError('email');
         this.clearError('password');
-        this.clearError('confirmPassword');
+        this.clearError('confirmPassword'); // เคลียร์ช่องยืนยันรหัสผ่าน (ถ้ามี)
         
         // เคลียร์สถานะ CSS Label และโหลดค่าที่จดจำไว้
         this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
         this.passwordInput.closest('.smart-field').classList.remove('error', 'has-value');
-        const confirmField = this.confirmPasswordInput.closest('.smart-field');
+        const confirmField = this.confirmPasswordInput ? this.confirmPasswordInput.closest('.smart-field') : null;
         if (confirmField) confirmField.classList.remove('error', 'has-value');
 
         this.loadRememberedCredentials();
@@ -282,15 +287,18 @@ class AIAssistantLoginForm {
 
     // Error Management
     showError(field, message) {
-        // *** FIX: การกำหนด ID สำหรับ Error Targeting ***
+        // *** FIX: ปรับปรุงการหา ID สำหรับ Error Targeting ให้แม่นยำขึ้น ***
         let targetFieldId = field;
         
-        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('สิทธิ์')) {
+        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('สิทธิ์') || field === 'email') {
             targetFieldId = 'email';
-        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง')) {
+        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
+        } else if (field === 'confirmPasswordReset') {
+             targetFieldId = 'confirmPasswordReset'; // สำหรับหน้า Forgot Step 2
+        } else if (field === 'confirmPassword') {
+             targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
         }
-        // ในหน้า Reset Password Error จะแสดงที่ช่องยืนยันรหัสผ่าน (confirmPasswordReset)
 
         const inputElement = document.getElementById(targetFieldId);
         if (!inputElement) return;
