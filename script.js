@@ -202,7 +202,7 @@ class AIAssistantLoginForm {
         // Update Header (ใช้คำว่า Admin)
         this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
         this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
-        this.submitButton.querySelector('.button-text').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
+        this.submitButton.querySelector('span').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'; // FIX: ใช้ span แทน button-text
         
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
@@ -321,8 +321,7 @@ class AIAssistantLoginForm {
         // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
         let targetFieldId = field;
         
-        // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
-        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
+        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
             targetFieldId = 'email';
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
@@ -463,7 +462,7 @@ class AIAssistantLoginForm {
             } else {
                 // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
                 let targetField = 'password';
-                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
+                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ลงทะเบียนไว้แล้ว') || result.message.includes('สิทธิ์')) {
                     targetField = 'email';
                 }
                 
