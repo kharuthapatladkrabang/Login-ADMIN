@@ -53,7 +53,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; // *** URL ล่าสุด ***
 
         this.init();
     }
@@ -115,15 +115,12 @@ class AIAssistantLoginForm {
 
     bindEvents() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        this.emailInput.addEventListener('blur', () => this.validateStudentId());
-        this.passwordInput.addEventListener('blur', () => this.validatePassword());
         
-        // Event input สำหรับฟอร์มหลักและ Register
+        // Event input เพื่อจัดการ CSS Label
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // FIX: ล้าง Error เฉพาะช่องที่กำลังพิมพ์ เพื่อรักษา Error อื่นๆ ไว้
-                     this.clearError(input.id); 
+                     this.clearError(input.id);
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -136,9 +133,10 @@ class AIAssistantLoginForm {
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // FIX: Clear Error เฉพาะช่องที่กำลังพิมพ์ (สำหรับ Reset Form)
+                     // *** FIX: Clear Error เฉพาะช่องที่กำลังพิมพ์ (สำหรับ Reset Form) ***
                      this.clearError(input.id);
                      this.forceLabelFloat(input, input.value.length > 0);
+                     // ไม่มีการ clearAllErrorsInForm ที่นี่ เพื่อป้องกัน Error หายวับ
                  });
                  input.addEventListener('blur', () => {
                      this.forceLabelFloat(input, input.value.length > 0);
@@ -183,7 +181,7 @@ class AIAssistantLoginForm {
         this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
         
         // FIX: ตั้งค่าข้อความเริ่มต้น
-        this.resetStep1Message.textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
+        document.getElementById('resetStep1Message').textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
@@ -310,13 +308,9 @@ class AIAssistantLoginForm {
     validateRegistration() {
         let isValid = true;
         
-        // 1. Validate Student ID (ใช้ ID 'email' สำหรับ error)
         if (!this.validateStudentId()) isValid = false;
-        
-        // 2. Validate Password (ใช้ ID 'password' สำหรับ error)
         if (!this.validatePassword()) isValid = false;
         
-        // 3. Validate Confirm Password (ใช้ ID 'confirmPassword' สำหรับ error)
         const password = this.passwordInput.value;
         const confirmPassword = this.confirmPasswordInput.value;
 
@@ -499,7 +493,7 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers (คงเดิม) ---
+    // --- Forgot Password Handlers ---
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
@@ -508,8 +502,8 @@ class AIAssistantLoginForm {
         const studentId = this.resetEmailInput.value.trim();
         this.tempStudentId = studentId;
 
-        // *** FIX: ตรวจสอบ Client-side validation ก่อนส่ง Server ***
         if (!studentId) {
+            // Client-side validation
             return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
         }
         this.clearError('resetEmail');
@@ -560,6 +554,7 @@ class AIAssistantLoginForm {
         let isValid = true;
         this.clearForgotPasswordErrors();
 
+        // ** การตรวจสอบ Client-side **
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
             this.showError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
