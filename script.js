@@ -127,6 +127,25 @@ class AIAssistantLoginForm {
             }
         });
         
+        // *** FIX: ผูก Event Toggle กับช่องยืนยันรหัสผ่านในฟอร์มหลัก ***
+        const confirmToggle = document.getElementById('confirmPasswordToggle');
+        if (confirmToggle) {
+             confirmToggle.addEventListener('click', () => {
+                 const isPassword = this.confirmPasswordInput.type === 'password';
+                 this.confirmPasswordInput.type = isPassword ? 'text' : 'password';
+                 confirmToggle.classList.toggle('toggle-active', isPassword);
+             });
+        }
+        // *** FIX: ผูก Event Toggle กับช่องยืนยันรหัสผ่านใน Reset Form ***
+        const resetConfirmToggle = document.getElementById('confirmPasswordResetToggle');
+        if (resetConfirmToggle) {
+             resetConfirmToggle.addEventListener('click', () => {
+                 const isPassword = this.confirmPasswordInputReset.type === 'password';
+                 this.confirmPasswordInputReset.type = isPassword ? 'text' : 'password';
+                 resetConfirmToggle.classList.toggle('toggle-active', isPassword);
+             });
+        }
+        
         // Register/Login Switch
         this.signupLink.addEventListener('click', (e) => {
             e.preventDefault();
@@ -290,23 +309,16 @@ class AIAssistantLoginForm {
         // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
         let targetFieldId = field;
         
-        // --- 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS) ---
-        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์')) {
+        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('สิทธิ์') || field === 'email') {
             targetFieldId = 'email';
-        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง')) {
+        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
-        }
-        // --- 2. ตรวจสอบ Error จากหน้า Reset Password (Step 2) ---
-        else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
-            targetFieldId = 'resetCode';
-        } else if (field === 'newPassword') {
-            targetFieldId = 'newPassword';
         } else if (field === 'confirmPasswordReset' || message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
-            targetFieldId = 'confirmPasswordReset';
-        }
-        // --- 3. ตรวจสอบ Error จากหน้า Register (Client-side) ---
-        else if (field === 'confirmPassword') {
-            targetFieldId = 'confirmPassword';
+             targetFieldId = 'confirmPasswordReset'; // สำหรับหน้า Forgot Step 2
+        } else if (field === 'confirmPassword') {
+             targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
+        } else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
+            targetFieldId = 'resetCode';
         }
 
 
@@ -348,6 +360,7 @@ class AIAssistantLoginForm {
 
     // AIEffects/Loading (คงเดิม)
     setupAIEffects() {
+        // ต้องตรวจสอบ confirmPasswordInput ก่อนใช้
         const inputsToTrack = [this.emailInput, this.passwordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset];
         if (this.confirmPasswordInput) inputsToTrack.push(this.confirmPasswordInput); 
 
@@ -437,7 +450,7 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers (มีการเปลี่ยน ID) ---
+    // --- Forgot Password Handlers (คงเดิม) ---
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
