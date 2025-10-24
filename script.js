@@ -18,7 +18,7 @@ class AIAssistantLoginForm {
         this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
         this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // Register Toggle ID
 
-        // iFrame Elements (ถูกเก็บไว้แต่ไม่มีการเรียกใช้)
+        // iFrame Elements
         this.contentView = document.getElementById('contentView');
         this.contentFrame = document.getElementById('contentFrame');
         this.contentTitle = document.getElementById('contentTitleDisplay'); 
@@ -165,6 +165,9 @@ class AIAssistantLoginForm {
         this.contentView.style.display = 'none'; 
         
         this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
+        
+        // FIX: ตั้งค่าข้อความเริ่มต้น
+        document.getElementById('resetStep1Message').textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
         
         this.clearForgotPasswordErrors();
         this.resetEmailInput.value = '';
@@ -321,6 +324,7 @@ class AIAssistantLoginForm {
         // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
         let targetFieldId = field;
         
+        // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
         if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
             targetFieldId = 'email';
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
@@ -462,7 +466,7 @@ class AIAssistantLoginForm {
             } else {
                 // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
                 let targetField = 'password';
-                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ลงทะเบียนไว้แล้ว') || result.message.includes('สิทธิ์')) {
+                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
                     targetField = 'email';
                 }
                 
@@ -506,12 +510,11 @@ class AIAssistantLoginForm {
             const result = await response.json();
 
             if (result.success) {
-                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 1 ***
-                document.getElementById('resetStep1Message').textContent = result.message; 
+                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 2 ***
+                document.getElementById('resetStep2Message').textContent = result.message; 
                 this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
                 this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
             } else {
-                // *** FIX: แสดง Error ใน input field ของ Step 1 ***
                 this.showError('resetEmail', result.message);
             }
         } catch (error) {
