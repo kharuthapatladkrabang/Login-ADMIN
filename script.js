@@ -52,7 +52,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbx0erdnXHChLGZ0YbDS6clv-v8cogzTnz5u6Y59euxA-guced_-mSH8_yc3YD_E8rof/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxibE8XOFIqQes0IuyaXcFUf4bQbd4i-q2Fyr1VF7xrJiTBIjbOzUlaUZQOGlUYUYLf/exec'; 
 
         this.init();
     }
@@ -65,7 +65,7 @@ class AIAssistantLoginForm {
         this.updateFormMode('login'); 
     }
     
-    // โหลดข้อมูลที่จดจำไว้จาก localStorage
+    // โหลดข้อมูลที่จดจำไว้จาก localStorage (คงเดิม)
     loadRememberedCredentials() {
         const rememberedId = localStorage.getItem('admin_remember_id');
         const rememberedPass = localStorage.getItem('admin_remember_pass');
@@ -88,7 +88,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // บันทึกข้อมูลลง localStorage
+    // บันทึกข้อมูลลง localStorage (คงเดิม)
     saveCredentials() {
         const rememberCheckbox = document.getElementById('remember');
         if (rememberCheckbox && rememberCheckbox.checked) {
@@ -100,7 +100,7 @@ class AIAssistantLoginForm {
         }
     }
     
-    // Helper: บังคับให้ Label ลอยขึ้น
+    // Helper: บังคับให้ Label ลอยขึ้น (คงเดิม)
     forceLabelFloat(inputElement, hasValue = true) {
         const smartField = inputElement.closest('.smart-field');
         if (smartField) {
@@ -253,11 +253,11 @@ class AIAssistantLoginForm {
         }
         
         // 4. ช่องยืนยันรหัสผ่านใหม่ (Reset Form)
-        if (this.confirmPasswordInputReset && this.confirmPasswordResetToggle) {
-             this.confirmPasswordResetToggle.addEventListener('click', () => {
+        if (this.confirmPasswordInputReset && document.getElementById('confirmPasswordResetToggle')) {
+             document.getElementById('confirmPasswordResetToggle').addEventListener('click', () => {
                  const isPassword = this.confirmPasswordInputReset.type === 'password';
                  this.confirmPasswordInputReset.type = isPassword ? 'text' : 'password';
-                 this.confirmPasswordResetToggle.classList.toggle('toggle-active', isPassword);
+                 document.getElementById('confirmPasswordResetToggle').classList.toggle('toggle-active', isPassword);
              });
         }
     }
@@ -321,7 +321,8 @@ class AIAssistantLoginForm {
         // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
         let targetFieldId = field;
         
-        if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
+        // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
+        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
             targetFieldId = 'email';
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
@@ -341,6 +342,9 @@ class AIAssistantLoginForm {
         const errorElement = document.getElementById(`${targetFieldId}Error`);
         
         if (smartField && errorElement) {
+             // เคลียร์ error เก่าก่อนแสดงอันใหม่
+             this.clearAllErrorsInForm(smartField.form); 
+
              smartField.classList.add('error');
              errorElement.textContent = message;
              errorElement.classList.add('show');
@@ -363,6 +367,19 @@ class AIAssistantLoginForm {
         }
     }
     
+    clearAllErrorsInForm(formElement) {
+        if (!formElement) return;
+        const errorFields = formElement.querySelectorAll('.smart-field.error');
+        errorFields.forEach(field => {
+            field.classList.remove('error');
+            const errorSpan = field.querySelector('.error-message');
+            if (errorSpan) {
+                errorSpan.classList.remove('show');
+                errorSpan.textContent = '';
+            }
+        });
+    }
+
     clearForgotPasswordErrors() {
         this.clearError('resetEmail');
         this.clearError('resetCode');
@@ -446,7 +463,7 @@ class AIAssistantLoginForm {
             } else {
                 // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
                 let targetField = 'password';
-                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ลงทะเบียนไว้แล้ว') || result.message.includes('สิทธิ์')) {
+                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
                     targetField = 'email';
                 }
                 
