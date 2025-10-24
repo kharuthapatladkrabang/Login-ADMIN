@@ -16,7 +16,7 @@ class AIAssistantLoginForm {
         // NEW INPUTS: ต้องประกาศ Input Field ที่ถูกเพิ่มใน Login Form
         this.confirmPasswordInput = document.getElementById('confirmPassword'); 
         this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
-        this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // NEW TOGGLE ID
+        this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // Register Toggle ID
 
         // iFrame Elements
         this.contentView = document.getElementById('contentView');
@@ -46,7 +46,8 @@ class AIAssistantLoginForm {
         this.confirmPasswordInputReset = document.getElementById('confirmPasswordReset'); // Reset Confirm Pass ID
         this.backToLoginLink = document.getElementById('backToLoginLink');
         this.forgotPasswordMessage = document.getElementById('forgotPasswordMessage');
-        this.confirmPasswordResetToggle = document.getElementById('confirmPasswordResetToggle'); // Reset Toggle ID
+        this.newPasswordToggle = document.getElementById('newPasswordToggle'); // Reset New Pass Toggle ID
+        this.confirmPasswordResetToggle = document.getElementById('confirmPasswordResetToggle'); // Reset Confirm Pass Toggle ID
         
         this.tempStudentId = null; 
 
@@ -224,32 +225,39 @@ class AIAssistantLoginForm {
         this.loadRememberedCredentials();
     }
 
+    // *** FIX: แยก Logic Password Toggle ไปอยู่ในฟังก์ชัน setupPasswordToggle() ***
     setupPasswordToggle() {
-        // Toggle สำหรับช่องรหัสผ่านหลัก
+        // 1. ช่องรหัสผ่านหลัก
         this.passwordToggle.addEventListener('click', () => {
             const isPassword = this.passwordInput.type === 'password';
             this.passwordInput.type = isPassword ? 'text' : 'password';
-            
             this.passwordToggle.classList.toggle('toggle-active', isPassword);
         });
         
-        // Toggle สำหรับช่องยืนยันรหัสผ่าน (Register)
-        const confirmToggle = document.getElementById('confirmPasswordToggle');
-        if (confirmToggle) {
-             confirmToggle.addEventListener('click', () => {
+        // 2. ช่องยืนยันรหัสผ่าน (Register Form)
+        if (this.confirmPasswordToggle && this.confirmPasswordInput) {
+             this.confirmPasswordToggle.addEventListener('click', () => {
                  const isPassword = this.confirmPasswordInput.type === 'password';
                  this.confirmPasswordInput.type = isPassword ? 'text' : 'password';
-                 confirmToggle.classList.toggle('toggle-active', isPassword);
+                 this.confirmPasswordToggle.classList.toggle('toggle-active', isPassword);
              });
         }
         
-        // Toggle สำหรับช่องยืนยันรหัสผ่าน (Reset Password)
-        const resetConfirmToggle = document.getElementById('confirmPasswordResetToggle');
-        if (resetConfirmToggle) {
-             resetConfirmToggle.addEventListener('click', () => {
+        // 3. ช่องรหัสผ่านใหม่ (Reset Form)
+        if (this.newPasswordInput && document.getElementById('newPasswordToggle')) {
+            document.getElementById('newPasswordToggle').addEventListener('click', () => {
+                 const isPassword = this.newPasswordInput.type === 'password';
+                 this.newPasswordInput.type = isPassword ? 'text' : 'password';
+                 document.getElementById('newPasswordToggle').classList.toggle('toggle-active', isPassword);
+            });
+        }
+        
+        // 4. ช่องยืนยันรหัสผ่านใหม่ (Reset Form)
+        if (this.confirmPasswordInputReset && this.confirmPasswordResetToggle) {
+             this.confirmPasswordResetToggle.addEventListener('click', () => {
                  const isPassword = this.confirmPasswordInputReset.type === 'password';
                  this.confirmPasswordInputReset.type = isPassword ? 'text' : 'password';
-                 resetConfirmToggle.classList.toggle('toggle-active', isPassword);
+                 this.confirmPasswordResetToggle.classList.toggle('toggle-active', isPassword);
              });
         }
     }
@@ -313,16 +321,21 @@ class AIAssistantLoginForm {
         // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
         let targetFieldId = field;
         
+        // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
         if (message.includes('รหัสนักศึกษา') || message.includes('ลงทะเบียนไว้แล้ว') || message.includes('สิทธิ์') || field === 'email') {
             targetFieldId = 'email';
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
-        } else if (field === 'confirmPasswordReset' || message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
-             targetFieldId = 'confirmPasswordReset'; // สำหรับหน้า Forgot Step 2
+        } 
+        // 2. ตรวจสอบ Error จากหน้า Reset Password (Step 2) หรือ Register Client-side
+        else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
+            targetFieldId = 'resetCode';
+        } else if (field === 'newPassword') {
+            targetFieldId = 'newPassword';
+        } else if (field === 'confirmPasswordReset') {
+             targetFieldId = 'confirmPasswordReset'; 
         } else if (field === 'confirmPassword') {
              targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
-        } else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
-            targetFieldId = 'resetCode';
         }
 
 
