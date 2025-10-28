@@ -443,9 +443,10 @@ class AIAssistantLoginForm {
         this.setLoading(true, submitButton);
         
         const formData = new FormData();
-        formData.append('action', this.currentMode); 
+        // *** ปรับปรุง: ใช้ action ใหม่สำหรับการเข้าสู่ระบบที่อ่านค่าจำนวนครั้งแต่ไม่บันทึกกลับไปที่ชีต 2 เพื่อความเร็วในการตรวจสอบ ***
+        formData.append('action', this.currentMode === 'login' ? 'admin_login_only_log34' : 'register'); 
         formData.append('studentId', this.emailInput.value.trim()); 
-        formData.append('email', this.emailInput.value.trim()); 
+        formData.append('email', this.emailInput.value.trim()); // ยังคงส่ง email เพื่อความเข้ากันได้
         formData.append('password', this.passwordInput.value);
         
         try {
@@ -466,7 +467,8 @@ class AIAssistantLoginForm {
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); // แสดงหน้า Success
                     } else {
-                        this.showError('password', 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
+                        // การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูลเพิ่มเติมได้ (ข้อความจาก Apps Script)
+                        this.showError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
                 } else {
                     alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว');
@@ -608,7 +610,8 @@ class AIAssistantLoginForm {
 
         document.getElementById('adminWelcome').textContent = `สวัสดี, ${adminName}!`;
         document.getElementById('displayStudentId').textContent = data.studentId;
-        document.getElementById('displayTotalLogins').textContent = data.totalLogins;
+        // ค่า Total Logins ยังคงอ่านมาจาก Apps Script (ชีต 2) แต่ Apps Script จะไม่เขียนกลับ
+        document.getElementById('displayTotalLogins').textContent = data.totalLogins; 
 
         // สร้างปุ่มลิงก์ตามจำนวนที่ได้รับ
         this.redirectButtonsContainer.innerHTML = '';
