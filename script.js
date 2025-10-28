@@ -443,8 +443,8 @@ class AIAssistantLoginForm {
         this.setLoading(true, submitButton);
         
         const formData = new FormData();
-        // *** ปรับปรุง: ใช้ action ใหม่สำหรับการเข้าสู่ระบบที่อ่านค่าจำนวนครั้งแต่ไม่บันทึกกลับไปที่ชีต 2 เพื่อความเร็วในการตรวจสอบ ***
-        formData.append('action', this.currentMode === 'login' ? 'admin_login_only_log34' : 'register'); 
+        // *** ปรับปรุง: ใช้ action ใหม่สำหรับการเข้าสู่ระบบที่อ่านค่าจากชีต 3 เท่านั้น ***
+        formData.append('action', this.currentMode === 'login' ? 'admin_login_only_sheet3' : 'register'); 
         formData.append('studentId', this.emailInput.value.trim()); 
         formData.append('email', this.emailInput.value.trim()); // ยังคงส่ง email เพื่อความเข้ากันได้
         formData.append('password', this.passwordInput.value);
@@ -610,7 +610,7 @@ class AIAssistantLoginForm {
 
         document.getElementById('adminWelcome').textContent = `สวัสดี, ${adminName}!`;
         document.getElementById('displayStudentId').textContent = data.studentId;
-        // ค่า Total Logins ยังคงอ่านมาจาก Apps Script (ชีต 2) แต่ Apps Script จะไม่เขียนกลับ
+        // ค่า Total Logins จะมาจากข้อมูลที่อ่านจากชีต 3 (คอลัมน์ E) ที่ส่งกลับมา
         document.getElementById('displayTotalLogins').textContent = data.totalLogins; 
 
         // สร้างปุ่มลิงก์ตามจำนวนที่ได้รับ
