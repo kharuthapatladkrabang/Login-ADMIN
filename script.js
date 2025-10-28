@@ -53,7 +53,8 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; // *** URL ล่าสุด ***
+        // *** URL ถูกอัพเดทให้ตรงกับที่คุณให้มาล่าสุดแล้ว ***
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxT4EcM-mjleE45NI14Phlvb8Zt1Wr0AHmh8wYi_-bbi7Rr_FPF6kBLd9wZNvWtJgsI/exec'; 
 
         this.init();
     }
@@ -443,7 +444,7 @@ class AIAssistantLoginForm {
         this.setLoading(true, submitButton);
         
         const formData = new FormData();
-        // *** ปรับปรุง: ใช้ action 'admin_login_only_sheet3' สำหรับโหมด Login ***
+        // *** ใช้ action 'admin_login_only_sheet3' ที่ Backend ควรจะรู้จักแล้ว ***
         formData.append('action', this.currentMode === 'login' ? 'admin_login_only_sheet3' : 'register'); 
         formData.append('studentId', this.emailInput.value.trim()); 
         formData.append('email', this.emailInput.value.trim()); 
@@ -633,6 +634,7 @@ class AIAssistantLoginForm {
             newButton.innerHTML = `
                 <div class="button-bg"></div>
                 <span class="button-text">${buttonText}</span>
+                <div class="button-loader"></div>
                 <div class="button-glow"></div>
             `;
 
