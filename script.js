@@ -54,7 +54,7 @@ class AIAssistantLoginForm {
 
         // URL Web App ล่าสุด
         // *** URL ถูกอัพเดทให้ตรงกับ Deployment ใหม่ล่าสุดที่คุณให้มาแล้ว ***
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwqzyUnEJv-YjYT1GCMzQ2dKoFJ_AOjJgc01Kk7yls_ZnGFwN7Ajh2vuey6dgPuSpti/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxBJdOA3IFKqM-O3qAamm99j1Wzcp35qdK9-CytIWn0tGlw4u7PaJWMAlhNQkeiySgd/exec'; 
 
         this.init();
     }
@@ -344,7 +344,7 @@ class AIAssistantLoginForm {
              targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
         } else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต')) {
             targetFieldId = 'resetCode';
-        } else if (field === 'resetEmail' || message.includes('ไม่พบบัญชี') || message.includes('กรอกรหัสนักศึกษา')) {
+        } else if (field === 'resetEmail' || message.includes('ไม่พบบัญชี')) {
              targetFieldId = 'resetEmail'; // สำหรับหน้า Forgot Step 1
         }
 
