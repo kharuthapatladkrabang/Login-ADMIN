@@ -53,7 +53,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxT4EcM-mjleE45NI14Phlvb8Zt1Wr0AHmh8wYi_-bbi7Rr_FPF6kBLd9wZNvWtJgsI/exec'; // *** URL ล่าสุด ***
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytDjqih8E_8OnmBZ4pPEDHONO80tgt5c2C-u6b95e3-hNa2QAsu9PwI-ITpslhW1W6/exec'; // *** URL ล่าสุด ***
 
         this.init();
     }
@@ -443,10 +443,10 @@ class AIAssistantLoginForm {
         this.setLoading(true, submitButton);
         
         const formData = new FormData();
-        // *** ปรับปรุง: ใช้ action ใหม่สำหรับการเข้าสู่ระบบที่อ่านค่าจากชีต 3 เท่านั้น ***
+        // *** ปรับปรุง: ใช้ action 'admin_login_only_sheet3' สำหรับโหมด Login ***
         formData.append('action', this.currentMode === 'login' ? 'admin_login_only_sheet3' : 'register'); 
         formData.append('studentId', this.emailInput.value.trim()); 
-        formData.append('email', this.emailInput.value.trim()); // ยังคงส่ง email เพื่อความเข้ากันได้
+        formData.append('email', this.emailInput.value.trim()); 
         formData.append('password', this.passwordInput.value);
         
         try {
