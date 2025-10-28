@@ -54,7 +54,7 @@ class AIAssistantLoginForm {
 
         // URL Web App ล่าสุด
         // *** URL ถูกอัพเดทให้ตรงกับ Deployment ใหม่ล่าสุดที่คุณให้มาแล้ว ***
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyYltSgbJrnKSzdY4TScDrxHKk5txD9ZLBYSZ_FWZqOoZYcZq6Oyx9zGGFt9rI3BL_N/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwqzyUnEJv-YjYT1GCMzQ2dKoFJ_AOjJgc01Kk7yls_ZnGFwN7Ajh2vuey6dgPuSpti/exec'; 
 
         this.init();
     }
@@ -117,7 +117,7 @@ class AIAssistantLoginForm {
     bindEvents() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         
-        // Event input สำหรับฟอร์มหลักและ Register
+        // Event input สำหรับฟอร์มหลักและ Register (ยังคงให้เคลียร์ error เมื่อพิมพ์)
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
@@ -134,7 +134,7 @@ class AIAssistantLoginForm {
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // *** FIX: ไม่มี this.clearError ที่นี่ เพื่อให้ Error ค้างอยู่ ***
+                     // *** แก้ไข: ลบ this.clearError(input.id); ออกจากตรงนี้เพื่อให้ Error ค้างไว้ ***
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
