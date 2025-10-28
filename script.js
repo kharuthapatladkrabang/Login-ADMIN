@@ -53,7 +53,6 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        // *** URL ถูกอัพเดทให้ตรงกับ Deployment ใหม่ล่าสุดที่คุณให้มาแล้ว ***
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxBJdOA3IFKqM-O3qAamm99j1Wzcp35qdK9-CytIWn0tGlw4u7PaJWMAlhNQkeiySgd/exec'; 
 
         this.init();
@@ -347,7 +346,7 @@ class AIAssistantLoginForm {
         
         // For Forgot Password (Step 1 & 2)
         // *** ปรับปรุงการจับ Error ให้กว้างขึ้นสำหรับขั้นตอนที่ 1 ***
-        else if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('กรอกรหัสนักศึกษา') || field === 'resetEmail') {
+        else if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('กรุณาตรวจสอบ') || field === 'resetEmail') {
              targetFieldId = 'resetEmail'; // New fixed error message (Step 1)
         } 
         // *** ปรับปรุงการจับ Error สำหรับรหัสรีเซ็ต (รหัสรีเซ็ต, หมดอายุ) ***
@@ -546,7 +545,7 @@ class AIAssistantLoginForm {
 
             } else {
                 // *** FIX: แสดง Error ใน input field ของ Step 1 ***
-                // ข้อความที่มาจาก Backend คือ 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
+                // Backend ส่งข้อความ: 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
                 this.showError('resetEmail', result.message); 
             }
         } catch (error) {
