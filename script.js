@@ -131,7 +131,7 @@ class AIAssistantLoginForm {
         });
         
         // Event input และ blur สำหรับฟอร์ม Forgot Password (Step 1 และ Step 2)
-        // *** แก้ไข: ยังคงไม่ให้เคลียร์ Error ด้วย Input event เพื่อให้ข้อความ Error ค้างไว้ ***
+        // *** ยืนยัน: ลบ this.clearError(input.id); ออกเพื่อให้ Error ค้างไว้ตามคำขอ ***
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
@@ -334,21 +334,23 @@ class AIAssistantLoginForm {
         let targetFieldId = field;
         
         // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
-        // ปรับปรุงการจับ Error สำหรับ Forgot Password (ขั้นตอนที่ 1)
+        
+        // For Login/Register
         if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
-            // โหมด Login/Register
             targetFieldId = 'email';
         } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
             targetFieldId = 'password';
-        } else if (field === 'confirmPasswordReset' || message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
-             targetFieldId = 'confirmPasswordReset'; // สำหรับหน้า Forgot Step 2
         } else if (field === 'confirmPassword') {
              targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
-        } else if (field === 'resetCode' || message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ')) {
-            targetFieldId = 'resetCode';
-        } else if (field === 'resetEmail' || message.includes('ตรวจสอบรหัสนักศึกษา') || message.includes('ไม่พบบัญชีนี้')) {
-             // *** NEW FIX: จับคู่ข้อความผิดพลาดที่มาจาก GAS สำหรับขั้นตอนที่ 1 ***
-             targetFieldId = 'resetEmail'; 
+        } 
+        
+        // For Forgot Password (Step 1 & 2)
+        else if (message.includes('ตรวจสอบรหัสนักศึกษา') || message.includes('ไม่พบบัญชีนี้') || field === 'resetEmail') {
+             targetFieldId = 'resetEmail'; // New fixed error message (Step 1)
+        } else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ') || targetFieldId === 'resetCode') {
+            targetFieldId = 'resetCode'; // Step 2 Code field
+        } else if (message.includes('รหัสผ่านใหม่ไม่ตรงกัน') || field === 'confirmPasswordReset') {
+             targetFieldId = 'confirmPasswordReset'; // Step 2 Confirm Pass
         }
 
 
@@ -360,7 +362,6 @@ class AIAssistantLoginForm {
         
         if (smartField && errorElement) {
              // เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
-             // NOTE: การเรียกใช้ clearAllErrorsInForm นี้ จะช่วยให้มั่นใจว่า Error ก่อนหน้าถูกล้าง แต่ยังคงรักษา Error ล่าสุดไว้
              this.clearAllErrorsInForm(smartField.form); 
 
              smartField.classList.add('error');
@@ -387,7 +388,6 @@ class AIAssistantLoginForm {
     
     clearAllErrorsInForm(formElement) {
         if (!formElement) return;
-        // การล้าง Error ทั้งหมดในฟอร์มนี้จะไม่กระทบ Error ที่กำลังจะถูกแสดงทันที
         const errorFields = formElement.querySelectorAll('.smart-field.error');
         errorFields.forEach(field => {
             field.classList.remove('error');
@@ -400,7 +400,6 @@ class AIAssistantLoginForm {
     }
 
     clearForgotPasswordErrors() {
-        // ใช้เมื่อเปลี่ยนหน้าฟอร์มเท่านั้น
         this.clearError('resetEmail');
         this.clearError('resetCode');
         this.clearError('newPassword');
@@ -541,7 +540,7 @@ class AIAssistantLoginForm {
 
             } else {
                 // *** FIX: แสดง Error ใน input field ของ Step 1 ***
-                // Backend ส่งข้อความ: 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
+                // ข้อความที่มาจาก Backend คือ 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
                 this.showError('resetEmail', result.message); 
             }
         } catch (error) {
@@ -603,7 +602,7 @@ class AIAssistantLoginForm {
                     targetField = 'resetCode';
                 }
                 // ถ้าเป็นรหัสผ่านใหม่ไม่ตรงกัน ให้ชี้ไปที่ confirmPasswordReset
-                if (result.message.includes('รหัสผ่านไม่ตรงกัน')) {
+                if (result.message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
                      targetField = 'confirmPasswordReset';
                 }
                 this.showError(targetField, result.message); 
