@@ -135,6 +135,7 @@ class AIAssistantLoginForm {
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
+                     // ไม่มีการ clearError() ที่นี่! Error ที่มาจาก Server จะแสดงค้างไว้
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -345,11 +346,16 @@ class AIAssistantLoginForm {
         } 
         
         // For Forgot Password (Step 1 & 2)
-        else if (message.includes('ตรวจสอบรหัสนักศึกษา') || message.includes('ไม่พบบัญชีนี้') || field === 'resetEmail') {
+        // *** ปรับปรุงการจับ Error ให้กว้างขึ้นสำหรับขั้นตอนที่ 1 ***
+        else if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('กรอกรหัสนักศึกษา') || field === 'resetEmail') {
              targetFieldId = 'resetEmail'; // New fixed error message (Step 1)
-        } else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ') || targetFieldId === 'resetCode') {
+        } 
+        // *** ปรับปรุงการจับ Error สำหรับรหัสรีเซ็ต (รหัสรีเซ็ต, หมดอายุ) ***
+        else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ') || targetFieldId === 'resetCode') {
             targetFieldId = 'resetCode'; // Step 2 Code field
-        } else if (message.includes('รหัสผ่านใหม่ไม่ตรงกัน') || field === 'confirmPasswordReset') {
+        } 
+        // สำหรับรหัสผ่านใหม่ไม่ตรงกัน
+        else if (message.includes('รหัสผ่านใหม่ไม่ตรงกัน') || field === 'confirmPasswordReset') {
              targetFieldId = 'confirmPasswordReset'; // Step 2 Confirm Pass
         }
 
