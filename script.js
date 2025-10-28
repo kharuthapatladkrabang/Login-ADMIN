@@ -53,7 +53,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด
-        // *** URL ถูกอัพเดทให้ตรงกับที่คุณให้มาล่าสุดแล้ว ***
+        // *** ยืนยันว่าใช้ URL ใหม่ล่าสุดที่ถูก Deploy แล้ว ***
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxT4EcM-mjleE45NI14Phlvb8Zt1Wr0AHmh8wYi_-bbi7Rr_FPF6kBLd9wZNvWtJgsI/exec'; 
 
         this.init();
