@@ -249,25 +249,34 @@ class AIAssistantLoginForm {
 
     // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที
     showPermanentError(field, message, duration = 20000) {
-        // 1. เรียกใช้ showError เดิมเพื่อแสดงผลทันที
+        // 1. เรียกใช้ showError เดิมเพื่อจัดการ DOM (ใส่ class 'error', 'show')
         this.showError(field, message);
 
         // 2. หากมี Timeout เก่าอยู่ ให้ยกเลิกก่อน
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
-
-        const inputElement = document.getElementById(field);
-        const smartField = inputElement ? inputElement.closest('.smart-field') : null;
         
-        if (smartField) {
-            // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
-            this.errorTimeout = setTimeout(() => {
-                this.clearError(field);
-            }, duration);
-            
-            // 4. Note: Error จะหายไปทันทีเมื่อผู้ใช้เริ่มพิมพ์ (input event) หรือส่งฟอร์มใหม่
+        // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
+        this.errorTimeout = setTimeout(() => {
+            this.clearError(field);
+        }, duration);
+
+        // *** มาตรการเด็ดขาด: ใช้ Global Notification สำหรับ Error ที่มาจาก Server ***
+        const globalDisplay = document.getElementById('globalErrorDisplay');
+        if (globalDisplay) {
+             // 4. เคลียร์ข้อความเก่า
+             globalDisplay.innerHTML = '';
+             
+             // 5. แสดงข้อความใหม่ (ข้อความจาก Server)
+             if (field !== 'email' && field !== 'password') { // แสดงเฉพาะ Error ที่ไม่ใช่ Validation ปกติ
+                 globalDisplay.textContent = `ข้อผิดพลาด: ${message}`;
+                 globalDisplay.style.display = 'block';
+             } else {
+                 globalDisplay.style.display = 'none';
+             }
         }
+        // *************************************************************************
     }
 
 
@@ -491,6 +500,13 @@ class AIAssistantLoginForm {
             this.errorTimeout = null;
         }
         
+        // ซ่อน Global Error เมื่อมีการพิมพ์/แก้ไข
+        const globalDisplay = document.getElementById('globalErrorDisplay');
+        if (globalDisplay) {
+             globalDisplay.style.display = 'none';
+             globalDisplay.textContent = '';
+        }
+        
         if (smartField && errorElement) {
             smartField.classList.remove('error');
             errorElement.classList.remove('show');
@@ -556,11 +572,10 @@ class AIAssistantLoginForm {
     
     // Core Form Submission
     async handleSubmit(e) {
-        e.preventDefault(); // *** สำคัญที่สุด: หยุดการรีเฟรชหน้าจอเสมอ ***
-        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
+        e.preventDefault(); // *** หยุดการรีเฟรชหน้าจอเสมอ ***
+        e.stopPropagation(); // *** หยุด Event Propagation (เพิ่มมาตรการเด็ดขาด) ***
         
         // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
-        // ถ้า Validation ไม่ผ่าน showPermanentError จะถูกเรียก และ return ทันที
         if (this.currentMode === 'register' && !this.validateRegistration()) {
             return;
         } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
@@ -613,6 +628,7 @@ class AIAssistantLoginForm {
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
                     } else {
+                        // ใช้ showPermanentError เมื่อมาจาก Server
                         this.showPermanentError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
                 } else {
