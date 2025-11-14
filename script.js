@@ -147,7 +147,6 @@ class AIAssistantLoginForm {
         });
         
         // Event input และ blur สำหรับฟอร์ม Forgot Password (Step 1 และ Step 2)
-        // *** ยืนยัน: ลบ this.clearError(input.id); ออกเพื่อให้ Error ค้างไว้ตามคำขอ ***
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
@@ -252,8 +251,8 @@ class AIAssistantLoginForm {
         });
     }
 
-    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที (เปลี่ยนเป็น 60 วินาที)
-    showPermanentError(field, message, duration = 60000) { // <--- แก้ไขระยะเวลา Error Persistence เป็น 60000 มิลลิวินาที
+    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 60 วินาที
+    showPermanentError(field, message, duration = 60000) { // <--- 60 วินาที
         // 1. เคลียร์ Error เดิมทั้งหมด
         let currentForm = this.form;
         if (document.getElementById('forgotPasswordCard1').style.display !== 'none') {
@@ -261,14 +260,13 @@ class AIAssistantLoginForm {
         } else if (document.getElementById('forgotPasswordCard2').style.display !== 'none') {
              currentForm = this.resetPasswordForm;
         }
-        this.clearAllErrorsInForm(currentForm);
-
-
-        const globalDisplay = document.getElementById('globalErrorDisplay') || document.getElementById('forgotPasswordGlobalErrorDisplay') || document.getElementById('resetPasswordGlobalErrorDisplay');
-
+        
         // 2. แสดง Error ภายใน Input Field
         const inputElement = document.getElementById(field);
         if (inputElement) {
+             // *** 2.1: ล้าง error เฉพาะ field ที่กำลังจะแสดงก่อน ***
+            this.clearError(field); 
+
             const smartField = inputElement.closest('.smart-field');
             const errorElement = document.getElementById(`${field}Error`);
             
@@ -279,22 +277,18 @@ class AIAssistantLoginForm {
             }
         }
 
-        // 3. แสดงข้อความบน Global Display (ถ้ามี)
-        if (globalDisplay) {
-             // globalDisplay.textContent = message;
-             // globalDisplay.style.display = 'block';
-        }
-
-        // 4. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (แต่จะถูกยกเลิกเมื่อผู้ใช้พิมพ์/ส่งใหม่)
+        // 3. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (60 วินาที)
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
         this.errorTimeout = setTimeout(() => {
+            // ซ่อน Global Display (ถ้ามี)
+            const globalDisplay = document.getElementById('globalErrorDisplay');
             if (globalDisplay) {
                  globalDisplay.style.display = 'none';
                  globalDisplay.textContent = '';
             }
-            if (inputElement) this.clearError(field);
+             this.clearError(field); // ใช้ clearError ปกติเพื่อลบ
         }, duration);
     }
 
@@ -464,9 +458,6 @@ class AIAssistantLoginForm {
         return isValid;
     }
 
-    // Error Management (ปรับให้ใช้กับ showPermanentError ได้ง่ายขึ้น)
-    // ... (ฟังก์ชัน showError, clearError, clearAllErrorsInForm, clearForgotPasswordErrors)
-
     // AIEffects/Loading (คงเดิม)
     setupAIEffects() {
         const inputsToTrack = [this.emailInput, this.passwordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset];
@@ -601,7 +592,7 @@ class AIAssistantLoginForm {
         const studentId = this.resetEmailInput.value.trim();
         this.tempStudentId = studentId;
 
-        // *** VALIDATION: ตรวจสอบว่ากรอกรหัสนักศึกษาหรือไม่ ***
+        // *** Client-side Validation Step 1: รหัสนักศึกษาว่างเปล่า ***
         if (!studentId) {
             this.showPermanentError('resetEmail', 'จำเป็นต้องระบุรหัสนักศึกษา');
             return;
@@ -624,7 +615,7 @@ class AIAssistantLoginForm {
             const result = await response.json();
 
             if (result.success) {
-                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 2 ***
+                // *** Success: แสดงข้อความ Success ใน p tag ของ Step 2 ***
                 this.resetStep2Message.textContent = result.message; 
                 this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
                 this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
@@ -638,7 +629,7 @@ class AIAssistantLoginForm {
                 this.forgotPasswordCard2.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 2)';
 
             } else {
-                // *** FIX: แสดง Error ใน input field ของ Step 1 ***
+                // *** Server Error: ใช้ showPermanentError ให้แสดงค้าง 60s ***
                 this.showPermanentError('resetEmail', result.message); 
             }
         } catch (error) {
@@ -658,22 +649,27 @@ class AIAssistantLoginForm {
         const confirmPassword = this.confirmPasswordInputReset.value; 
         
         let isValid = true;
+        // **สำคัญ**: เคลียร์ Error ทั้งหมดก่อนเริ่ม Validation ใหม่
         this.clearForgotPasswordErrors(); 
 
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
+            // Client-side validation: รหัสรีเซ็ตไม่ถูกต้อง
             this.showPermanentError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
         }
         
         if (newPassword.length < 6) {
+            // Client-side validation: รหัสผ่านสั้นเกินไป
             this.showPermanentError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
             isValid = false;
         }
         
         if (newPassword.length >= 6 && newPassword !== confirmPassword) {
+            // Client-side validation: รหัสผ่านไม่ตรงกัน
             this.showPermanentError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
             isValid = false;
         } else if (newPassword.length >= 6 && !confirmPassword) {
+             // Client-side validation: ยืนยันรหัสผ่านว่างเปล่า
              this.showPermanentError('confirmPasswordReset', 'จำเป็นต้องยืนยันรหัสผ่านใหม่');
              isValid = false;
         }
@@ -701,13 +697,13 @@ class AIAssistantLoginForm {
                 alert(result.message);
                 this.showLoginCard(); // กลับไปหน้า Login
             } else {
+                // Server-side error handling
                 let targetField = 'confirmPasswordReset';
                 if (result.message.includes('รหัสรีเซ็ต') || result.message.includes('หมดอายุ')) {
                     targetField = 'resetCode';
                 }
-                if (result.message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
-                     targetField = 'confirmPasswordReset';
-                }
+                
+                // *** Server Error: ใช้ showPermanentError ให้แสดงค้าง 60s (เหมือนขั้นตอนที่ 1) ***
                 this.showPermanentError(targetField, result.message); 
             }
         } catch (error) {
@@ -811,7 +807,7 @@ class AIAssistantLoginForm {
         this.startSessionTimer();
     }
     
-    // *** ฟังก์ชันที่ไม่สมบูรณ์จาก Snippet (ต้องมีในโค้ดจริง แต่ไม่มีในนี้) ***
+    // Error Handling Helpers (ย้ายมาไว้ด้านล่างเพื่อความสะอาด)
     clearError(field) {
         const inputElement = document.getElementById(field);
         if (!inputElement) return;
@@ -820,7 +816,7 @@ class AIAssistantLoginForm {
         const errorElement = document.getElementById(`${field}Error`);
         
         if (this.errorTimeout) {
-            clearTimeout(this.errorTimeout);
+            // clearTimeout(this.errorTimeout); // ไม่ต้องเคลียร์ตรงนี้ เพราะถูกเคลียร์เมื่อมีการเรียก showPermanentError ใหม่
             this.errorTimeout = null;
         }
         
@@ -858,7 +854,6 @@ class AIAssistantLoginForm {
         this.clearError('newPassword');
         this.clearError('confirmPasswordReset');
     }
-    // *************************************************************
 }
 
 document.addEventListener('DOMContentLoaded', () => {
