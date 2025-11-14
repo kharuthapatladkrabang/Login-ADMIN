@@ -64,6 +64,7 @@ class AIAssistantLoginForm {
         // ตัวแปรสำหรับควบคุมการโหลด
         this.isSimulatingLoad = false;
         this.progressInterval = null;
+        this.errorTimeout = null; // สำหรับควบคุมการซ่อน Error อัตโนมัติ
 
         this.init();
     }
@@ -145,7 +146,7 @@ class AIAssistantLoginForm {
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     // ไม่มีการ clearError() ที่นี่! Error ที่มาจาก Server จะแสดงค้างไว้
+                     this.clearError(input.id); // แก้ไข: เพิ่ม clearError เพื่อให้หายเมื่อพิมพ์
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
@@ -206,7 +207,6 @@ class AIAssistantLoginForm {
     }
     
     // NEW: Simulation function (Progress Bar Start% -> Target% ตามเวลาที่กำหนด)
-    // Progress Bar วิ่งอย่างต่อเนื่องตามเวลา ไม่มีการดีดไป 80% ก่อน
     simulateLoad(targetProgress, durationInSeconds = 0.5) {
         return new Promise(resolve => {
             // หยุดการวิ่งก่อนหน้า
@@ -246,6 +246,30 @@ class AIAssistantLoginForm {
             }, intervalDuration); 
         });
     }
+
+    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที
+    showPermanentError(field, message, duration = 20000) {
+        // 1. เรียกใช้ showError เดิมเพื่อแสดงผลทันที
+        this.showError(field, message);
+
+        // 2. หากมี Timeout เก่าอยู่ ให้ยกเลิกก่อน
+        if (this.errorTimeout) {
+            clearTimeout(this.errorTimeout);
+        }
+
+        const inputElement = document.getElementById(field);
+        const smartField = inputElement ? inputElement.closest('.smart-field') : null;
+        
+        if (smartField) {
+            // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
+            this.errorTimeout = setTimeout(() => {
+                this.clearError(field);
+            }, duration);
+            
+            // 4. Note: Error จะหายไปทันทีเมื่อผู้ใช้เริ่มพิมพ์ (input event) หรือส่งฟอร์มใหม่
+        }
+    }
+
 
     // UI/Mode Management
     showForgotPasswordStep1() {
@@ -361,7 +385,7 @@ class AIAssistantLoginForm {
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
-            this.showError('email', 'จำเป็นต้องระบุรหัสนักศึกษา');
+            this.showPermanentError('email', 'จำเป็นต้องระบุรหัสนักศึกษา');
             return false;
         }
         this.clearError('email');
@@ -371,11 +395,11 @@ class AIAssistantLoginForm {
     validatePassword() {
         const password = this.passwordInput.value;
         if (!password) {
-            this.showError('password', 'ต้องใช้รหัสความปลอดภัย');
+            this.showPermanentError('password', 'ต้องใช้รหัสความปลอดภัย');
             return false;
         }
         if (password.length < 6) {
-            this.showError('password', 'รหัสความปลอดภัยต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+            this.showPermanentError('password', 'รหัสความปลอดภัยต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
             return false;
         }
         this.clearError('password');
@@ -394,10 +418,10 @@ class AIAssistantLoginForm {
 
         if (this.currentMode === 'register') {
             if (!confirmPassword) {
-                 this.showError('confirmPassword', 'จำเป็นต้องยืนยันรหัสผ่าน');
+                 this.showPermanentError('confirmPassword', 'จำเป็นต้องยืนยันรหัสผ่าน');
                  isValid = false;
             } else if (password !== confirmPassword) {
-                 this.showError('confirmPassword', 'รหัสผ่านไม่ตรงกัน');
+                 this.showPermanentError('confirmPassword', 'รหัสผ่านไม่ตรงกัน');
                  isValid = false;
             } else {
                  this.clearError('confirmPassword');
@@ -461,6 +485,12 @@ class AIAssistantLoginForm {
         const smartField = inputElement.closest('.smart-field');
         const errorElement = document.getElementById(`${field}Error`);
         
+        // ยกเลิก timeout การซ่อนอัตโนมัติเมื่อมีการ clear Error
+        if (this.errorTimeout) {
+            clearTimeout(this.errorTimeout);
+            this.errorTimeout = null;
+        }
+        
         if (smartField && errorElement) {
             smartField.classList.remove('error');
             errorElement.classList.remove('show');
@@ -498,6 +528,10 @@ class AIAssistantLoginForm {
 
         inputsToTrack.forEach(input => {
             if(input) {
+                // ผูก event input กับ clearError
+                 input.addEventListener('input', () => {
+                     this.clearError(input.id);
+                 });
                 input.addEventListener('focus', (e) => {
                     this.triggerNeuralEffect(e.target.closest('.smart-field'));
                 });
@@ -541,12 +575,12 @@ class AIAssistantLoginForm {
         formData.append('password', this.passwordInput.value);
         
         try {
-            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 10%) ---
+            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 1%) ---
             this.updateLoadingText('กำลังตรวจสอบบัญชี...');
             this.toggleLoadingOverlay(true);
             
-            // Progress Bar ขยับทันทีที่เริ่มส่งคำขอ (0% -> 10%)
-            await this.simulateLoad(10, 0.3); 
+            // Progress Bar ขยับทันทีที่เริ่มส่งคำขอ (0% -> 1%)
+            this.updateProgressBar(1); 
             
             // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
             const response = await fetch(this.WEB_APP_URL, {
@@ -559,11 +593,11 @@ class AIAssistantLoginForm {
             const result = await response.json();
             
             if (result.success) {
-                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (10% -> 100%) ---
+                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (1% -> 60%) ---
                 
                 this.updateLoadingText('กำลังเข้าสู่ระบบ...');
-                // Progress Bar วิ่งต่อเนื่องจาก 10% ไปจนถึง 100% ภายใน 1.5 วินาที
-                await this.simulateLoad(100, 1.5); 
+                // Progress Bar วิ่งต่อเนื่องจาก 1% ไปจนถึง 60% ภายใน 0.5 วินาที
+                await this.simulateLoad(60, 0.5); 
                 
                 // 4. แสดงหน้า Success
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
@@ -572,13 +606,16 @@ class AIAssistantLoginForm {
                     this.saveCredentials(); 
                     
                     if (result.adminName) {
-                        // หน่วงเวลาก่อนเปลี่ยนหน้า
-                        await new Promise(r => setTimeout(r, 500)); 
+                        // หน่วงเวลาก่อนดีดไป 100% และแสดงหน้า Success
+                        await new Promise(r => setTimeout(r, 200)); 
+                        this.updateProgressBar(100);
+                        await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาให้เห็น 100% แว็บหนึ่ง
                         
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
                     } else {
-                        this.showError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
+                        // ใช้ showPermanentError เมื่อมาจาก Server
+                        this.showPermanentError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
                 } else {
                     alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว');
@@ -591,12 +628,13 @@ class AIAssistantLoginForm {
                     targetField = 'email';
                 }
                 
-                this.showError(targetField, result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
+                // ใช้ showPermanentError สำหรับ Error ที่มาจาก Server
+                this.showPermanentError(targetField, result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
             }
         } catch (error) {
             console.error(`${this.currentMode} error:`, error);
             // แสดง Error หากเกิดปัญหาเครือข่าย/เซิร์ฟเวอร์
-            this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
+            this.showPermanentError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
         } finally {
             this.setLoading(false, submitButton);
             this.toggleLoadingOverlay(false); // ปิด Pop-up (ใช้เป็น Fallback)
@@ -616,8 +654,8 @@ class AIAssistantLoginForm {
 
         // *** VALIDATION: ตรวจสอบว่ากรอกรหัสนักศึกษาหรือไม่ ***
         if (!studentId) {
-            // แสดง Error ทันที (Client-side)
-            this.showError('resetEmail', 'จำเป็นต้องระบุรหัสนักศึกษา');
+            // แสดง Error ถาวร (Client-side)
+            this.showPermanentError('resetEmail', 'จำเป็นต้องระบุรหัสนักศึกษา');
             return;
         }
         // *******************************************************
@@ -656,10 +694,10 @@ class AIAssistantLoginForm {
             } else {
                 // *** FIX: แสดง Error ใน input field ของ Step 1 ***
                 // Backend ส่งข้อความ: 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
-                this.showError('resetEmail', result.message); 
+                this.showPermanentError('resetEmail', result.message); 
             }
         } catch (error) {
-            this.showError('resetEmail', 'เกิดข้อผิดพลาดในการส่งรหัสรีเซ็ต');
+            this.showPermanentError('resetEmail', 'เกิดข้อผิดพลาดในการส่งรหัสรีเซ็ต');
         } finally {
             this.setLoading(false, submitButton);
         }
@@ -678,15 +716,15 @@ class AIAssistantLoginForm {
         this.clearForgotPasswordErrors(); 
 
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
-            this.showError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
+            this.showPermanentError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
         }
         if (newPassword.length < 6) {
-            this.showError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
+            this.showPermanentError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
             isValid = false;
         }
         if (newPassword !== confirmPassword) {
-            this.showError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
+            this.showPermanentError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
             isValid = false;
         }
 
@@ -721,10 +759,10 @@ class AIAssistantLoginForm {
                 if (result.message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
                      targetField = 'confirmPasswordReset';
                 }
-                this.showError(targetField, result.message); 
+                this.showPermanentError(targetField, result.message); 
             }
         } catch (error) {
-            this.showError('confirmPasswordReset', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน'); 
+            this.showPermanentError('confirmPasswordReset', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน'); 
         } finally {
             this.setLoading(false, submitButton);
         }
