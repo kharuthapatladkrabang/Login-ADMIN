@@ -256,12 +256,12 @@ class AIAssistantLoginForm {
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
-
+        
         const inputElement = document.getElementById(field);
         const smartField = inputElement ? inputElement.closest('.smart-field') : null;
         
-        // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
         if (smartField) {
+            // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
             this.errorTimeout = setTimeout(() => {
                 this.clearError(field);
             }, duration);
@@ -561,6 +561,7 @@ class AIAssistantLoginForm {
         e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
         
         // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
+        // ถ้า Validation ไม่ผ่าน showPermanentError จะถูกเรียก และ return ทันที
         if (this.currentMode === 'register' && !this.validateRegistration()) {
             return;
         } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
