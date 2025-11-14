@@ -260,7 +260,11 @@ class AIAssistantLoginForm {
         } else if (document.getElementById('forgotPasswordCard2').style.display !== 'none') {
              currentForm = this.resetPasswordForm;
         }
-        
+        this.clearAllErrorsInForm(currentForm);
+
+
+        const globalDisplay = document.getElementById('globalErrorDisplay') || document.getElementById('forgotPasswordGlobalErrorDisplay') || document.getElementById('resetPasswordGlobalErrorDisplay');
+
         // 2. แสดง Error ภายใน Input Field
         const inputElement = document.getElementById(field);
         if (inputElement) {
@@ -629,7 +633,7 @@ class AIAssistantLoginForm {
                 this.forgotPasswordCard2.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 2)';
 
             } else {
-                // *** Server Error: ใช้ showPermanentError ให้แสดงค้าง 60s ***
+                // *** Server Error: ใช้ showPermanentError ให้แสดงค้าง 60s (เหมือนขั้นตอนที่ 1) ***
                 this.showPermanentError('resetEmail', result.message); 
             }
         } catch (error) {
@@ -807,7 +811,7 @@ class AIAssistantLoginForm {
         this.startSessionTimer();
     }
     
-    // Error Handling Helpers (ย้ายมาไว้ด้านล่างเพื่อความสะอาด)
+    // Error Handling Helpers
     clearError(field) {
         const inputElement = document.getElementById(field);
         if (!inputElement) return;
@@ -816,7 +820,7 @@ class AIAssistantLoginForm {
         const errorElement = document.getElementById(`${field}Error`);
         
         if (this.errorTimeout) {
-            // clearTimeout(this.errorTimeout); // ไม่ต้องเคลียร์ตรงนี้ เพราะถูกเคลียร์เมื่อมีการเรียก showPermanentError ใหม่
+            clearTimeout(this.errorTimeout);
             this.errorTimeout = null;
         }
         
