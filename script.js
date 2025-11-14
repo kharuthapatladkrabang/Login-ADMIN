@@ -52,7 +52,7 @@ class AIAssistantLoginForm {
         
         this.tempStudentId = null; 
 
-        // URL Web App ล่าสุด (UPDATED!)
+        // URL Web App ล่าสุด
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwRxWfDBZ9mIigSkyhR2BYGC1zdjNX1iL5KWAanEXmXBvFXIyUpa8kDoGdWAIEsG_8T/exec'; 
 
         // NEW: Loading Overlay Elements
@@ -235,7 +235,8 @@ class AIAssistantLoginForm {
         
         this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
         
-        // FIX: ตั้งค่าข้อความเริ่มต้น
+        // อัปเดตข้อความหัวข้อ
+        this.forgotPasswordCard1.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน'; 
         this.resetStep1Message.textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
         
         this.clearForgotPasswordErrors();
@@ -271,8 +272,8 @@ class AIAssistantLoginForm {
             if (this.confirmPasswordField) this.confirmPasswordField.style.display = 'none';
         }
         
-        // Update Header (ใช้คำว่า Admin)
-        this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
+        // Update Header
+        this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'ลงทะเบียน Admin';
         this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
         this.submitButton.querySelector('span').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
         
@@ -610,6 +611,9 @@ class AIAssistantLoginForm {
                 this.newPasswordInput.value = '';
                 this.confirmPasswordInputReset.value = '';
 
+                // อัปเดตหัวข้อ Step 2
+                this.forgotPasswordCard2.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน';
+
             } else {
                 // *** FIX: แสดง Error ใน input field ของ Step 1 ***
                 // Backend ส่งข้อความ: 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
@@ -691,7 +695,8 @@ class AIAssistantLoginForm {
         const adminName = data.adminName || 'Admin';
         const links = data.redirectButtons || []; 
 
-        document.getElementById('adminWelcome').textContent = `สวัสดี, ${adminName}!`;
+        // แก้ไข: เปลี่ยน 'สวัสดี, ${adminName}!' เป็น 'เมนู Admin'
+        document.getElementById('adminWelcome').textContent = 'เมนู Admin';
         document.getElementById('displayStudentId').textContent = data.studentId;
         // ค่า Total Logins จะมาจากข้อมูลที่อ่านจากชีต 3 (คอลัมน์ E) ที่ส่งกลับมา
         document.getElementById('displayTotalLogins').textContent = data.totalLogins; 
