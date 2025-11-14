@@ -572,7 +572,8 @@ class AIAssistantLoginForm {
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
-        e.preventDefault();
+        e.preventDefault(); // <--- แก้ไข: เพิ่มบรรทัดนี้เพื่อหยุดการรีเฟรชหน้าจอ
+
         const submitButton = document.getElementById('sendResetCodeButton');
         const studentId = this.resetEmailInput.value.trim();
         this.tempStudentId = studentId;
