@@ -248,35 +248,42 @@ class AIAssistantLoginForm {
     }
 
     // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที
+    // NOTE: จะใช้ Global Display ถ้ามี Error ที่มาจาก Server (ที่ไม่เกี่ยวกับ Validation)
     showPermanentError(field, message, duration = 20000) {
-        // 1. เรียกใช้ showError เดิมเพื่อจัดการ DOM (ใส่ class 'error', 'show')
-        this.showError(field, message);
+        // 1. เคลียร์ Error เดิมทั้งหมด (ทั้งใน Input และ Global)
+        this.clearAllErrorsInForm(this.form || this.forgotPasswordForm || this.resetPasswordForm);
+        const globalDisplay = document.getElementById('globalErrorDisplay');
 
-        // 2. หากมี Timeout เก่าอยู่ ให้ยกเลิกก่อน
+        // 2. แสดง Error ภายใน Input Field
+        const inputElement = document.getElementById(field);
+        if (inputElement) {
+            const smartField = inputElement.closest('.smart-field');
+            const errorElement = document.getElementById(`${field}Error`);
+            
+            if (smartField && errorElement) {
+                smartField.classList.add('error');
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+        }
+
+        // 3. แสดงข้อความบน Global Display (ถ้ามี)
+        if (globalDisplay) {
+             globalDisplay.textContent = message;
+             globalDisplay.style.display = 'block';
+        }
+
+        // 4. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (แต่จะถูกยกเลิกเมื่อผู้ใช้พิมพ์/ส่งใหม่)
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
-        
-        // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
         this.errorTimeout = setTimeout(() => {
-            this.clearError(field);
-        }, duration);
-
-        // *** มาตรการเด็ดขาด: ใช้ Global Notification สำหรับ Error ที่มาจาก Server ***
-        const globalDisplay = document.getElementById('globalErrorDisplay');
-        if (globalDisplay) {
-             // 4. เคลียร์ข้อความเก่า
-             globalDisplay.innerHTML = '';
-             
-             // 5. แสดงข้อความใหม่ (ข้อความจาก Server)
-             if (field !== 'email' && field !== 'password') { // แสดงเฉพาะ Error ที่ไม่ใช่ Validation ปกติ
-                 globalDisplay.textContent = `ข้อผิดพลาด: ${message}`;
-                 globalDisplay.style.display = 'block';
-             } else {
+            if (globalDisplay) {
                  globalDisplay.style.display = 'none';
-             }
-        }
-        // *************************************************************************
+                 globalDisplay.textContent = '';
+            }
+            if (inputElement) this.clearError(field);
+        }, duration);
     }
 
 
@@ -390,7 +397,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // Validation Helpers
+    // Validation Helpers (ใช้ showPermanentError เพื่อบังคับให้ Error ค้าง)
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
@@ -572,10 +579,11 @@ class AIAssistantLoginForm {
     
     // Core Form Submission
     async handleSubmit(e) {
-        e.preventDefault(); // *** หยุดการรีเฟรชหน้าจอเสมอ ***
-        e.stopPropagation(); // *** หยุด Event Propagation (เพิ่มมาตรการเด็ดขาด) ***
+        e.preventDefault(); // *** สำคัญที่สุด: หยุดการรีเฟรชหน้าจอเสมอ ***
+        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
         
         // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
+        // ถ้า Validation ไม่ผ่าน showPermanentError จะถูกเรียก และ return ทันที
         if (this.currentMode === 'register' && !this.validateRegistration()) {
             return;
         } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
@@ -628,7 +636,6 @@ class AIAssistantLoginForm {
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
                     } else {
-                        // ใช้ showPermanentError เมื่อมาจาก Server
                         this.showPermanentError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
                 } else {
