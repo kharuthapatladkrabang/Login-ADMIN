@@ -766,6 +766,7 @@ body.register-mode .login-card {
 }
 
 /* Progress Bar Styles */
+/* กำหนด Custom Property สำหรับควบคุมความกว้างของแถบโหลดจาก JS */
 .loader {
     display: block;
     position: relative;
@@ -774,6 +775,7 @@ body.register-mode .login-card {
     border: 1px solid rgba(59, 130, 246, 0.4);
     border-radius: 10px;
     overflow: hidden;
+    --progress-width: 0%; /* Custom property เริ่มต้น */
 }
 
 .loader:after {
@@ -782,7 +784,8 @@ body.register-mode .login-card {
     left: 0;
     top: 0;
     height: 100%;
-    width: 0; /* เริ่มที่ 0% */
+    /* ใช้ Custom Property ที่ถูกกำหนดโดย JS */
+    width: var(--progress-width); 
     background: linear-gradient(90deg, #3b82f6, #8b5cf6); /* ใช้ Gradient สีเดียวกับปุ่ม */
     transition: width 0.3s ease; /* เพิ่ม transition เพื่อให้แถบเลื่อนดู Smooth */
 }
