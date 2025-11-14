@@ -404,7 +404,7 @@ class AIAssistantLoginForm {
         // For Forgot Password (Step 1 & 2)
         // *** ปรับปรุงการจับ Error ให้กว้างขึ้นสำหรับขั้นตอนที่ 1 ***
         else if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('กรุณาตรวจสอบ') || field === 'resetEmail') {
-             targetFieldId = 'resetEmail'; // New fixed error message (Step 1)
+            targetFieldId = 'resetEmail'; // New fixed error message (Step 1)
         } 
         // *** ปรับปรุงการจับ Error สำหรับรหัสรีเซ็ต (รหัสรีเซ็ต, หมดอายุ) ***
         else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ') || targetFieldId === 'resetCode') {
@@ -579,10 +579,13 @@ class AIAssistantLoginForm {
         const studentId = this.resetEmailInput.value.trim();
         this.tempStudentId = studentId;
 
+        // *** NEW VALIDATION: ตรวจสอบว่ากรอกรหัสนักศึกษาหรือไม่ ***
         if (!studentId) {
-            // Client-side validation
-            return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
+            this.showError('resetEmail', 'จำเป็นต้องระบุรหัสนักศึกษา');
+            return;
         }
+        // *******************************************************
+        
         // FIX: ล้าง Error เฉพาะ Client-side ก่อนส่ง Server
         this.clearError('resetEmail');
 
