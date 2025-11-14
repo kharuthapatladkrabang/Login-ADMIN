@@ -204,38 +204,39 @@ class AIAssistantLoginForm {
         this.percentageDisplay.textContent = `${percentage}%`;
     }
     
-    // NEW: Simulation function (Progress Bar 0% -> 100% ตามเวลาที่กำหนด)
-    simulateLoad(durationInSeconds = 1.5) {
+    // NEW: Simulation function (Progress Bar Start% -> Target% ตามเวลาที่กำหนด)
+    simulateLoad(targetProgress, durationInSeconds = 0.5) {
         return new Promise(resolve => {
-            if (this.isSimulatingLoad) {
+            if (this.progressInterval) {
                 clearInterval(this.progressInterval);
             }
             
-            this.isSimulatingLoad = true;
-            this.updateProgressBar(0); // เริ่มที่ 0% เสมอ
-            this.toggleLoadingOverlay(true); // แสดง Pop-up
+            const startProgress = parseFloat(this.progressBar.style.getPropertyValue('--progress-width')) || 0;
+            const difference = targetProgress - startProgress;
+
+            if (difference <= 0) {
+                 this.updateProgressBar(targetProgress);
+                 return resolve();
+            }
 
             let startTime = performance.now();
-            const endTime = startTime + (durationInSeconds * 1000);
-
-            const intervalDuration = 50; // 50ms update frequency
+            // ลดเวลาการอัพเดทให้เร็วขึ้นเพื่อความสมจริง (50ms -> 20ms)
+            const intervalDuration = 20; 
 
             this.progressInterval = setInterval(() => {
                 const currentTime = performance.now();
-                const elapsedTime = currentTime - startTime;
+                const timeRatio = (currentTime - startTime) / (durationInSeconds * 1000);
                 
-                // คำนวณเปอร์เซ็นต์ตามเวลาที่ผ่านไป
-                let progressPercentage = (elapsedTime / (durationInSeconds * 1000)) * 100;
+                let newProgress = startProgress + (difference * timeRatio);
                 
-                if (progressPercentage >= 100) {
-                    progressPercentage = 100; 
+                if (newProgress >= targetProgress) {
+                    newProgress = targetProgress; 
                     clearInterval(this.progressInterval);
-                    this.isSimulatingLoad = false;
-                    this.updateProgressBar(100);
+                    this.updateProgressBar(targetProgress);
                     return resolve(); 
                 }
                 
-                this.updateProgressBar(Math.floor(progressPercentage));
+                this.updateProgressBar(Math.floor(newProgress));
 
             }, intervalDuration); 
         });
@@ -535,12 +536,15 @@ class AIAssistantLoginForm {
         formData.append('password', this.passwordInput.value);
         
         try {
-            // 2. Pop-up โหลดขึ้นมาทันที และเปลี่ยนข้อความสถานะ (Phase 1: ตรวจสอบสิทธิ์)
+            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 1%) ---
             this.updateLoadingText('กำลังตรวจสอบบัญชี...');
             this.toggleLoadingOverlay(true);
-            this.updateProgressBar(5); // Start at 5% (เพื่อให้ดูเหมือนเริ่มทำงาน)
             
-            // 3. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบรหัสผ่าน
+            // Progress Bar ขยับทันทีที่เริ่มส่งคำขอ (0% -> 1%)
+            await this.simulateLoad(1, 0.1); 
+            
+            // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
+            // (GAS จะทำงานในฉากหลังและส่ง Response กลับมา)
             const response = await fetch(this.WEB_APP_URL, {
                 method: 'POST',
                 body: formData 
@@ -551,11 +555,13 @@ class AIAssistantLoginForm {
             const result = await response.json();
             
             if (result.success) {
-                // 4. ล็อกอินสำเร็จ: วิ่ง Progress Bar ต่อและเปลี่ยนข้อความสถานะ (Phase 2: เข้าสู่ระบบและโหลดเมนู)
-                this.updateLoadingText('กำลังเข้าสู่ระบบ...');
-                await this.simulateLoad(100, 1.5); // โหลด 1.5 วินาทีจนถึง 100%
+                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (1% -> 100%) ---
                 
-                // 5. แสดงหน้า Success
+                this.updateLoadingText('กำลังเข้าสู่ระบบ...');
+                // Progress Bar วิ่งต่อเนื่องจาก 1% ไปจนถึง 100% ภายใน 1.5 วินาที
+                await this.simulateLoad(100, 1.5); 
+                
+                // 4. แสดงหน้า Success
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
                 await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาเล็กน้อยก่อนเปลี่ยนหน้า
 
@@ -596,7 +602,7 @@ class AIAssistantLoginForm {
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
-        e.preventDefault(); // <--- แก้ไข: เพิ่มบรรทัดนี้เพื่อหยุดการรีเฟรชหน้าจอ
+        e.preventDefault(); // <--- ป้องกันการรีเฟรชหน้าจอ
 
         const submitButton = document.getElementById('sendResetCodeButton');
         const studentId = this.resetEmailInput.value.trim();
@@ -654,7 +660,7 @@ class AIAssistantLoginForm {
     }
 
     async handleResetPassword(e) {
-        e.preventDefault(); // <--- แก้ไข: เพิ่มบรรทัดนี้เพื่อหยุดการรีเฟรชหน้าจอ
+        e.preventDefault(); // <--- ป้องกันการรีเฟรชหน้าจอ
         
         const submitButton = document.getElementById('confirmResetButton');
         const resetCode = this.resetCodeInput.value.trim();
