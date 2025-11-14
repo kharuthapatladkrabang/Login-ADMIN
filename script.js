@@ -695,7 +695,7 @@ class AIAssistantLoginForm {
         const adminName = data.adminName || 'Admin';
         const links = data.redirectButtons || []; 
 
-        // แก้ไข: เปลี่ยน 'สวัสดี, ${adminName}!' เป็น 'เมนู Admin'
+        // แก้ไข: เปลี่ยน 'สวัสดี, แอดมิน!' เป็น 'เมนู Admin'
         document.getElementById('adminWelcome').textContent = 'เมนู Admin';
         document.getElementById('displayStudentId').textContent = data.studentId;
         // ค่า Total Logins จะมาจากข้อมูลที่อ่านจากชีต 3 (คอลัมน์ E) ที่ส่งกลับมา
