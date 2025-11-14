@@ -53,7 +53,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null;
 
         // URL Web App ล่าสุด
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyVRoj6_SJ4FJudJnlUtnNSQc3pbcz5yMh9DQT0GFI2tuRhG1rNC40ljTjT2faEjp4/exec';
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzLQSzJ9GflSuZxkx9e-sFnZ2xxwu0XVRqtaV1wxmKvpywKbPvg8MxaH7hAn6JjcN1g/exec';
 
         // NEW: Loading Overlay Elements
         this.loadingOverlay = document.getElementById('loadingOverlay');
