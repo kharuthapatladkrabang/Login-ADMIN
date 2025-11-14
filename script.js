@@ -248,42 +248,26 @@ class AIAssistantLoginForm {
     }
 
     // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที
-    // NOTE: จะใช้ Global Display ถ้ามี Error ที่มาจาก Server (ที่ไม่เกี่ยวกับ Validation)
     showPermanentError(field, message, duration = 20000) {
-        // 1. เคลียร์ Error เดิมทั้งหมด (ทั้งใน Input และ Global)
-        this.clearAllErrorsInForm(this.form || this.forgotPasswordForm || this.resetPasswordForm);
-        const globalDisplay = document.getElementById('globalErrorDisplay');
+        // 1. เรียกใช้ showError เดิมเพื่อจัดการ DOM (ใส่ class 'error', 'show')
+        this.showError(field, message);
 
-        // 2. แสดง Error ภายใน Input Field
-        const inputElement = document.getElementById(field);
-        if (inputElement) {
-            const smartField = inputElement.closest('.smart-field');
-            const errorElement = document.getElementById(`${field}Error`);
-            
-            if (smartField && errorElement) {
-                smartField.classList.add('error');
-                errorElement.textContent = message;
-                errorElement.classList.add('show');
-            }
-        }
-
-        // 3. แสดงข้อความบน Global Display (ถ้ามี)
-        if (globalDisplay) {
-             globalDisplay.textContent = message;
-             globalDisplay.style.display = 'block';
-        }
-
-        // 4. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (แต่จะถูกยกเลิกเมื่อผู้ใช้พิมพ์/ส่งใหม่)
+        // 2. หากมี Timeout เก่าอยู่ ให้ยกเลิกก่อน
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
-        this.errorTimeout = setTimeout(() => {
-            if (globalDisplay) {
-                 globalDisplay.style.display = 'none';
-                 globalDisplay.textContent = '';
-            }
-            if (inputElement) this.clearError(field);
-        }, duration);
+
+        const inputElement = document.getElementById(field);
+        const smartField = inputElement ? inputElement.closest('.smart-field') : null;
+        
+        // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
+        if (smartField) {
+            this.errorTimeout = setTimeout(() => {
+                this.clearError(field);
+            }, duration);
+            
+            // 4. Note: Error จะหายไปทันทีเมื่อผู้ใช้เริ่มพิมพ์ (input event) หรือส่งฟอร์มใหม่
+        }
     }
 
 
@@ -308,12 +292,13 @@ class AIAssistantLoginForm {
     }
 
     showLoginCard() {
+        this.mainLoginCard.style.display = 'block';
+        
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         this.successMessage.style.display = 'none';
         this.contentView.style.display = 'none'; 
         
-        this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
         this.updateFormMode('login');
     }
@@ -397,7 +382,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // Validation Helpers (ใช้ showPermanentError เพื่อบังคับให้ Error ค้าง)
+    // Validation Helpers
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
@@ -507,13 +492,6 @@ class AIAssistantLoginForm {
             this.errorTimeout = null;
         }
         
-        // ซ่อน Global Error เมื่อมีการพิมพ์/แก้ไข
-        const globalDisplay = document.getElementById('globalErrorDisplay');
-        if (globalDisplay) {
-             globalDisplay.style.display = 'none';
-             globalDisplay.textContent = '';
-        }
-        
         if (smartField && errorElement) {
             smartField.classList.remove('error');
             errorElement.classList.remove('show');
@@ -583,7 +561,6 @@ class AIAssistantLoginForm {
         e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
         
         // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
-        // ถ้า Validation ไม่ผ่าน showPermanentError จะถูกเรียก และ return ทันที
         if (this.currentMode === 'register' && !this.validateRegistration()) {
             return;
         } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
