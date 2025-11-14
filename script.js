@@ -557,6 +557,7 @@ class AIAssistantLoginForm {
     // Core Form Submission
     async handleSubmit(e) {
         e.preventDefault(); // *** สำคัญที่สุด: หยุดการรีเฟรชหน้าจอเสมอ ***
+        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
         
         // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
         // ถ้า Validation ไม่ผ่าน showPermanentError จะถูกเรียก และ return ทันที
@@ -644,6 +645,7 @@ class AIAssistantLoginForm {
 
     async handleSendResetCode(e) {
         e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
+        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
 
         const submitButton = document.getElementById('sendResetCodeButton');
         const studentId = this.resetEmailInput.value.trim();
@@ -702,6 +704,7 @@ class AIAssistantLoginForm {
 
     async handleResetPassword(e) {
         e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
+        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
         
         const submitButton = document.getElementById('confirmResetButton');
         const resetCode = this.resetCodeInput.value.trim();
