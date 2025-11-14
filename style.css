@@ -718,6 +718,74 @@ body.register-mode .login-card {
 }
 /* -------------------------------------- */
 
+/* --- NEW: Loading Overlay Styles --- */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    backdrop-filter: blur(8px); /* Blur effect */
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100; /* ต้องอยู่เหนือทุกอย่าง */
+    display: none; /* ซ่อนไว้ก่อน */
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.loading-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.loading-box {
+    background: rgba(15, 15, 20, 0.95);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    padding: 30px 40px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 300px;
+    width: 100%;
+}
+
+.loading-text {
+    color: #f8fafc;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+.loading-percentage {
+    color: #3b82f6;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* Progress Bar Styles */
+.loader {
+    display: block;
+    position: relative;
+    height: 12px;
+    width: 100%; /* ใช้ 100% แทน 80% เพื่อให้เต็มพื้นที่ */
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.loader:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0; /* เริ่มที่ 0% */
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6); /* ใช้ Gradient สีเดียวกับปุ่ม */
+    transition: width 0.3s ease; /* เพิ่ม transition เพื่อให้แถบเลื่อนดู Smooth */
+}
 
 /* Mobile Responsive */
 @media (max-width: 480px) {
