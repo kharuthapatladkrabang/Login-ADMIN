@@ -60,6 +60,7 @@ class AIAssistantLoginForm {
         this.progressBar = document.getElementById('loginProgressBar');
         this.percentageDisplay = document.getElementById('loadingPercentage');
         this.loadingTextDisplay = document.querySelector('.loading-box .loading-text'); 
+        this.globalErrorDisplay = document.getElementById('globalErrorDisplay'); // NEW Global Error
         
         // ตัวแปรสำหรับควบคุมการโหลด
         this.isSimulatingLoad = false;
@@ -260,13 +261,28 @@ class AIAssistantLoginForm {
         const inputElement = document.getElementById(field);
         const smartField = inputElement ? inputElement.closest('.smart-field') : null;
         
+        // *** 3. บังคับแสดง Global Error สำหรับข้อผิดพลาดจาก Server หรือข้อผิดพลาดร้ายแรง ***
+        const globalDisplay = document.getElementById('globalErrorDisplay') || 
+                              document.getElementById('forgotPasswordGlobalErrorDisplay') || 
+                              document.getElementById('resetPasswordGlobalErrorDisplay');
+
+        if (globalDisplay) {
+             // 3a. เคลียร์ข้อความเก่า
+             globalDisplay.textContent = '';
+             
+             // 3b. แสดงข้อความใหม่
+             globalDisplay.textContent = `ข้อผิดพลาด: ${message}`;
+             globalDisplay.style.display = 'block';
+        }
+        // *************************************************************************
+        
         if (smartField) {
-            // 3. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
+            // 4. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
             this.errorTimeout = setTimeout(() => {
                 this.clearError(field);
             }, duration);
             
-            // 4. Note: Error จะหายไปทันทีเมื่อผู้ใช้เริ่มพิมพ์ (input event) หรือส่งฟอร์มใหม่
+            // 5. Note: Error จะหายไปทันทีเมื่อผู้ใช้เริ่มพิมพ์ (input event) หรือส่งฟอร์มใหม่
         }
     }
 
@@ -292,13 +308,12 @@ class AIAssistantLoginForm {
     }
 
     showLoginCard() {
-        this.mainLoginCard.style.display = 'block';
-        
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         this.successMessage.style.display = 'none';
         this.contentView.style.display = 'none'; 
         
+        this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
         this.updateFormMode('login');
     }
@@ -326,6 +341,13 @@ class AIAssistantLoginForm {
         
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
+
+        // Clear Global Error เมื่อเปลี่ยนโหมด
+        const globalDisplay = document.getElementById('globalErrorDisplay');
+        if (globalDisplay) {
+             globalDisplay.style.display = 'none';
+             globalDisplay.textContent = '';
+        }
 
         this.submitButton.style.display = 'flex'; 
 
@@ -492,6 +514,20 @@ class AIAssistantLoginForm {
             this.errorTimeout = null;
         }
         
+        // *** แก้ไข: ซ่อน Global Error เมื่อมีการพิมพ์/แก้ไข Input ใดๆ ก็ตาม ***
+        const currentForm = inputElement.form;
+        let globalDisplayId = '';
+        if (currentForm && currentForm.id === 'loginForm') globalDisplayId = 'globalErrorDisplay';
+        else if (currentForm && currentForm.id === 'forgotPasswordForm') globalDisplayId = 'forgotPasswordGlobalErrorDisplay';
+        else if (currentForm && currentForm.id === 'resetPasswordForm') globalDisplayId = 'resetPasswordGlobalErrorDisplay';
+        
+        const globalDisplay = document.getElementById(globalDisplayId);
+        if (globalDisplay) {
+             globalDisplay.style.display = 'none';
+             globalDisplay.textContent = '';
+        }
+        // *************************************************************************
+        
         if (smartField && errorElement) {
             smartField.classList.remove('error');
             errorElement.classList.remove('show');
@@ -513,6 +549,18 @@ class AIAssistantLoginForm {
                 errorSpan.textContent = '';
             }
         });
+        
+        // Clear Global Display ของฟอร์มนี้ด้วย
+        let globalDisplayId = '';
+        if (formElement.id === 'loginForm') globalDisplayId = 'globalErrorDisplay';
+        else if (formElement.id === 'forgotPasswordForm') globalDisplayId = 'forgotPasswordGlobalErrorDisplay';
+        else if (formElement.id === 'resetPasswordForm') globalDisplayId = 'resetPasswordGlobalErrorDisplay';
+
+        const globalDisplay = document.getElementById(globalDisplayId);
+        if (globalDisplay) {
+             globalDisplay.style.display = 'none';
+             globalDisplay.textContent = '';
+        }
     }
 
     clearForgotPasswordErrors() {
@@ -561,6 +609,7 @@ class AIAssistantLoginForm {
         e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
         
         // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
+        // ถ้า Validation ไม่ผ่าน showPermanentError จะถูกเรียก และ return ทันที
         if (this.currentMode === 'register' && !this.validateRegistration()) {
             return;
         } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
