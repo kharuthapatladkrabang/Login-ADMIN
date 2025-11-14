@@ -443,9 +443,10 @@ class AIAssistantLoginForm {
         if (smartField && errorElement) {
             smartField.classList.remove('error');
             errorElement.classList.remove('show');
+            // ลบข้อความออกจาก DOM แต่ปล่อยให้ field.classList.remove('error') จัดการการซ่อน
             setTimeout(() => {
                 errorElement.textContent = '';
-            }, 200);
+            }, 200); 
         }
     }
     
