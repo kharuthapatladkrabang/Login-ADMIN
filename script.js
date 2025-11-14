@@ -541,12 +541,12 @@ class AIAssistantLoginForm {
         formData.append('password', this.passwordInput.value);
         
         try {
-            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 1%) ---
+            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 10%) ---
             this.updateLoadingText('กำลังตรวจสอบบัญชี...');
             this.toggleLoadingOverlay(true);
             
-            // Progress Bar ขยับทันทีที่เริ่มส่งคำขอ (0% -> 1%)
-            this.updateProgressBar(1); 
+            // Progress Bar ขยับทันทีที่เริ่มส่งคำขอ (0% -> 10%)
+            await this.simulateLoad(10, 0.3); 
             
             // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
             const response = await fetch(this.WEB_APP_URL, {
@@ -559,23 +559,21 @@ class AIAssistantLoginForm {
             const result = await response.json();
             
             if (result.success) {
-                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (1% -> 60%) ---
+                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (10% -> 100%) ---
                 
                 this.updateLoadingText('กำลังเข้าสู่ระบบ...');
-                // Progress Bar วิ่งต่อเนื่องจาก 1% ไปจนถึง 60% ภายใน 0.5 วินาที
-                await this.simulateLoad(60, 0.5); 
+                // Progress Bar วิ่งต่อเนื่องจาก 10% ไปจนถึง 100% ภายใน 1.5 วินาที
+                await this.simulateLoad(100, 1.5); 
                 
-                // 3. แสดงหน้า Success (และ Progress Bar จะดีดไป 100% ใน showNeuralSuccess)
+                // 4. แสดงหน้า Success
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
                 
                 if (this.currentMode === 'login') {
                     this.saveCredentials(); 
                     
                     if (result.adminName) {
-                        // หน่วงเวลาก่อนดีดไป 100% และแสดงหน้า Success
-                        await new Promise(r => setTimeout(r, 200)); 
-                        this.updateProgressBar(100);
-                        await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาให้เห็น 100% แว็บหนึ่ง
+                        // หน่วงเวลาก่อนเปลี่ยนหน้า
+                        await new Promise(r => setTimeout(r, 500)); 
                         
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
@@ -610,7 +608,7 @@ class AIAssistantLoginForm {
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
-        e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
+        e.preventDefault(); // <--- ป้องกันการรีเฟรชหน้าจอ
 
         const submitButton = document.getElementById('sendResetCodeButton');
         const studentId = this.resetEmailInput.value.trim();
@@ -737,8 +735,11 @@ class AIAssistantLoginForm {
         const adminName = data.adminName || 'Admin';
         const links = data.redirectButtons || []; 
 
-        // แก้ไข: เปลี่ยน 'สวัสดี, แอดมิน!' เป็น 'เมนู Admin'
-        document.getElementById('adminWelcome').textContent = 'เมนู Admin';
+        // แก้ไข: เปลี่ยน 'เมนู Admin' เป็น 'สวัสดี, [ชื่อแอดมิน]!' และตัวใหญ่
+        document.getElementById('adminWelcome').innerHTML = `
+            <span style="font-size: 1.8rem; font-weight: 700;">สวัสดี,</span>
+            <br><span style="font-size: 1.4rem; font-weight: 600; color: #3b82f6;">${adminName}!</span>
+        `;
         document.getElementById('displayStudentId').textContent = data.studentId;
         // ค่า Total Logins จะมาจากข้อมูลที่อ่านจากชีต 3 (คอลัมน์ E) ที่ส่งกลับมา
         document.getElementById('displayTotalLogins').textContent = data.totalLogins; 
