@@ -387,48 +387,45 @@ class AIAssistantLoginForm {
 
     // Error Management
     showError(field, message) {
-        // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
+        // *** แก้ไขการหา Target ID ให้ครอบคลุมที่สุด ***
         let targetFieldId = field;
         
-        // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
-        
-        // For Login/Register
-        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
-            targetFieldId = 'email';
-        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
+        // Logic เพื่อแมปข้อความ Error จาก GAS ไปยัง Field ID ที่ถูกต้อง
+        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์')) {
+            // ใช้ 'resetEmail' สำหรับหน้า Forgot Password, 'email' สำหรับหน้า Login/Register
+            targetFieldId = document.getElementById('resetEmail') && document.getElementById('forgotPasswordCard1').style.display !== 'none' ? 'resetEmail' : 'email';
+        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง')) {
             targetFieldId = 'password';
-        } else if (field === 'confirmPassword') {
-             targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
-        } 
-        
-        // For Forgot Password (Step 1 & 2)
-        // *** ปรับปรุงการจับ Error ให้กว้างขึ้นสำหรับขั้นตอนที่ 1 ***
-        else if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('กรุณาตรวจสอบ') || field === 'resetEmail') {
-            targetFieldId = 'resetEmail'; // New fixed error message (Step 1)
-        } 
-        // *** ปรับปรุงการจับ Error สำหรับรหัสรีเซ็ต (รหัสรีเซ็ต, หมดอายุ) ***
-        else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ') || targetFieldId === 'resetCode') {
-            targetFieldId = 'resetCode'; // Step 2 Code field
-        } 
-        // สำหรับรหัสผ่านใหม่ไม่ตรงกัน
-        else if (message.includes('รหัสผ่านใหม่ไม่ตรงกัน') || field === 'confirmPasswordReset') {
-             targetFieldId = 'confirmPasswordReset'; // Step 2 Confirm Pass
+        } else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ')) {
+            targetFieldId = 'resetCode';
+        } else if (message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
+             targetFieldId = 'confirmPasswordReset';
         }
 
         const inputElement = document.getElementById(targetFieldId);
         
-        // ปิด Pop-up (สำคัญมากสำหรับการแสดง Error)
+        // 1. ปิด Pop-up (สำคัญมากสำหรับการแสดง Error)
         this.toggleLoadingOverlay(false);
         
-        if (!inputElement) return;
+        // 2. ถ้าหา input element ไม่เจอ (เช่น field เป็น 'password' แต่เราอยู่ในหน้า Forgot Password Step 1) ให้ออก
+        if (!inputElement) {
+             console.error(`Error: Could not find input element for field ID: ${targetFieldId}`);
+             return;
+        }
 
         const smartField = inputElement.closest('.smart-field');
         const errorElement = document.getElementById(`${targetFieldId}Error`);
         
         if (smartField && errorElement) {
-             // เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
-             this.clearAllErrorsInForm(smartField.form); 
+             // 3. เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
+             if (smartField.form) {
+                 this.clearAllErrorsInForm(smartField.form);
+             } else {
+                 // ถ้า form หายไป อาจเป็นปัญหาที่โครงสร้าง HTML แต่ยังคงแสดง error เฉพาะ field นั้น
+                 this.clearError(targetFieldId);
+             } 
 
+             // 4. แสดง Error ใหม่
              smartField.classList.add('error');
              errorElement.textContent = message;
              errorElement.classList.add('show');
@@ -565,7 +562,7 @@ class AIAssistantLoginForm {
             this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
         } finally {
             this.setLoading(false, submitButton);
-            this.toggleLoadingOverlay(false); // ปิด Pop-up (กรณี Error หรือสำเร็จแล้ว)
+            // ไม่ต้องเรียก toggleLoadingOverlay(false) ซ้ำ เพราะถูกเรียกใน showError/showNeuralSuccess แล้ว
         }
     }
 
@@ -579,8 +576,9 @@ class AIAssistantLoginForm {
         const studentId = this.resetEmailInput.value.trim();
         this.tempStudentId = studentId;
 
-        // *** NEW VALIDATION: ตรวจสอบว่ากรอกรหัสนักศึกษาหรือไม่ ***
+        // *** VALIDATION: ตรวจสอบว่ากรอกรหัสนักศึกษาหรือไม่ ***
         if (!studentId) {
+            // แสดง Error ทันที (Client-side)
             this.showError('resetEmail', 'จำเป็นต้องระบุรหัสนักศึกษา');
             return;
         }
