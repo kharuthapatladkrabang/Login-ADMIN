@@ -580,8 +580,8 @@ class AIAssistantLoginForm {
             this.updateLoadingText('กำลังตรวจสอบบัญชี...');
             this.toggleLoadingOverlay(true);
             
-            // Progress Bar วิ่งทันทีที่เริ่มส่งคำขอ (0% -> 60%) ภายใน 2 วินาที
-            await this.simulateLoad(60, 3); // Phase 1: 3 วินาที
+            // Progress Bar วิ่งทันทีที่เริ่มส่งคำขอ (0% -> 60%) ภายใน 3 วินาที
+            await this.simulateLoad(60, 3); 
             
             // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
             const response = await fetch(this.WEB_APP_URL, {
@@ -598,7 +598,7 @@ class AIAssistantLoginForm {
                 
                 this.updateLoadingText('กำลังเข้าสู่ระบบ...');
                 // Progress Bar วิ่งต่อเนื่องจาก 60% ไปจนถึง 100% ภายใน 2 วินาที
-                await this.simulateLoad(100, 2); // Phase 2: 2 วินาที
+                await this.simulateLoad(100, 2); 
                 
                 // 4. แสดงหน้า Success
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
@@ -607,7 +607,7 @@ class AIAssistantLoginForm {
                     this.saveCredentials(); 
                     
                     if (result.adminName) {
-                        await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาให้ผู้ใช้เห็น 100% แว็บหนึ่ง
+                        await new Promise(r => setTimeout(r, 500)); // หน่วงเวลาให้ผู้ใช้เห็น 100% แว็บหนึ่ง
                         
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
