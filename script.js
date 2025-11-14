@@ -55,7 +55,7 @@ class AIAssistantLoginForm {
         // URL Web App ล่าสุด (UPDATED!)
         this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzH5_rERyRW4PcEDt-q8-DwSpBx4ZTl5nW-CvsZfXEPZ4-FF6Q8vAacrOfP0B8sDYt6/exec'; 
 
-        // NEW: Loading Overlay Elements (From Previous Step)
+        // NEW: Loading Overlay Elements
         this.loadingOverlay = document.getElementById('loadingOverlay');
         this.progressBar = document.getElementById('loginProgressBar');
         this.percentageDisplay = document.getElementById('loadingPercentage');
@@ -189,28 +189,8 @@ class AIAssistantLoginForm {
         }
     }
     
-    // NEW: Function to update progress bar and percentage
+    // NEW: Function to update progress bar and percentage (using CSS Variable)
     updateProgressBar(percentage) {
-        // ต้องเข้าถึง :after element ผ่านการเพิ่ม CSS transition และใช้ JS ควบคุม width
-        const loaderElement = this.progressBar;
-        const styleSheet = document.styleSheets[0]; 
-        
-        // เนื่องจาก CSS :after เป็น Pseudo-element เราจึงไม่สามารถเข้าถึง style โดยตรงได้
-        // วิธีที่เร็วที่สุดคือการสร้าง style tag ชั่วคราวหรือกำหนด class
-        
-        // ในกรณีนี้ เราจะสมมติว่าคุณได้เพิ่มโค้ด CSS สำหรับ .loader:after ที่มี transition: width 0.3s ease; แล้ว
-        // และเราจะควบคุมความกว้างของแถบโหลดผ่าน inline style บน .loader element แทน (ถ้าเป็นไปได้)
-        // เนื่องจากเราไม่สามารถควบคุม width ของ :after โดยตรงจาก JS ได้
-        
-        // เนื่องจากโครงสร้าง HTML/CSS ที่เตรียมไว้ใช้ .loader:after สำหรับแถบสี
-        // เราจึงจำเป็นต้องเข้าถึง DOM element ที่เป็นแถบสีโดยตรง (ถ้ามีการสร้าง element นั้น)
-        // หากไม่มี element โดยตรง, เราจะพึ่งพาการตั้งค่า CSS ที่มี transition บน width ของ :after
-        
-        // *** เนื่องจากโครงสร้าง CSS ที่คุณใช้ควบคุม width ผ่าน :after, 
-        // การควบคุมจาก JS ต้องใช้เทคนิคที่ซับซ้อนขึ้น หรือเปลี่ยนโครงสร้าง HTML/CSS เล็กน้อย ***
-        
-        // สำหรับวัตถุประสงค์นี้ ผมจะใช้การควบคุมผ่าน CSS Variable เพื่อให้โค้ด JS สะอาดขึ้น
-        // (*** จำเป็นต้องเพิ่มโค้ดใน style.css ตามด้านล่างนี้ ***)
         this.progressBar.style.setProperty('--progress-width', `${percentage}%`);
         this.percentageDisplay.textContent = `${percentage}%`;
     }
@@ -443,6 +423,9 @@ class AIAssistantLoginForm {
         const smartField = inputElement.closest('.smart-field');
         const errorElement = document.getElementById(`${targetFieldId}Error`);
         
+        // เราไม่ต้องการให้ error แสดงบน Pop-up, แต่ต้องการให้แสดงบนหน้า login หลัก
+        this.toggleLoadingOverlay(false); // ปิด Pop-up ทันทีเมื่อเกิด Error
+        
         if (smartField && errorElement) {
              // เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
              this.clearAllErrorsInForm(smartField.form); 
@@ -570,7 +553,7 @@ class AIAssistantLoginForm {
                     this.updateFormMode('login');
                 }
             } else {
-                // 4. ถ้าไม่สำเร็จ: แสดง Error และปิด Pop-up ทันที
+                // 4. ถ้าไม่สำเร็จ: แสดง Error และปิด Pop-up ทันที (ฟังก์ชัน showError จะทำตรงนี้แทน)
                 let targetField = 'password';
                 if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
                     targetField = 'email';
@@ -583,7 +566,7 @@ class AIAssistantLoginForm {
             this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
         } finally {
             this.setLoading(false, this.submitButton);
-            this.toggleLoadingOverlay(false); // ปิด Pop-up
+            this.toggleLoadingOverlay(false); // ปิด Pop-up (กรณีสำเร็จ, ไม่สำเร็จ, หรือเกิดข้อผิดพลาดเครือข่าย)
         }
     }
 
