@@ -607,7 +607,7 @@ class AIAssistantLoginForm {
                     this.saveCredentials(); 
                     
                     if (result.adminName) {
-                        await new Promise(r => setTimeout(r, 500)); // หน่วงเวลาให้ผู้ใช้เห็น 100% แว็บหนึ่ง
+                        await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาให้ผู้ใช้เห็น 100% แว็บหนึ่ง
                         
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
