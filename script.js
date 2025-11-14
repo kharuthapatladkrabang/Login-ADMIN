@@ -151,7 +151,7 @@ class AIAssistantLoginForm {
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
-                     this.clearError(input.id); // แก้ไข: เพิ่ม clearError เพื่อให้หายเมื่อพิมพ์
+                     // ❌ ห้ามล้าง error ตรงนี้
                      this.forceLabelFloat(input, input.value.length > 0);
                  });
                  input.addEventListener('blur', () => {
