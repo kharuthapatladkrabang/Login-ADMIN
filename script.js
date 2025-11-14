@@ -65,6 +65,11 @@ class AIAssistantLoginForm {
         this.isSimulatingLoad = false;
         this.progressInterval = null;
         this.errorTimeout = null; // สำหรับควบคุมการซ่อน Error อัตโนมัติ
+        
+        // NEW TIMER ELEMENTS
+        this.sessionTimerDisplay = document.getElementById('sessionTimerDisplay');
+        this.timerInterval = null;
+        this.SESSION_DURATION = 600; // 10 นาที = 600 วินาที
 
         this.init();
     }
@@ -247,12 +252,21 @@ class AIAssistantLoginForm {
         });
     }
 
-    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที
+    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที (เปลี่ยนเป็น 60 วินาที)
     // NOTE: จะใช้ Global Display ถ้ามี Error ที่มาจาก Server (ที่ไม่เกี่ยวกับ Validation)
-    showPermanentError(field, message, duration = 20000) {
+    showPermanentError(field, message, duration = 60000) { // <--- แก้ไขระยะเวลา Error Persistence เป็น 60000 มิลลิวินาที
         // 1. เคลียร์ Error เดิมทั้งหมด (ทั้งใน Input และ Global)
-        this.clearAllErrorsInForm(this.form || this.forgotPasswordForm || this.resetPasswordForm);
-        const globalDisplay = document.getElementById('globalErrorDisplay');
+        // ต้องตรวจสอบว่าฟอร์มปัจจุบันคืออะไรก่อนจะเคลียร์
+        let currentForm = this.form;
+        if (document.getElementById('forgotPasswordCard1').style.display !== 'none') {
+             currentForm = this.forgotPasswordForm;
+        } else if (document.getElementById('forgotPasswordCard2').style.display !== 'none') {
+             currentForm = this.resetPasswordForm;
+        }
+        this.clearAllErrorsInForm(currentForm);
+
+
+        const globalDisplay = document.getElementById('globalErrorDisplay') || document.getElementById('forgotPasswordGlobalErrorDisplay') || document.getElementById('resetPasswordGlobalErrorDisplay');
 
         // 2. แสดง Error ภายใน Input Field
         const inputElement = document.getElementById(field);
@@ -269,8 +283,10 @@ class AIAssistantLoginForm {
 
         // 3. แสดงข้อความบน Global Display (ถ้ามี)
         if (globalDisplay) {
-             globalDisplay.textContent = message;
-             globalDisplay.style.display = 'block';
+             // เราจะไม่ใช้ Global Display เมื่อแสดง Error ภายใน Input Field
+             // แต่ถ้าอยากให้แสดงพร้อมกันก็สามารถทำได้
+             // globalDisplay.textContent = message;
+             // globalDisplay.style.display = 'block';
         }
 
         // 4. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (แต่จะถูกยกเลิกเมื่อผู้ใช้พิมพ์/ส่งใหม่)
@@ -297,8 +313,8 @@ class AIAssistantLoginForm {
         
         this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
         
-        // อัปเดตข้อความหัวข้อ
-        this.forgotPasswordCard1.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน'; 
+        // อัปเดตข้อความหัวข้อ (เพิ่ม ' (ขั้นตอนที่ 1)')
+        this.forgotPasswordCard1.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 1)'; 
         this.resetStep1Message.textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
         
         this.clearForgotPasswordErrors();
@@ -316,6 +332,11 @@ class AIAssistantLoginForm {
         this.mainLoginCard.style.display = 'block';
         document.querySelector('.signup-section').style.display = 'block';
         this.updateFormMode('login');
+        
+        // หยุด Session Timer เมื่อกลับไปหน้า Login
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+        }
     }
 
     updateFormMode(mode) {
@@ -604,8 +625,8 @@ class AIAssistantLoginForm {
             this.updateLoadingText('กำลังตรวจสอบบัญชี...');
             this.toggleLoadingOverlay(true);
             
-            // Progress Bar วิ่งทันทีที่เริ่มส่งคำขอ (0% -> 60%) ภายใน 3 วินาที
-            await this.simulateLoad(60, 3); 
+            // Progress Bar วิ่งทันทีที่เริ่มส่งคำขอ (0% -> 60%) ภายใน 15 วินาที <--- แก้ไข duration
+            await this.simulateLoad(60, 15); 
             
             // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
             const response = await fetch(this.WEB_APP_URL, {
@@ -621,8 +642,8 @@ class AIAssistantLoginForm {
                 // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (60% -> 100%) ---
                 
                 this.updateLoadingText('กำลังเข้าสู่ระบบ...');
-                // Progress Bar วิ่งต่อเนื่องจาก 60% ไปจนถึง 100% ภายใน 2 วินาที
-                await this.simulateLoad(100, 2); 
+                // Progress Bar วิ่งต่อเนื่องจาก 60% ไปจนถึง 100% ภายใน 3 วินาที <--- แก้ไข duration
+                await this.simulateLoad(100, 3); 
                 
                 // 4. แสดงหน้า Success
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
@@ -700,7 +721,7 @@ class AIAssistantLoginForm {
             const result = await response.json();
 
             if (result.success) {
-                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 1 (แล้วย้ายไป Step 2) ***
+                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 2 ***
                 this.resetStep2Message.textContent = result.message; 
                 this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
                 this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
@@ -710,8 +731,8 @@ class AIAssistantLoginForm {
                 this.newPasswordInput.value = '';
                 this.confirmPasswordInputReset.value = '';
 
-                // อัปเดตหัวข้อ Step 2
-                this.forgotPasswordCard2.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน';
+                // อัปเดตหัวข้อ Step 2 (เพิ่ม ' (ขั้นตอนที่ 2)')
+                this.forgotPasswordCard2.querySelector('.login-header h2').textContent = 'รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 2)';
 
             } else {
                 // *** FIX: แสดง Error ใน input field ของ Step 1 ***
@@ -739,17 +760,28 @@ class AIAssistantLoginForm {
         this.clearForgotPasswordErrors(); 
 
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
+            // *** ใช้ showPermanentError สำหรับ Client-side Validation ***
             this.showPermanentError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
         }
+        
         if (newPassword.length < 6) {
+            // *** ใช้ showPermanentError สำหรับ Client-side Validation ***
             this.showPermanentError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
             isValid = false;
         }
-        if (newPassword !== confirmPassword) {
+        
+        // ตรวจสอบความยาวรหัสผ่านใหม่และยืนยันรหัสผ่านใหม่ไม่ตรงกัน
+        if (newPassword.length >= 6 && newPassword !== confirmPassword) {
+             // *** ใช้ showPermanentError สำหรับ Client-side Validation ***
             this.showPermanentError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
             isValid = false;
+        } else if (newPassword.length >= 6 && !confirmPassword) {
+             // กรณีรหัสผ่านใหม่กรอกแล้ว แต่ยืนยันรหัสผ่านยังว่าง
+             this.showPermanentError('confirmPasswordReset', 'จำเป็นต้องยืนยันรหัสผ่านใหม่');
+             isValid = false;
         }
+
 
         if (!isValid) return;
 
@@ -773,7 +805,7 @@ class AIAssistantLoginForm {
                 alert(result.message);
                 this.showLoginCard(); // กลับไปหน้า Login
             } else {
-                // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
+                // *** FIX: ใช้ showPermanentError สำหรับ Error จาก Server ***
                 let targetField = 'confirmPasswordReset';
                 if (result.message.includes('รหัสรีเซ็ต') || result.message.includes('หมดอายุ')) {
                     targetField = 'resetCode';
@@ -789,6 +821,40 @@ class AIAssistantLoginForm {
         } finally {
             this.setLoading(false, submitButton);
         }
+    }
+    
+    // NEW: Session Timer Logic
+    startSessionTimer() {
+        // Clear interval เก่าถ้ามี
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+        }
+
+        let timeLeft = this.SESSION_DURATION; // เริ่มที่ 600 วินาที
+
+        const updateTimer = () => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            const displayMinutes = String(minutes).padStart(2, '0');
+            const displaySeconds = String(seconds).padStart(2, '0');
+
+            this.sessionTimerDisplay.textContent = `เซสชันจะหมดอายุใน: ${displayMinutes}:${displaySeconds}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(this.timerInterval);
+                this.sessionTimerDisplay.textContent = 'เซสชันหมดอายุแล้ว กำลังนำกลับไปหน้าล็อกอิน...';
+                // บังคับโหลดหน้าซ้ำเพื่อกลับไปที่หน้าล็อกอิน
+                setTimeout(() => {
+                    location.reload(); 
+                }, 2000); 
+            } else {
+                timeLeft--;
+            }
+        };
+
+        updateTimer(); // เรียกใช้ครั้งแรกทันที
+        this.timerInterval = setInterval(updateTimer, 1000); // อัปเดตทุก 1 วินาที
     }
     
     // Display Functions (คงเดิม)
@@ -859,6 +925,9 @@ class AIAssistantLoginForm {
         
         // ซ่อน iframe container ที่ไม่ได้ใช้
         this.contentView.style.display = 'none'; 
+        
+        // *** NEW: เริ่ม Session Timer ***
+        this.startSessionTimer();
     }
 }
 
