@@ -8,8 +8,8 @@
     <link rel="icon" type="image/png" href="https://img2.pic.in.th/pic/012.1-LOGO---1.png">
     
     <link rel="stylesheet" href="style.css">
-
     <style>
+        /* CSS เพิ่มเติมสำหรับการจัดการ iFrame และ Layout */
         .content-view-container {
             width: 100%;
             max-width: 420px; /* ใช้ความกว้างเดียวกับ Login Card */
@@ -34,208 +34,303 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 5px 0 15px 0;
+            padding: 5px 0 10px 0;
             color: #f8fafc;
         }
-        #contentHeader h3 {
-            font-size: 1.2rem;
-            font-weight: 500;
+        .menu-button-small {
+            width: 120px;
+            margin-left: 10px;
         }
-
-        /* สำหรับ Progress Bar และ Loading Overlay */
+        #contentTitleDisplay {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        /* สไตล์สำหรับ Progress Bar และ Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 15, 0.9);
+            background: rgba(0, 0, 0, 0.5); 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.3s ease;
         }
 
         .loading-overlay.show {
             display: flex;
             opacity: 1;
-            visibility: visible;
+        }
+        .loading-box {
+            background: rgba(15, 15, 20, 0.95);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 30px 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-width: 300px;
+            width: 100%;
+        }
+        .loading-text {
+            color: #f8fafc;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        .loading-percentage {
+            color: #3b82f6;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .loader {
+            display: block;
+            position: relative;
+            height: 12px;
+            width: 100%;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+            --progress-width: 0%;
+        }
+        .loader:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: var(--progress-width); 
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            transition: width 0.3s ease;
         }
     </style>
 </head>
-
 <body>
     <div class="neural-background">
-        <div class="neural-node" style="top: 20%; left: 15%;"></div>
-        <div class="neural-node" style="top: 60%; left: 80%;"></div>
-        <div class="neural-node" style="top: 80%; left: 30%;"></div>
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
     </div>
 
-    <div class="login-card" id="mainLoginCard">
-        <div class="ai-glow"></div>
+    <div class="login-container" id="mainContainerWrapper">
         
-        <div id="mainLogoContainer" class="logo-container">
-            <img src="https://img5.pic.in.th/file/secure-sv1/Asset-401.png" alt="Logo">
-        </div>
-
-        <div class="login-header">
-            <h1>เข้าสู่ระบบ Admin</h1>
-            <p>เข้าสู่ระบบผู้ดูแลระบบ</p>
-        </div>
-
-        <div id="globalErrorDisplay" class="error-message global-error" style="display: none; margin-bottom: 15px;"></div>
-
-        <form id="loginForm">
-            <div class="smart-field">
-                <input type="text" id="email" required autocomplete="off">
-                <label for="email">รหัสนักศึกษา</label>
-                <span class="ai-indicator"></span>
-                <span id="emailError" class="error-message"></span>
-            </div>
-
-            <div class="smart-field">
-                <input type="password" id="password" required autocomplete="current-password">
-                <label for="password">รหัสความปลอดภัย</label>
-                <button type="button" class="password-toggle" id="passwordToggle">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.91 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.73-.16L10.91 10.91M2 2l20 20"></path></svg>
-                </button>
-                <span class="ai-indicator"></span>
-                <span id="passwordError" class="error-message"></span>
-            </div>
-
-            <div class="smart-field" id="confirmPasswordField" style="display: none;">
-                <input type="password" id="confirmPassword" autocomplete="off">
-                <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
-                <button type="button" class="password-toggle" id="confirmPasswordToggle">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.91 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.73-.16L10.91 10.91M2 2l20 20"></path></svg>
-                </button>
-                <span class="ai-indicator"></span>
-                <span id="confirmPasswordError" class="error-message"></span>
-            </div>
-
-            <div class="form-options">
-                <label class="remember-me">
-                    <input type="checkbox" id="remember">
-                    จดจำฉันไว้
-                </label>
-                <a href="#" id="forgotPasswordLink">ลืมรหัสผ่าน?</a>
-            </div>
-
-            <button type="submit" class="neural-button">
-                <div class="button-bg"></div>
-                <span class="button-text">เข้าสู่ระบบ</span>
-                <div class="button-loader"></div>
-                <div class="button-glow"></div>
-            </button>
-        </form>
-
-        <div class="signup-section">
-            <span>ยังไม่มีบัญชีใช่หรือไม่?</span>
-            <a href="#" id="signupLink">ลงทะเบียน</a>
-        </div>
-    </div>
-    
-    <div class="login-card" id="forgotPasswordCard1" style="display:none;">
-        <div class="ai-glow"></div>
-        <div class="login-header">
-            <h2>รีเซ็ตรหัสผ่าน</h2>
-            <p id="resetStep1Message">กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต</p>
-        </div>
-        
-        <form id="forgotPasswordForm">
-            <div class="smart-field">
-                <input type="text" id="resetEmail" required autocomplete="off">
-                <label for="resetEmail">รหัสนักศึกษา</label>
-                <span class="ai-indicator"></span>
-                <span id="resetEmailError" class="error-message"></span>
+        <div class="login-card" id="mainLoginCard">
+            <div class="ai-glow"></div>
+            
+            <div class="login-header">
+                <div class="ai-logo" id="mainLogoContainer">
+                    <img src="https://img5.pic.in.th/file/secure-sv1/Asset-401.png" alt="Admin Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <h1>เข้าสู่ระบบ Admin</h1> 
+                <p>เข้าสู่ระบบผู้ดูแลระบบ</p>
             </div>
             
-            <button type="submit" class="neural-button" id="sendResetCodeButton">
-                <div class="button-bg"></div>
-                <span class="button-text">รับรหัสรีเซ็ต</span>
-                <div class="button-loader"></div>
-                <div class="button-glow"></div>
-            </button>
-        </form>
-        
-        <div class="signup-section">
-            <a href="#" id="backToLoginLink">กลับไปที่ล็อกอิน</a>
+            <div id="globalErrorDisplay" style="color: #ef4444; margin: 15px 0; font-weight: 600; text-align: center; display: none;"></div>
+            
+            <form class="login-form" id="loginForm" novalidate>
+                <div class="smart-field" data-field="email">
+                    <div class="field-background"></div>
+                    <input type="text" id="email" name="studentId" required autocomplete="username">
+                    <label for="email">รหัสนักศึกษา</label> 
+                    <div class="ai-indicator">
+                        <div class="ai-pulse"></div>
+                    </div>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+
+                <div class="smart-field" data-field="password">
+                    <div class="field-background"></div>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                    <label for="password">รหัสผ่าน</label>
+                    <button type="button" class="smart-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                        <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="ai-indicator">
+                        <div class="ai-pulse"></div>
+                    </div>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+
+                <div class="smart-field" data-field="confirmPassword" id="confirmPasswordField" style="display: none;"> 
+                    <div class="field-background"></div>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off">
+                    <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+                    <button type="button" class="smart-toggle" id="confirmPasswordToggle" aria-label="Toggle password visibility">
+                         <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="ai-indicator">
+                        <div class="ai-pulse"></div>
+                    </div>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="confirmPasswordError"></span>
+                </div>
+
+
+                <div class="form-options">
+                    <label class="smart-checkbox">
+                        <input type="checkbox" id="remember" name="remember">
+                        <span class="checkbox-ai">
+                            <div class="checkbox-core"></div>
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                                <path d="M1 5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        <span class="checkbox-text">จดจำการเข้าสู่ระบบ</span>
+                    </label>
+                    <a href="#" class="neural-link" id="forgotPasswordLink">ลืมรหัสผ่าน</a>
+                </div>
+
+                <button type="submit" class="neural-button">
+                    <div class="button-bg"></div>
+                    <span class="button-text">เข้าสู่ระบบ</span>
+                    <div class="button-loader">
+                        <div class="neural-spinner">
+                            <div class="spinner-segment"></div>
+                            <div class="spinner-segment"></div>
+                            <div class="spinner-segment"></div>
+                        </div>
+                    </div>
+                    <div class="button-glow"></div>
+                </button>
+            </form>
+
+            <div class="auth-separator" style="display: none;"></div>
+            <div class="neural-social" style="display: none;"></div>
+
+            <div class="signup-section">
+                <span>ยังไม่มีบัญชีใช่หรือไม่? </span> 
+                <a href="#" class="neural-signup" id="signupLink">ลงทะเบียน</a>
+            </div>
         </div>
-    </div>
-    
-    <div class="login-card" id="forgotPasswordCard2" style="display:none;">
-        <div class="ai-glow"></div>
-        <div class="login-header">
-            <h2>รีเซ็ตรหัสผ่าน</h2>
-            <p id="resetStep2Message">กรุณาป้อนรหัสรีเซ็ตและรหัสผ่านใหม่</p>
-        </div>
-        
-        <form id="resetPasswordForm">
-            <div class="smart-field">
-                <input type="text" id="resetCode" required maxlength="6" autocomplete="off">
-                <label for="resetCode">รหัสรีเซ็ต (6 หลัก)</label>
-                <span class="ai-indicator"></span>
-                <span id="resetCodeError" class="error-message"></span>
+
+        <div class="login-card" id="forgotPasswordCard1" style="display:none;">
+            <div class="ai-glow"></div>
+            <div class="login-header">
+                <h2 style="color: #f8fafc;">รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 1)</h2>
+                <p id="resetStep1Message" style="color: #94a3b8;">กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต</p>
             </div>
             
-            <div class="smart-field">
-                <input type="password" id="newPassword" required autocomplete="new-password">
-                <label for="newPassword">รหัสผ่านใหม่</label>
-                <button type="button" class="password-toggle" id="newPasswordToggle">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.91 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.73-.16L10.91 10.91M2 2l20 20"></path></svg>
-                </button>
-                <span class="ai-indicator"></span>
-                <span id="newPasswordError" class="error-message"></span>
-            </div>
+            <div id="forgotPasswordGlobalErrorDisplay" style="color: #ef4444; margin: 15px 0; font-weight: 600; text-align: center; display: none;"></div>
 
-             <div class="smart-field">
-                <input type="password" id="confirmPasswordReset" required autocomplete="new-password">
-                <label for="confirmPasswordReset">ยืนยันรหัสผ่านใหม่</label>
-                <button type="button" class="password-toggle" id="confirmPasswordResetToggle">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.91 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.73-.16L10.91 10.91M2 2l20 20"></path></svg>
+            <form id="forgotPasswordForm" novalidate>
+                <div class="smart-field" data-field="resetEmail">
+                    <div class="field-background"></div>
+                    <input type="text" id="resetEmail" name="studentId" required autocomplete="off"> 
+                    <label for="resetEmail">รหัสนักศึกษา</label> 
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="resetEmailError"></span>
+                </div>
+                <button type="submit" class="neural-button" id="sendResetCodeButton">
+                    <div class="button-bg"></div>
+                    <span class="button-text">ส่งรหัสรีเซ็ต</span>
+                    <div class="button-loader"></div>
+                    <div class="button-glow"></div>
                 </button>
-                <span class="ai-indicator"></span>
-                <span id="confirmPasswordResetError" class="error-message"></span>
+            </form>
+            <a href="#" class="neural-link" id="backToLoginLink">ย้อนกลับสู่หน้าเข้าสู่ระบบ</a>
+        </div>
+
+        <div class="login-card" id="forgotPasswordCard2" style="display:none;">
+            <div class="ai-glow"></div>
+            <div class="login-header">
+                <h2 style="color: #f8fafc;">รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 2)</h2>
+                <p id="resetStep2Message" style="color: #94a3b8;">กรุณากรอกรหัสรีเซ็ตและรหัสผ่านใหม่</p>
             </div>
             
-            <button type="submit" class="neural-button" id="confirmResetButton">
-                <div class="button-bg"></div>
-                <span class="button-text">รีเซ็ตรหัสผ่าน</span>
-                <div class="button-loader"></div>
-                <div class="button-glow"></div>
-            </button>
-        </form>
-        
-        <div class="signup-section">
-            <a href="#" id="backToLoginLink">กลับไปที่ล็อกอิน</a>
-        </div>
-    </div>
+            <div id="resetPasswordGlobalErrorDisplay" style="color: #ef4444; margin: 15px 0; font-weight: 600; text-align: center; display: none;"></div>
 
-    <div class="login-card success-neural" id="successMessage" style="display:none;">
-        <div class="ai-glow"></div>
-        <div class="success-core">
-            <div class="success-rings">
-                <div class="success-ring"></div>
-                <div class="success-ring"></div>
-                <div class="success-ring"></div>
+            <form id="resetPasswordForm" novalidate>
+                <div class="smart-field" data-field="resetCode">
+                    <div class="field-background"></div>
+                    <input type="text" id="resetCode" name="resetCode" required autocomplete="off"> 
+                    <label for="resetCode">รหัสรีเซ็ต (6 หลัก)</label> 
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="resetCodeError"></span>
+                </div>
+
+                <div class="smart-field" data-field="newPassword">
+                    <div class="field-background"></div>
+                    <input type="password" id="newPassword" name="newPassword" required autocomplete="off"> 
+                    <label for="newPassword">รหัสผ่านใหม่</label> 
+                    <button type="button" class="smart-toggle" id="newPasswordToggle" aria-label="Toggle password visibility">
+                         <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="newPasswordError"></span>
+                </div>
+                
+                <div class="smart-field" data-field="confirmPasswordReset">
+                    <div class="field-background"></div>
+                    <input type="password" id="confirmPasswordReset" name="confirmPasswordReset" required autocomplete="off"> 
+                    <label for="confirmPasswordReset">ยืนยันรหัสผ่านใหม่</label> 
+                    <button type="button" class="smart-toggle" id="confirmPasswordResetToggle" aria-label="Toggle password visibility">
+                         <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="confirmPasswordResetError"></span>
+                </div>
+
+                <button type="submit" class="neural-button" id="confirmResetButton">
+                    <div class="button-bg"></div>
+                    <span class="button-text">ยืนยันการเปลี่ยนรหัสผ่าน</span>
+                    <div class="button-loader"></div>
+                    <div class="button-glow"></div>
+                </button>
+            </form>
+        </div>
+
+        <div class="login-card success-neural" id="successMessage" style="display:none;">
+            <div class="ai-glow"></div>
+            <div class="success-core">
+                <div class="success-rings">
+                    <div class="success-ring"></div>
+                    <div class="success-ring"></div>
+                    <div class="success-ring"></div>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <h3 id="adminWelcome"></h3>
+            <p id="adminDetails">
+                รหัสนักศึกษา: <span id="displayStudentId"></span><br>
+                เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง
+            </p>
+            <div id="redirectButtonsContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px;">
+                </div>
+            <p style="margin-top: 20px;">กำลังเข้าสู่พื้นที่ทำงาน...</p>
+            <p id="sessionTimerDisplay" style="color: #60a5fa; font-size: 14px; font-weight: 600; margin-top: 5px;"></p>
         </div>
-        <h3 id="adminWelcome"></h3>
-        <p id="adminDetails">
-            รหัสนักศึกษา: <span id="displayStudentId"></span><br>
-            เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง
-        </p>
-        <div id="redirectButtonsContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px;">
-        </div>
-        
-        <p style="margin-top: 20px;">กำลังเข้าสู่พื้นที่ทำงาน...</p>
-        <p id="sessionTimerDisplay" style="color: #60a5fa; font-size: 14px; font-weight: 600; margin-top: 5px;"></p>
     </div>
 
     <div class="content-view-container" id="contentView" style="display:none;">
@@ -258,6 +353,7 @@
         </div>
     </div>
 
+    <script src="../../shared/js/form-utils.js"></script> 
     <script src="script.js"></script>
 </body>
 </html>
