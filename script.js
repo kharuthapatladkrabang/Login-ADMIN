@@ -60,7 +60,6 @@ class AIAssistantLoginForm {
         this.progressBar = document.getElementById('loginProgressBar');
         this.percentageDisplay = document.getElementById('loadingPercentage');
         this.loadingTextDisplay = document.querySelector('.loading-box .loading-text'); 
-        this.globalErrorDisplay = document.getElementById('globalErrorDisplay'); // NEW Global Error
         
         // ตัวแปรสำหรับควบคุมการโหลด
         this.isSimulatingLoad = false;
@@ -249,41 +248,42 @@ class AIAssistantLoginForm {
     }
 
     // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที
+    // NOTE: จะใช้ Global Display ถ้ามี Error ที่มาจาก Server (ที่ไม่เกี่ยวกับ Validation)
     showPermanentError(field, message, duration = 20000) {
-        // 1. เรียกใช้ showError เดิมเพื่อจัดการ DOM (ใส่ class 'error', 'show')
-        this.showError(field, message);
+        // 1. เคลียร์ Error เดิมทั้งหมด (ทั้งใน Input และ Global)
+        this.clearAllErrorsInForm(this.form || this.forgotPasswordForm || this.resetPasswordForm);
+        const globalDisplay = document.getElementById('globalErrorDisplay');
 
-        // 2. หากมี Timeout เก่าอยู่ ให้ยกเลิกก่อน
+        // 2. แสดง Error ภายใน Input Field
+        const inputElement = document.getElementById(field);
+        if (inputElement) {
+            const smartField = inputElement.closest('.smart-field');
+            const errorElement = document.getElementById(`${field}Error`);
+            
+            if (smartField && errorElement) {
+                smartField.classList.add('error');
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+        }
+
+        // 3. แสดงข้อความบน Global Display (ถ้ามี)
+        if (globalDisplay) {
+             globalDisplay.textContent = message;
+             globalDisplay.style.display = 'block';
+        }
+
+        // 4. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (แต่จะถูกยกเลิกเมื่อผู้ใช้พิมพ์/ส่งใหม่)
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
-
-        const inputElement = document.getElementById(field);
-        const smartField = inputElement ? inputElement.closest('.smart-field') : null;
-        
-        // *** 3. บังคับแสดง Global Error สำหรับข้อผิดพลาดจาก Server หรือข้อผิดพลาดร้ายแรง ***
-        const globalDisplay = document.getElementById('globalErrorDisplay') || 
-                              document.getElementById('forgotPasswordGlobalErrorDisplay') || 
-                              document.getElementById('resetPasswordGlobalErrorDisplay');
-
-        if (globalDisplay) {
-             // 3a. เคลียร์ข้อความเก่า
-             globalDisplay.textContent = '';
-             
-             // 3b. แสดงข้อความใหม่
-             globalDisplay.textContent = `ข้อผิดพลาด: ${message}`;
-             globalDisplay.style.display = 'block';
-        }
-        // *************************************************************************
-        
-        if (smartField) {
-            // 4. กำหนด timeout เพื่อซ่อน Error อัตโนมัติ (เป็น Fallback)
-            this.errorTimeout = setTimeout(() => {
-                this.clearError(field);
-            }, duration);
-            
-            // 5. Note: Error จะหายไปทันทีเมื่อผู้ใช้เริ่มพิมพ์ (input event) หรือส่งฟอร์มใหม่
-        }
+        this.errorTimeout = setTimeout(() => {
+            if (globalDisplay) {
+                 globalDisplay.style.display = 'none';
+                 globalDisplay.textContent = '';
+            }
+            if (inputElement) this.clearError(field);
+        }, duration);
     }
 
 
@@ -342,13 +342,6 @@ class AIAssistantLoginForm {
         document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
         this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
 
-        // Clear Global Error เมื่อเปลี่ยนโหมด
-        const globalDisplay = document.getElementById('globalErrorDisplay');
-        if (globalDisplay) {
-             globalDisplay.style.display = 'none';
-             globalDisplay.textContent = '';
-        }
-
         this.submitButton.style.display = 'flex'; 
 
         // Clear inputs and errors
@@ -404,7 +397,7 @@ class AIAssistantLoginForm {
         }
     }
 
-    // Validation Helpers
+    // Validation Helpers (ใช้ showPermanentError เพื่อบังคับให้ Error ค้าง)
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
@@ -514,19 +507,12 @@ class AIAssistantLoginForm {
             this.errorTimeout = null;
         }
         
-        // *** แก้ไข: ซ่อน Global Error เมื่อมีการพิมพ์/แก้ไข Input ใดๆ ก็ตาม ***
-        const currentForm = inputElement.form;
-        let globalDisplayId = '';
-        if (currentForm && currentForm.id === 'loginForm') globalDisplayId = 'globalErrorDisplay';
-        else if (currentForm && currentForm.id === 'forgotPasswordForm') globalDisplayId = 'forgotPasswordGlobalErrorDisplay';
-        else if (currentForm && currentForm.id === 'resetPasswordForm') globalDisplayId = 'resetPasswordGlobalErrorDisplay';
-        
-        const globalDisplay = document.getElementById(globalDisplayId);
+        // ซ่อน Global Error เมื่อมีการพิมพ์/แก้ไข
+        const globalDisplay = document.getElementById('globalErrorDisplay');
         if (globalDisplay) {
              globalDisplay.style.display = 'none';
              globalDisplay.textContent = '';
         }
-        // *************************************************************************
         
         if (smartField && errorElement) {
             smartField.classList.remove('error');
@@ -549,18 +535,6 @@ class AIAssistantLoginForm {
                 errorSpan.textContent = '';
             }
         });
-        
-        // Clear Global Display ของฟอร์มนี้ด้วย
-        let globalDisplayId = '';
-        if (formElement.id === 'loginForm') globalDisplayId = 'globalErrorDisplay';
-        else if (formElement.id === 'forgotPasswordForm') globalDisplayId = 'forgotPasswordGlobalErrorDisplay';
-        else if (formElement.id === 'resetPasswordForm') globalDisplayId = 'resetPasswordGlobalErrorDisplay';
-
-        const globalDisplay = document.getElementById(globalDisplayId);
-        if (globalDisplay) {
-             globalDisplay.style.display = 'none';
-             globalDisplay.textContent = '';
-        }
     }
 
     clearForgotPasswordErrors() {
