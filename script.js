@@ -147,7 +147,6 @@ class AIAssistantLoginForm {
         });
         
         // Event input และ blur สำหรับฟอร์ม Forgot Password (Step 1 และ Step 2)
-        // *** ยืนยัน: ลบ this.clearError(input.id); ออกเพื่อให้ Error ค้างไว้ตามคำขอ ***
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
@@ -252,8 +251,8 @@ class AIAssistantLoginForm {
         });
     }
 
-    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที (เปลี่ยนเป็น 60 วินาที)
-    showPermanentError(field, message, duration = 60000) { // <--- แก้ไขระยะเวลา Error Persistence เป็น 60000 มิลลิวินาที
+    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 60 วินาที
+    showPermanentError(field, message, duration = 60000) { // <--- 60 วินาที
         // 1. เคลียร์ Error เดิมทั้งหมด
         let currentForm = this.form;
         if (document.getElementById('forgotPasswordCard1').style.display !== 'none') {
@@ -269,6 +268,9 @@ class AIAssistantLoginForm {
         // 2. แสดง Error ภายใน Input Field
         const inputElement = document.getElementById(field);
         if (inputElement) {
+            // *** 2.1: ล้าง error เฉพาะ field ที่กำลังจะแสดงก่อน ***
+            this.clearError(field); 
+
             const smartField = inputElement.closest('.smart-field');
             const errorElement = document.getElementById(`${field}Error`);
             
@@ -279,22 +281,18 @@ class AIAssistantLoginForm {
             }
         }
 
-        // 3. แสดงข้อความบน Global Display (ถ้ามี)
-        if (globalDisplay) {
-             // globalDisplay.textContent = message;
-             // globalDisplay.style.display = 'block';
-        }
-
-        // 4. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (แต่จะถูกยกเลิกเมื่อผู้ใช้พิมพ์/ส่งใหม่)
+        // 3. ตั้ง Timeout เพื่อซ่อนอัตโนมัติ (60 วินาที)
         if (this.errorTimeout) {
             clearTimeout(this.errorTimeout);
         }
         this.errorTimeout = setTimeout(() => {
+            // ซ่อน Global Display (ถ้ามี)
+            const globalDisplay = document.getElementById('globalErrorDisplay');
             if (globalDisplay) {
                  globalDisplay.style.display = 'none';
                  globalDisplay.textContent = '';
             }
-            if (inputElement) this.clearError(field);
+             this.clearError(field); // ใช้ clearError ปกติเพื่อลบ
         }, duration);
     }
 
@@ -463,9 +461,6 @@ class AIAssistantLoginForm {
         
         return isValid;
     }
-
-    // Error Management (ปรับให้ใช้กับ showPermanentError ได้ง่ายขึ้น)
-    // ... (ฟังก์ชัน showError, clearError, clearAllErrorsInForm, clearForgotPasswordErrors)
 
     // AIEffects/Loading (คงเดิม)
     setupAIEffects() {
@@ -648,6 +643,9 @@ class AIAssistantLoginForm {
         }
     }
 
+    // ***************************************************************
+    // *** BEGIN EDITED SECTION: handleResetPassword (ขั้นตอนที่ 2) ***
+    // ***************************************************************
     async handleResetPassword(e) {
         e.preventDefault(); 
         e.stopPropagation(); 
@@ -658,25 +656,32 @@ class AIAssistantLoginForm {
         const confirmPassword = this.confirmPasswordInputReset.value; 
         
         let isValid = true;
+        // **สำคัญ**: เคลียร์ Error ทั้งหมดก่อนเริ่ม Validation ใหม่
         this.clearForgotPasswordErrors(); 
 
+        // *** START CLIENT-SIDE VALIDATION (ใช้ showPermanentError เหมือนขั้นตอนที่ 1) ***
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
+            // Client-side validation: รหัสรีเซ็ตไม่ถูกต้อง
             this.showPermanentError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
         }
         
         if (newPassword.length < 6) {
+            // Client-side validation: รหัสผ่านสั้นเกินไป
             this.showPermanentError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
             isValid = false;
         }
         
+        // ตรวจสอบรหัสผ่านใหม่ไม่ตรงกัน (ต้องทำหลังตรวจสอบความยาว)
         if (newPassword.length >= 6 && newPassword !== confirmPassword) {
             this.showPermanentError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
             isValid = false;
         } else if (newPassword.length >= 6 && !confirmPassword) {
+             // Client-side validation: ยืนยันรหัสผ่านว่างเปล่า
              this.showPermanentError('confirmPasswordReset', 'จำเป็นต้องยืนยันรหัสผ่านใหม่');
              isValid = false;
         }
+        // *** END CLIENT-SIDE VALIDATION ***
 
 
         if (!isValid) return;
@@ -701,6 +706,7 @@ class AIAssistantLoginForm {
                 alert(result.message);
                 this.showLoginCard(); // กลับไปหน้า Login
             } else {
+                // *** SERVER-SIDE ERROR HANDLING (ใช้ showPermanentError เหมือนขั้นตอนที่ 1) ***
                 let targetField = 'confirmPasswordReset';
                 if (result.message.includes('รหัสรีเซ็ต') || result.message.includes('หมดอายุ')) {
                     targetField = 'resetCode';
@@ -716,6 +722,9 @@ class AIAssistantLoginForm {
             this.setLoading(false, submitButton);
         }
     }
+    // ***************************************************************
+    // *** END EDITED SECTION: handleResetPassword (ขั้นตอนที่ 2) ***
+    // ***************************************************************
     
     // NEW: Session Timer Logic
     startSessionTimer() {
@@ -811,7 +820,7 @@ class AIAssistantLoginForm {
         this.startSessionTimer();
     }
     
-    // *** ฟังก์ชันที่ไม่สมบูรณ์จาก Snippet (ต้องมีในโค้ดจริง แต่ไม่มีในนี้) ***
+    // Error Handling Helpers
     clearError(field) {
         const inputElement = document.getElementById(field);
         if (!inputElement) return;
@@ -858,7 +867,6 @@ class AIAssistantLoginForm {
         this.clearError('newPassword');
         this.clearError('confirmPasswordReset');
     }
-    // *************************************************************
 }
 
 document.addEventListener('DOMContentLoaded', () => {
