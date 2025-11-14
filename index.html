@@ -1,757 +1,288 @@
-// Login Form JavaScript
-class AIAssistantLoginForm {
-    constructor() {
-        // Main Login Elements
-        this.form = document.getElementById('loginForm');
-        this.emailInput = document.getElementById('email'); 
-        this.passwordInput = document.getElementById('password');
-        this.passwordToggle = document.getElementById('passwordToggle');
-        this.submitButton = this.form.querySelector('.neural-button'); 
-        this.signupLink = document.getElementById('signupLink'); 
-        this.redirectButtonsContainer = document.getElementById('redirectButtonsContainer'); 
-        this.successMessage = document.getElementById('successMessage'); // Success Card
-        
-        this.mainLoginCard = document.getElementById('mainLoginCard'); // Login Card
-        
-        // NEW INPUTS: ต้องประกาศ Input Field ที่ถูกเพิ่มใน Login Form
-        this.confirmPasswordInput = document.getElementById('confirmPassword'); 
-        this.confirmPasswordField = document.getElementById('confirmPasswordField'); // Field Container
-        this.confirmPasswordToggle = document.getElementById('confirmPasswordToggle'); // Register Toggle ID
-
-        // iFrame Elements
-        this.contentView = document.getElementById('contentView');
-        this.contentFrame = document.getElementById('contentFrame');
-        this.contentTitle = document.getElementById('contentTitleDisplay'); 
-        
-        // โลโก้ URLs
-        this.LOGIN_LOGO = 'https://img5.pic.in.th/file/secure-sv1/Asset-401.png';
-        this.REGISTER_LOGO = 'https://img2.pic.in.th/pic/Asset-101.png';
-        this.logoImage = document.getElementById('mainLogoContainer').querySelector('img');
-        
-        this.formHeader = document.querySelector('.login-header h1');
-        this.formSubHeader = document.querySelector('.login-header p');
-        this.actionText = document.querySelector('.signup-section span');
-        this.currentMode = 'login'; 
-        this.redirectUrl = null; 
-
-        // Forgot Password Elements
-        this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        this.forgotPasswordCard1 = document.getElementById('forgotPasswordCard1'); // Step 1 Card
-        this.forgotPasswordCard2 = document.getElementById('forgotPasswordCard2'); // Step 2 Card
-        this.forgotPasswordForm = document.getElementById('forgotPasswordForm');
-        this.resetEmailInput = document.getElementById('resetEmail');
-        this.resetPasswordForm = document.getElementById('resetPasswordForm');
-        this.resetCodeInput = document.getElementById('resetCode');
-        this.newPasswordInput = document.getElementById('newPassword');
-        this.confirmPasswordInputReset = document.getElementById('confirmPasswordReset'); // Reset Confirm Pass ID
-        this.backToLoginLink = document.getElementById('backToLoginLink');
-        this.resetStep1Message = document.getElementById('resetStep1Message'); // Step 1 Subtitle/Message
-        this.resetStep2Message = document.getElementById('resetStep2Message'); // Step 2 Subtitle/Message
-        this.newPasswordToggle = document.getElementById('newPasswordToggle'); // Reset New Pass Toggle ID
-        this.confirmPasswordResetToggle = document.getElementById('confirmPasswordResetToggle'); // Reset Confirm Pass Toggle ID
-        
-        this.tempStudentId = null; 
-
-        // URL Web App ล่าสุด (UPDATED!)
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzH5_rERyRW4PcEDt-q8-DwSpBx4ZTl5nW-CvsZfXEPZ4-FF6Q8vAacrOfP0B8sDYt6/exec'; 
-
-        // NEW: Loading Overlay Elements
-        this.loadingOverlay = document.getElementById('loadingOverlay');
-        this.progressBar = document.getElementById('loginProgressBar');
-        this.percentageDisplay = document.getElementById('loadingPercentage');
-        
-        // ตัวแปรสำหรับควบคุมการโหลด
-        this.isSimulatingLoad = false;
-        this.progressInterval = null;
-
-        this.init();
-    }
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ระบบเข้าสู่ระบบ Admin</title>
     
-    init() {
-        this.loadRememberedCredentials(); 
-        this.bindEvents();
-        this.setupPasswordToggle();
-        this.setupAIEffects();
-        this.updateFormMode('login'); 
-    }
+    <link rel="icon" type="image/png" href="https://img2.pic.in.th/pic/012.1-LOGO---1.png">
     
-    // โหลดข้อมูลที่จดจำไว้จาก localStorage (คงเดิม)
-    loadRememberedCredentials() {
-        const rememberedId = localStorage.getItem('admin_remember_id');
-        const rememberedPass = localStorage.getItem('admin_remember_pass');
-        const rememberCheckbox = document.getElementById('remember');
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* CSS เพิ่มเติมสำหรับการจัดการ iFrame */
+        .content-view-container {
+            width: 100%;
+            max-width: 420px; /* ใช้ความกว้างเดียวกับ Login Card */
+            height: 95vh; 
+            position: absolute;
+            z-index: 10;
+            display: none; 
+            flex-direction: column;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); 
+        }
 
-        if (rememberedId && rememberedPass) {
-            this.emailInput.value = rememberedId;
-            this.passwordInput.value = rememberedPass;
+        #contentFrame {
+            flex-grow: 1;
+            width: 100%;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 10px;
+            background: #15151a;
+        }
+        #contentHeader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0 10px 0;
+            color: #f8fafc;
+        }
+        .menu-button-small {
+            width: 120px;
+            margin-left: 10px;
+        }
+        #contentTitleDisplay {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="neural-background">
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
+        <div class="neural-node"></div>
+    </div>
+
+    <div class="login-container" id="mainContainerWrapper">
+        
+        <div class="login-card" id="mainLoginCard">
+            <div class="ai-glow"></div>
             
-            if (rememberCheckbox) rememberCheckbox.checked = true; 
+            <div class="login-header">
+                <div class="ai-logo" id="mainLogoContainer">
+                    <img src="https://img5.pic.in.th/file/secure-sv1/Asset-401.png" alt="Admin Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <h1>เข้าสู่ระบบ Admin</h1> 
+                <p>เข้าสู่ระบบผู้ดูแลระบบ</p>
+            </div>
             
-            this.forceLabelFloat(this.emailInput);
-            this.forceLabelFloat(this.passwordInput);
-        } else {
-             if (rememberCheckbox) rememberCheckbox.checked = false;
-             this.emailInput.value = '';
-             this.passwordInput.value = '';
-             this.forceLabelFloat(this.emailInput, false);
-             this.forceLabelFloat(this.passwordInput, false);
-        }
-    }
+            <form class="login-form" id="loginForm" novalidate>
+                <div class="smart-field" data-field="email">
+                    <div class="field-background"></div>
+                    <input type="text" id="email" name="studentId" required autocomplete="username">
+                    <label for="email">รหัสนักศึกษา</label> 
+                    <div class="ai-indicator">
+                        <div class="ai-pulse"></div>
+                    </div>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="emailError"></span>
+                </div>
 
-    // บันทึกข้อมูลลง localStorage (คงเดิม)
-    saveCredentials() {
-        const rememberCheckbox = document.getElementById('remember');
-        if (rememberCheckbox && rememberCheckbox.checked) {
-            localStorage.setItem('admin_remember_id', this.emailInput.value.trim());
-            localStorage.setItem('admin_remember_pass', this.passwordInput.value);
-        } else {
-            localStorage.removeItem('admin_remember_id');
-            localStorage.removeItem('admin_remember_pass');
-        }
-    }
-    
-    // Helper: บังคับให้ Label ลอยขึ้น (คงเดิม)
-    forceLabelFloat(inputElement, hasValue = true) {
-        const smartField = inputElement.closest('.smart-field');
-        if (smartField) {
-            if (hasValue && inputElement.value.length > 0) {
-                 smartField.classList.add('has-value');
-            } else {
-                 smartField.classList.remove('has-value');
-            }
-        }
-    }
+                <div class="smart-field" data-field="password">
+                    <div class="field-background"></div>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                    <label for="password">รหัสผ่าน</label>
+                    <button type="button" class="smart-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                        <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="ai-indicator">
+                        <div class="ai-pulse"></div>
+                    </div>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
 
-    bindEvents() {
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-        
-        // Event input สำหรับฟอร์มหลักและ Register (ยังคงให้เคลียร์ error เมื่อพิมพ์)
-        [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
-            if (input) { 
-                 input.addEventListener('input', () => {
-                     this.clearError(input.id);
-                     this.forceLabelFloat(input, input.value.length > 0);
-                 });
-                 input.addEventListener('blur', () => {
-                     this.forceLabelFloat(input, input.value.length > 0);
-                 });
-            }
-        });
-        
-        // Event input และ blur สำหรับฟอร์ม Forgot Password (Step 1 และ Step 2)
-        // *** ยืนยัน: ลบ this.clearError(input.id); ออกเพื่อให้ Error ค้างไว้ตามคำขอ ***
-        [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
-            if (input) { 
-                 input.addEventListener('input', () => {
-                     // ไม่มีการ clearError() ที่นี่! Error ที่มาจาก Server จะแสดงค้างไว้
-                     this.forceLabelFloat(input, input.value.length > 0);
-                 });
-                 input.addEventListener('blur', () => {
-                     this.forceLabelFloat(input, input.value.length > 0);
-                 });
-            }
-        });
+                <div class="smart-field" data-field="confirmPassword" id="confirmPasswordField" style="display: none;"> 
+                    <div class="field-background"></div>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="off">
+                    <label for="confirmPassword">ยืนยันรหัสผ่าน</label>
+                    <button type="button" class="smart-toggle" id="confirmPasswordToggle" aria-label="Toggle password visibility">
+                         <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="ai-indicator">
+                        <div class="ai-pulse"></div>
+                    </div>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="confirmPasswordError"></span>
+                </div>
 
-        // Register/Login Switch (คงเดิม)
-        this.signupLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            const newMode = this.currentMode === 'login' ? 'register' : 'login';
-            this.updateFormMode(newMode);
-        });
-        
-        // Forgot Password Links (คงเดิม)
-        this.forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showForgotPasswordStep1();
-        });
 
-        this.backToLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showLoginCard();
-        });
+                <div class="form-options">
+                    <label class="smart-checkbox">
+                        <input type="checkbox" id="remember" name="remember">
+                        <span class="checkbox-ai">
+                            <div class="checkbox-core"></div>
+                            <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+                                <path d="M1 5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        <span class="checkbox-text">จดจำการเข้าสู่ระบบ</span>
+                    </label>
+                    <a href="#" class="neural-link" id="forgotPasswordLink">ลืมรหัสผ่าน</a>
+                </div>
 
-        // Forgot Password Forms Submission (คงเดิม)
-        this.forgotPasswordForm.addEventListener('submit', (e) => this.handleSendResetCode(e));
-        this.resetPasswordForm.addEventListener('submit', (e) => this.handleResetPassword(e));
-        
-        this.emailInput.setAttribute('placeholder', ' ');
-        this.passwordInput.setAttribute('placeholder', ' ');
-    }
-    
-    // NEW: Function to show/hide loading popup
-    toggleLoadingOverlay(show) {
-        if (show) {
-            this.loadingOverlay.classList.add('show');
-        } else {
-            this.loadingOverlay.classList.remove('show');
-            // Reset Progress Bar
-            this.updateProgressBar(0);
-        }
-    }
-    
-    // NEW: Function to update progress bar and percentage (using CSS Variable)
-    updateProgressBar(percentage) {
-        this.progressBar.style.setProperty('--progress-width', `${percentage}%`);
-        this.percentageDisplay.textContent = `${percentage}%`;
-    }
-    
-    // NEW: Simulation function
-    simulateLoad(durationInSeconds = 2) {
-        return new Promise(resolve => {
-            if (this.isSimulatingLoad) {
-                clearInterval(this.progressInterval);
-            }
-            this.isSimulatingLoad = true;
-            this.updateProgressBar(0);
-            this.toggleLoadingOverlay(true);
+                <button type="submit" class="neural-button">
+                    <div class="button-bg"></div>
+                    <span class="button-text">เข้าสู่ระบบ</span>
+                    <div class="button-loader">
+                        <div class="neural-spinner">
+                            <div class="spinner-segment"></div>
+                            <div class="spinner-segment"></div>
+                            <div class="spinner-segment"></div>
+                        </div>
+                    </div>
+                    <div class="button-glow"></div>
+                </button>
+            </form>
 
-            let currentProgress = 0;
-            const step = 100 / (durationInSeconds * 10); // 10 steps per second
+            <div class="auth-separator" style="display: none;"></div>
+            <div class="neural-social" style="display: none;"></div>
 
-            this.progressInterval = setInterval(() => {
-                currentProgress += step;
+            <div class="signup-section">
+                <span>ยังไม่มีบัญชีใช่หรือไม่? </span> 
+                <a href="#" class="neural-signup" id="signupLink">ลงทะเบียน</a>
+            </div>
+        </div>
+
+        <div class="login-card" id="forgotPasswordCard1" style="display:none;">
+            <div class="ai-glow"></div>
+            <div class="login-header">
+                <h2 style="color: #f8fafc;">รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 1)</h2>
+                <p id="resetStep1Message" style="color: #94a3b8;">กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต</p>
+            </div>
+            
+            <form id="forgotPasswordForm" novalidate>
+                <div class="smart-field" data-field="resetEmail">
+                    <div class="field-background"></div>
+                    <input type="text" id="resetEmail" name="studentId" required autocomplete="off"> 
+                    <label for="resetEmail">รหัสนักศึกษา</label> 
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="resetEmailError"></span>
+                </div>
+                <button type="submit" class="neural-button" id="sendResetCodeButton">
+                    <div class="button-bg"></div>
+                    <span class="button-text">ส่งรหัสรีเซ็ต</span>
+                    <div class="button-loader"></div>
+                    <div class="button-glow"></div>
+                </button>
+            </form>
+            <a href="#" class="neural-link" id="backToLoginLink">ย้อนกลับสู่หน้าเข้าสู่ระบบ</a>
+        </div>
+
+        <div class="login-card" id="forgotPasswordCard2" style="display:none;">
+            <div class="ai-glow"></div>
+            <div class="login-header">
+                <h2 style="color: #f8fafc;">รีเซ็ตรหัสผ่าน (ขั้นตอนที่ 2)</h2>
+                <p id="resetStep2Message" style="color: #94a3b8;">กรุณากรอกรหัสรีเซ็ตและรหัสผ่านใหม่</p>
+            </div>
+            
+            <form id="resetPasswordForm" novalidate>
+                <div class="smart-field" data-field="resetCode">
+                    <div class="field-background"></div>
+                    <input type="text" id="resetCode" name="resetCode" required autocomplete="off"> 
+                    <label for="resetCode">รหัสรีเซ็ต (6 หลัก)</label> 
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="resetCodeError"></span>
+                </div>
+
+                <div class="smart-field" data-field="newPassword">
+                    <div class="field-background"></div>
+                    <input type="password" id="newPassword" name="newPassword" required autocomplete="off"> 
+                    <label for="newPassword">รหัสผ่านใหม่</label> 
+                    <button type="button" class="smart-toggle" id="newPasswordToggle" aria-label="Toggle password visibility">
+                         <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="newPasswordError"></span>
+                </div>
                 
-                // ให้ progress วิ่งไปถึง 80% ก่อน (เพื่อรอผลลัพธ์จาก Server)
-                if (currentProgress >= 80) {
-                    currentProgress = 80; 
-                    clearInterval(this.progressInterval);
-                    this.isSimulatingLoad = false;
-                }
-                
-                this.updateProgressBar(Math.floor(currentProgress));
+                <div class="smart-field" data-field="confirmPasswordReset">
+                    <div class="field-background"></div>
+                    <input type="password" id="confirmPasswordReset" name="confirmPasswordReset" required autocomplete="off"> 
+                    <label for="confirmPasswordReset">ยืนยันรหัสผ่านใหม่</label> 
+                    <button type="button" class="smart-toggle" id="confirmPasswordResetToggle" aria-label="Toggle password visibility">
+                         <svg class="toggle-show" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M9 3.75c-3.15 0-5.85 1.89-7.02 4.72a.75.75 0 000 .56c1.17 2.83 3.87 4.72 7.02 4.72s5.85-1.89 7.02-4.72a.75.75 0 000-.56C14.85 5.64 12.15 3.75 9 3.75zM9 12a3 3 0 110-6 3 3 0 010 6z" fill="currentColor"/>
+                        </svg>
+                        <svg class="toggle-hide" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l11 11a.75.75 0 101.06-1.06l-2.82-2.82c.8-.c7 1.5-1.49 2.04-2.42a.75.75 0 000-.56C12.58 4.84 10.89 3.75 9 3.75c-.c9 0-1.36.1-2 .29L3.53 2.47zM7.974 5.847L10.126 8a1.5 1.5 0 01-2.126-2.126l-.026-.027z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="field-completion"></div>
+                    <span class="error-message" id="confirmPasswordResetError"></span>
+                </div>
 
-                if (!this.isSimulatingLoad && currentProgress >= 80) {
-                    resolve();
-                }
-            }, 100); 
-        });
-    }
+                <button type="submit" class="neural-button" id="confirmResetButton">
+                    <div class="button-bg"></div>
+                    <span class="button-text">ยืนยันการเปลี่ยนรหัสผ่าน</span>
+                    <div class="button-loader"></div>
+                    <div class="button-glow"></div>
+                </button>
+            </form>
+        </div>
 
-    // UI/Mode Management
-    showForgotPasswordStep1() {
-        this.mainLoginCard.style.display = 'none';
-        this.successMessage.style.display = 'none';
-        this.forgotPasswordCard2.style.display = 'none';
-        document.querySelector('.signup-section').style.display = 'none';
-        this.contentView.style.display = 'none'; 
-        
-        this.forgotPasswordCard1.style.display = 'block'; // แสดง Step 1 Card
-        
-        // FIX: ตั้งค่าข้อความเริ่มต้น
-        this.resetStep1Message.textContent = 'กรุณากรอกรหัสนักศึกษาเพื่อรับรหัสรีเซ็ต';
-        
-        this.clearForgotPasswordErrors();
-        this.resetEmailInput.value = '';
-        
-        document.body.classList.remove('register-mode'); // Force Dark Mode
-    }
+        <div class="login-card success-neural" id="successMessage" style="display:none;">
+            <div class="ai-glow"></div>
+            <div class="success-core">
+                <div class="success-rings">
+                    <div class="success-ring"></div>
+                    <div class="success-ring"></div>
+                    <div class="success-ring"></div>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h3 id="adminWelcome">สวัสดี, แอดมิน!</h3>
+            <p id="adminDetails">
+                รหัสนักศึกษา: <span id="displayStudentId"></span><br>
+                เข้าสู่ระบบรวม: <span id="displayTotalLogins"></span> ครั้ง
+            </p>
+            <div id="redirectButtonsContainer" style="margin-top: 20px; display: flex; flex-direction: column; gap: 5px;">
+                </div>
+            <p style="margin-top: 20px;">กำลังเข้าสู่พื้นที่ทำงาน...</p>
+        </div>
+    </div>
 
-    showLoginCard() {
-        this.forgotPasswordCard1.style.display = 'none';
-        this.forgotPasswordCard2.style.display = 'none';
-        this.successMessage.style.display = 'none';
-        this.contentView.style.display = 'none'; 
-        
-        this.mainLoginCard.style.display = 'block';
-        document.querySelector('.signup-section').style.display = 'block';
-        this.updateFormMode('login');
-    }
-
-    updateFormMode(mode) {
-        this.currentMode = mode;
-        
-        // สลับ Style และโลโก้
-        if (mode === 'register') {
-            document.body.classList.add('register-mode');
-            this.logoImage.src = this.REGISTER_LOGO;
-            // แสดงช่องยืนยันรหัสผ่าน
-            if (this.confirmPasswordField) this.confirmPasswordField.style.display = 'block';
-        } else {
-            document.body.classList.remove('register-mode');
-            this.logoImage.src = this.LOGIN_LOGO;
-            // ซ่อนช่องยืนยันรหัสผ่าน
-            if (this.confirmPasswordField) this.confirmPasswordField.style.display = 'none';
-        }
-        
-        // Update Header (ใช้คำว่า Admin)
-        this.formHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบ Admin' : 'การลงทะเบียน Admin';
-        this.formSubHeader.textContent = mode === 'login' ? 'เข้าสู่ระบบผู้ดูแลระบบ' : 'สร้างรหัสความปลอดภัยสำหรับการเข้าถึง';
-        this.submitButton.querySelector('span').textContent = mode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
-        
-        document.querySelector('.signup-section span').textContent = mode === 'login' ? 'ยังไม่มีบัญชีใช่หรือไม่? ' : 'ลงทะเบียนแล้วใช่หรือไม่? ';
-        this.signupLink.textContent = mode === 'login' ? 'ลงทะเบียน' : 'กลับไปที่ล็อกอิน';
-
-        this.submitButton.style.display = 'flex'; 
-
-        // Clear inputs and errors
-        this.emailInput.value = '';
-        this.passwordInput.value = '';
-        this.clearError('email');
-        this.clearError('password');
-        this.clearError('confirmPassword'); // เคลียร์ช่องยืนยันรหัสผ่าน (ถ้ามี)
-        
-        // เคลียร์สถานะ CSS Label และโหลดค่าที่จดจำไว้
-        this.emailInput.closest('.smart-field').classList.remove('error', 'has-value');
-        this.passwordInput.closest('.smart-field').classList.remove('error', 'has-value');
-        const confirmField = this.confirmPasswordInput ? this.confirmPasswordInput.closest('.smart-field') : null;
-        if (confirmField) confirmField.classList.remove('error', 'has-value');
-
-        this.loadRememberedCredentials();
-    }
-
-    setupPasswordToggle() {
-        // 1. ช่องรหัสผ่านหลัก
-        this.passwordToggle.addEventListener('click', () => {
-            const isPassword = this.passwordInput.type === 'password';
-            this.passwordInput.type = isPassword ? 'text' : 'password';
-            this.passwordToggle.classList.toggle('toggle-active', isPassword);
-        });
-        
-        // 2. ช่องยืนยันรหัสผ่าน (Register Form)
-        const confirmToggle = document.getElementById('confirmPasswordToggle');
-        if (confirmToggle && this.confirmPasswordInput) {
-             confirmToggle.addEventListener('click', () => {
-                 const isPassword = this.confirmPasswordInput.type === 'password';
-                 this.confirmPasswordInput.type = isPassword ? 'text' : 'password';
-                 confirmToggle.classList.toggle('toggle-active', isPassword);
-             });
-        }
-        
-        // 3. ช่องรหัสผ่านใหม่ (Reset Form)
-        if (this.newPasswordInput && document.getElementById('newPasswordToggle')) {
-            document.getElementById('newPasswordToggle').addEventListener('click', () => {
-                 const isPassword = this.newPasswordInput.type === 'password';
-                 this.newPasswordInput.type = isPassword ? 'text' : 'password';
-                 document.getElementById('newPasswordToggle').classList.toggle('toggle-active', isPassword);
-            });
-        }
-        
-        // 4. ช่องยืนยันรหัสผ่านใหม่ (Reset Form)
-        if (this.confirmPasswordInputReset && document.getElementById('confirmPasswordResetToggle')) {
-             document.getElementById('confirmPasswordResetToggle').addEventListener('click', () => {
-                 const isPassword = this.confirmPasswordInputReset.type === 'password';
-                 this.confirmPasswordInputReset.type = isPassword ? 'text' : 'password';
-                 document.getElementById('confirmPasswordResetToggle').classList.toggle('toggle-active', isPassword);
-            });
-        }
-    }
-
-    // Validation Helpers
-    validateStudentId() {
-        const studentId = this.emailInput.value.trim();
-        if (!studentId) {
-            this.showError('email', 'จำเป็นต้องระบุรหัสนักศึกษา');
-            return false;
-        }
-        this.clearError('email');
-        return true;
-    }
-    
-    validatePassword() {
-        const password = this.passwordInput.value;
-        if (!password) {
-            this.showError('password', 'ต้องใช้รหัสความปลอดภัย');
-            return false;
-        }
-        if (password.length < 6) {
-            this.showError('password', 'รหัสความปลอดภัยต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
-            return false;
-        }
-        this.clearError('password');
-        return true;
-    }
-    
-    // Validation สำหรับโหมดลงทะเบียน
-    validateRegistration() {
-        let isValid = true;
-        
-        if (!this.validateStudentId()) isValid = false;
-        if (!this.validatePassword()) isValid = false;
-        
-        const password = this.passwordInput.value;
-        const confirmPassword = this.confirmPasswordInput.value;
-
-        if (this.currentMode === 'register') {
-            if (!confirmPassword) {
-                 this.showError('confirmPassword', 'จำเป็นต้องยืนยันรหัสผ่าน');
-                 isValid = false;
-            } else if (password !== confirmPassword) {
-                 this.showError('confirmPassword', 'รหัสผ่านไม่ตรงกัน');
-                 isValid = false;
-            } else {
-                 this.clearError('confirmPassword');
-            }
-        }
-        
-        return isValid;
-    }
-
-    // Error Management
-    showError(field, message) {
-        // *** FIX: การกำหนด ID สำหรับ Error Targeting ที่แม่นยำที่สุด ***
-        let targetFieldId = field;
-        
-        // 1. ตรวจสอบ Error จาก Apps Script (ข้อความที่ส่งมาจาก GAS)
-        
-        // For Login/Register
-        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์') || field === 'email') {
-            targetFieldId = 'email';
-        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง') || field === 'password') {
-            targetFieldId = 'password';
-        } else if (field === 'confirmPassword') {
-             targetFieldId = 'confirmPassword'; // สำหรับหน้า Register
-        } 
-        
-        // For Forgot Password (Step 1 & 2)
-        // *** ปรับปรุงการจับ Error ให้กว้างขึ้นสำหรับขั้นตอนที่ 1 ***
-        else if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('กรุณาตรวจสอบ') || field === 'resetEmail') {
-             targetFieldId = 'resetEmail'; // New fixed error message (Step 1)
-        } 
-        // *** ปรับปรุงการจับ Error สำหรับรหัสรีเซ็ต (รหัสรีเซ็ต, หมดอายุ) ***
-        else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ') || targetFieldId === 'resetCode') {
-            targetFieldId = 'resetCode'; // Step 2 Code field
-        } 
-        // สำหรับรหัสผ่านใหม่ไม่ตรงกัน
-        else if (message.includes('รหัสผ่านใหม่ไม่ตรงกัน') || field === 'confirmPasswordReset') {
-             targetFieldId = 'confirmPasswordReset'; // Step 2 Confirm Pass
-        }
-
-
-        const inputElement = document.getElementById(targetFieldId);
-        if (!inputElement) return;
-
-        const smartField = inputElement.closest('.smart-field');
-        const errorElement = document.getElementById(`${targetFieldId}Error`);
-        
-        // เราไม่ต้องการให้ error แสดงบน Pop-up, แต่ต้องการให้แสดงบนหน้า login หลัก
-        this.toggleLoadingOverlay(false); // ปิด Pop-up ทันทีเมื่อเกิด Error
-        
-        if (smartField && errorElement) {
-             // เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
-             this.clearAllErrorsInForm(smartField.form); 
-
-             smartField.classList.add('error');
-             errorElement.textContent = message;
-             errorElement.classList.add('show');
-        }
-    }
-    
-    clearError(field) {
-        const inputElement = document.getElementById(field);
-        if (!inputElement) return;
-        
-        const smartField = inputElement.closest('.smart-field');
-        const errorElement = document.getElementById(`${field}Error`);
-        
-        if (smartField && errorElement) {
-            smartField.classList.remove('error');
-            errorElement.classList.remove('show');
-            setTimeout(() => {
-                errorElement.textContent = '';
-            }, 200);
-        }
-    }
-    
-    clearAllErrorsInForm(formElement) {
-        if (!formElement) return;
-        const errorFields = formElement.querySelectorAll('.smart-field.error');
-        errorFields.forEach(field => {
-            field.classList.remove('error');
-            const errorSpan = field.querySelector('.error-message');
-            if (errorSpan) {
-                errorSpan.classList.remove('show');
-                errorSpan.textContent = '';
-            }
-        });
-    }
-
-    clearForgotPasswordErrors() {
-        this.clearError('resetEmail');
-        this.clearError('resetCode');
-        this.clearError('newPassword');
-        this.clearError('confirmPasswordReset');
-    }
-
-    // AIEffects/Loading (คงเดิม)
-    setupAIEffects() {
-        const inputsToTrack = [this.emailInput, this.passwordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset];
-        if (this.confirmPasswordInput) inputsToTrack.push(this.confirmPasswordInput); 
-
-        inputsToTrack.forEach(input => {
-            if(input) {
-                input.addEventListener('focus', (e) => {
-                    this.triggerNeuralEffect(e.target.closest('.smart-field'));
-                });
-            }
-        });
-    }
-    
-    triggerNeuralEffect(field) {
-        const indicator = field ? field.querySelector('.ai-indicator') : null;
-        if(indicator) {
-            indicator.style.opacity = '1';
-            setTimeout(() => {
-                indicator.style.opacity = '';
-            }, 2000);
-        }
-    }
-
-    setLoading(loading, button = this.submitButton) {
-        button.classList.toggle('loading', loading);
-        button.disabled = loading;
-    }
-    
-    // Core Form Submission
-    async handleSubmit(e) {
-        e.preventDefault();
-        
-        if (this.currentMode === 'register' && !this.validateRegistration()) {
-            return;
-        } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
-            return;
-        }
-
-        // 1. เริ่มแสดง Pop-up และจำลองการโหลด (วิ่งไปถึง 80%)
-        this.setLoading(true, this.submitButton); // ยังคงแสดง Loading ที่ปุ่ม
-        await this.simulateLoad(2); // รอจนกระทั่ง Progress Bar วิ่งไปถึง 80%
-
-        const formData = new FormData();
-        formData.append('action', this.currentMode === 'login' ? 'admin_login_only_sheet3' : 'register'); 
-        formData.append('studentId', this.emailInput.value.trim()); 
-        formData.append('email', this.emailInput.value.trim()); 
-        formData.append('password', this.passwordInput.value);
-        
-        try {
-            const response = await fetch(this.WEB_APP_URL, {
-                method: 'POST',
-                body: formData 
-            });
-            
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                // 2. ถ้าสำเร็จ: เติม Progress Bar ให้เต็ม 100%
-                this.updateProgressBar(100);
-                
-                // 3. รอเล็กน้อยก่อนปิด Pop-up และแสดงหน้า Success
-                await new Promise(r => setTimeout(r, 500)); 
-                
-                if (this.currentMode === 'login') {
-                    this.saveCredentials(); // บันทึกข้อมูลเมื่อล็อกอินสำเร็จ
-                    
-                    if (result.adminName) {
-                        this.updateSuccessScreen(result); 
-                        this.showNeuralSuccess(); // แสดงหน้า Success
-                    } else {
-                        // การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูลเพิ่มเติมได้ (ข้อความจาก Apps Script)
-                        this.showError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
-                    }
-                } else {
-                    alert('ลงทะเบียนสำเร็จ! สามารถเข้าสู่ระบบได้แล้ว');
-                    this.updateFormMode('login');
-                }
-            } else {
-                // 4. ถ้าไม่สำเร็จ: แสดง Error และปิด Pop-up ทันที (ฟังก์ชัน showError จะทำตรงนี้แทน)
-                let targetField = 'password';
-                if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
-                    targetField = 'email';
-                }
-                
-                this.showError(targetField, result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
-            }
-        } catch (error) {
-            console.error(`${this.currentMode} error:`, error);
-            this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
-        } finally {
-            this.setLoading(false, this.submitButton);
-            this.toggleLoadingOverlay(false); // ปิด Pop-up (กรณีสำเร็จ, ไม่สำเร็จ, หรือเกิดข้อผิดพลาดเครือข่าย)
-        }
-    }
-
-    // -----------------------------------------------------------
-    // --- Forgot Password Handlers ---
-    // -----------------------------------------------------------
-
-    async handleSendResetCode(e) {
-        e.preventDefault();
-        const submitButton = document.getElementById('sendResetCodeButton');
-        const studentId = this.resetEmailInput.value.trim();
-        this.tempStudentId = studentId;
-
-        if (!studentId) {
-            // Client-side validation
-            return this.showError('resetEmail', 'กรุณากรอกรหัสนักศึกษา');
-        }
-        // FIX: ล้าง Error เฉพาะ Client-side ก่อนส่ง Server
-        this.clearError('resetEmail');
-
-        this.setLoading(true, submitButton);
-
-        const formData = new FormData();
-        formData.append('action', 'forgot_password');
-        formData.append('studentId', studentId);
-
-        try {
-            const response = await fetch(this.WEB_APP_URL, {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // *** FIX: แสดงข้อความ Success ใน p tag ของ Step 1 (แล้วย้ายไป Step 2) ***
-                this.resetStep2Message.textContent = result.message; 
-                this.forgotPasswordCard1.style.display = 'none'; // ซ่อน Step 1
-                this.forgotPasswordCard2.style.display = 'block'; // แสดง Step 2
-                
-                // Clear inputs ใน Step 2
-                this.resetCodeInput.value = '';
-                this.newPasswordInput.value = '';
-                this.confirmPasswordInputReset.value = '';
-
-            } else {
-                // *** FIX: แสดง Error ใน input field ของ Step 1 ***
-                // Backend ส่งข้อความ: 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
-                this.showError('resetEmail', result.message); 
-            }
-        } catch (error) {
-            this.showError('resetEmail', 'เกิดข้อผิดพลาดในการส่งรหัสรีเซ็ต');
-        } finally {
-            this.setLoading(false, submitButton);
-        }
-    }
-
-    async handleResetPassword(e) {
-        e.preventDefault();
-        const submitButton = document.getElementById('confirmResetButton');
-        const resetCode = this.resetCodeInput.value.trim();
-        const newPassword = this.newPasswordInput.value;
-        const confirmPassword = this.confirmPasswordInputReset.value; 
-        
-        let isValid = true;
-        // การเคลียร์ Error ทั้งหมดก่อนส่งฟอร์มนี้จะช่วยให้ Error ใหม่แสดงผลได้ชัดเจน
-        this.clearForgotPasswordErrors(); 
-
-        if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
-            this.showError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
-            isValid = false;
-        }
-        if (newPassword.length < 6) {
-            this.showError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
-            isValid = false;
-        }
-        if (newPassword !== confirmPassword) {
-            this.showError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
-            isValid = false;
-        }
-
-        if (!isValid) return;
-
-        this.setLoading(true, submitButton);
-
-        const formData = new FormData();
-        formData.append('action', 'reset_password');
-        formData.append('studentId', this.tempStudentId);
-        formData.append('resetCode', resetCode);
-        formData.append('newPassword', newPassword);
-
-        try {
-            const response = await fetch(this.WEB_APP_URL, {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert(result.message);
-                this.showLoginCard(); // กลับไปหน้า Login
-            } else {
-                // *** FIX: แสดง Error ตามประเภทที่มาจาก Apps Script ***
-                let targetField = 'confirmPasswordReset';
-                if (result.message.includes('รหัสรีเซ็ต') || result.message.includes('หมดอายุ')) {
-                    targetField = 'resetCode';
-                }
-                // ถ้าเป็นรหัสผ่านใหม่ไม่ตรงกัน ให้ชี้ไปที่ confirmPasswordReset
-                if (result.message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
-                     targetField = 'confirmPasswordReset';
-                }
-                this.showError(targetField, result.message); 
-            }
-        } catch (error) {
-            this.showError('confirmPasswordReset', 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน'); 
-        } finally {
-            this.setLoading(false, submitButton);
-        }
-    }
-    
-    // Display Functions (คงเดิม)
-    updateSuccessScreen(data) {
-        const adminName = data.adminName || 'Admin';
-        const links = data.redirectButtons || []; 
-
-        document.getElementById('adminWelcome').textContent = `สวัสดี, ${adminName}!`;
-        document.getElementById('displayStudentId').textContent = data.studentId;
-        // ค่า Total Logins จะมาจากข้อมูลที่อ่านจากชีต 3 (คอลัมน์ E) ที่ส่งกลับมา
-        document.getElementById('displayTotalLogins').textContent = data.totalLogins; 
-
-        // สร้างปุ่มลิงก์ตามจำนวนที่ได้รับ
-        this.redirectButtonsContainer.innerHTML = '';
-        
-        if (links.length === 0) {
-            this.redirectButtonsContainer.innerHTML = '<p style="color: #ef4444; margin-top: 10px;">ไม่พบลิงก์สำหรับ Admin</p>';
-            return;
-        }
-        
-        links.forEach((buttonData, index) => {
-            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจาก Apps Script (ชีต 2 แถว 1)
-            const link = buttonData.link;
-            
-            const newButton = document.createElement('button');
-            newButton.className = 'neural-button';
-            newButton.type = 'button';
-            newButton.style.marginTop = '0px';
-            
-            newButton.innerHTML = `
+    <div class="content-view-container" id="contentView" style="display:none;">
+        <div id="contentHeader">
+            <h3 id="contentTitleDisplay">หน้าสำหรับ Admin</h3>
+            <button class="neural-button" style="width: 120px; margin: 0;" onclick="location.reload()">
                 <div class="button-bg"></div>
-                <span class="button-text">${buttonText}</span>
-                <div class="button-loader"></div>
+                <span class="button-text">ออกจากระบบ</span>
                 <div class="button-glow"></div>
-            `;
-
-            newButton.addEventListener('click', () => {
-                // เปิดแท็บใหม่ (หน้าเว็บปลายทางแสดงผลเหมือนเดิม)
-                window.open(link, '_blank');
-            });
-            
-            // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px)
-            if (index > 0) {
-                newButton.style.marginTop = '5px'; 
-            }
-            
-            this.redirectButtonsContainer.appendChild(newButton);
-        });
-    }
+            </button>
+        </div>
+        <iframe id="contentFrame" src="about:blank"></iframe>
+    </div>
     
-    showNeuralSuccess() {
-        // ซ่อน Login/Forgot Cards ทั้งหมด
-        this.mainLoginCard.style.display = 'none'; 
-        this.forgotPasswordCard1.style.display = 'none';
-        this.forgotPasswordCard2.style.display = 'none';
-        
-        // แสดง Success Card
-        document.querySelector('.signup-section').style.display = 'none';
-        this.successMessage.classList.add('show');
-        this.successMessage.style.display = 'block'; 
-        
-        // ซ่อน iframe container ที่ไม่ได้ใช้
-        this.contentView.style.display = 'none'; 
-    }
-}
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-box">
+            <h3 class="loading-text">กำลังเข้าสู่ระบบ...</h3>
+            <span class="loader" id="loginProgressBar"></span>
+            <p class="loading-percentage" id="loadingPercentage">0%</p>
+        </div>
+    </div>
 
-document.addEventListener('DOMContentLoaded', () => {
-    new AIAssistantLoginForm();
-});
+    <script src="../../shared/js/form-utils.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
