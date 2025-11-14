@@ -191,6 +191,7 @@ class AIAssistantLoginForm {
     
     // NEW: Function to update progress bar and percentage (using CSS Variable)
     updateProgressBar(percentage) {
+        // ต้องมั่นใจว่าไฟล์ style.css มี --progress-width: 0%; และ width: var(--progress-width); ใน .loader:after
         this.progressBar.style.setProperty('--progress-width', `${percentage}%`);
         this.percentageDisplay.textContent = `${percentage}%`;
     }
@@ -562,7 +563,7 @@ class AIAssistantLoginForm {
             this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
         } finally {
             this.setLoading(false, submitButton);
-            // ไม่ต้องเรียก toggleLoadingOverlay(false) ซ้ำ เพราะถูกเรียกใน showError/showNeuralSuccess แล้ว
+            this.toggleLoadingOverlay(false); // ปิด Pop-up (กรณี Error หรือสำเร็จแล้ว)
         }
     }
 
