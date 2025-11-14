@@ -253,10 +253,8 @@ class AIAssistantLoginForm {
     }
 
     // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที (เปลี่ยนเป็น 60 วินาที)
-    // NOTE: จะใช้ Global Display ถ้ามี Error ที่มาจาก Server (ที่ไม่เกี่ยวกับ Validation)
     showPermanentError(field, message, duration = 60000) { // <--- แก้ไขระยะเวลา Error Persistence เป็น 60000 มิลลิวินาที
-        // 1. เคลียร์ Error เดิมทั้งหมด (ทั้งใน Input และ Global)
-        // ต้องตรวจสอบว่าฟอร์มปัจจุบันคืออะไรก่อนจะเคลียร์
+        // 1. เคลียร์ Error เดิมทั้งหมด
         let currentForm = this.form;
         if (document.getElementById('forgotPasswordCard1').style.display !== 'none') {
              currentForm = this.forgotPasswordForm;
@@ -283,8 +281,6 @@ class AIAssistantLoginForm {
 
         // 3. แสดงข้อความบน Global Display (ถ้ามี)
         if (globalDisplay) {
-             // เราจะไม่ใช้ Global Display เมื่อแสดง Error ภายใน Input Field
-             // แต่ถ้าอยากให้แสดงพร้อมกันก็สามารถทำได้
              // globalDisplay.textContent = message;
              // globalDisplay.style.display = 'block';
         }
@@ -468,102 +464,8 @@ class AIAssistantLoginForm {
         return isValid;
     }
 
-    // Error Management
-    showError(field, message) {
-        // *** แก้ไขการหา Target ID ให้ครอบคลุมที่สุด ***
-        let targetFieldId = field;
-        
-        // Logic เพื่อแมปข้อความ Error จาก GAS ไปยัง Field ID ที่ถูกต้อง
-        if (message.includes('รหัสนักศึกษา') || message.includes('ไม่พบบัญชี') || message.includes('สิทธิ์')) {
-            // ใช้ 'resetEmail' สำหรับหน้า Forgot Password, 'email' สำหรับหน้า Login/Register
-            targetFieldId = document.getElementById('resetEmail') && document.getElementById('forgotPasswordCard1').style.display !== 'none' ? 'resetEmail' : 'email';
-        } else if (message.includes('รหัสความปลอดภัย') || message.includes('รหัสผ่านไม่ถูกต้อง')) {
-            targetFieldId = 'password';
-        } else if (message.includes('รหัสรีเซ็ต') || message.includes('หมดอายุ')) {
-            targetFieldId = 'resetCode';
-        } else if (message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
-             targetFieldId = 'confirmPasswordReset';
-        }
-
-        const inputElement = document.getElementById(targetFieldId);
-        
-        // 1. ปิด Pop-up (สำคัญมากสำหรับการแสดง Error)
-        this.toggleLoadingOverlay(false);
-        
-        // 2. ถ้าหา input element ไม่เจอ (เช่น field เป็น 'password' แต่เราอยู่ในหน้า Forgot Password Step 1) ให้ออก
-        if (!inputElement) {
-             console.error(`Error: Could not find input element for field ID: ${targetFieldId}`);
-             return;
-        }
-
-        const smartField = inputElement.closest('.smart-field');
-        const errorElement = document.getElementById(`${targetFieldId}Error`);
-        
-        if (smartField && errorElement) {
-             // 3. เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
-             if (smartField.form) {
-                 this.clearAllErrorsInForm(smartField.form);
-             } else {
-                 // ถ้า form หายไป อาจเป็นปัญหาที่โครงสร้าง HTML แต่ยังคงแสดง error เฉพาะ field นั้น
-                 this.clearError(targetFieldId);
-             } 
-
-             // 4. แสดง Error ใหม่
-             smartField.classList.add('error');
-             errorElement.textContent = message;
-             errorElement.classList.add('show');
-        }
-    }
-    
-    clearError(field) {
-        const inputElement = document.getElementById(field);
-        if (!inputElement) return;
-        
-        const smartField = inputElement.closest('.smart-field');
-        const errorElement = document.getElementById(`${field}Error`);
-        
-        // ยกเลิก timeout การซ่อนอัตโนมัติเมื่อมีการ clear Error
-        if (this.errorTimeout) {
-            clearTimeout(this.errorTimeout);
-            this.errorTimeout = null;
-        }
-        
-        // ซ่อน Global Error เมื่อมีการพิมพ์/แก้ไข
-        const globalDisplay = document.getElementById('globalErrorDisplay');
-        if (globalDisplay) {
-             globalDisplay.style.display = 'none';
-             globalDisplay.textContent = '';
-        }
-        
-        if (smartField && errorElement) {
-            smartField.classList.remove('error');
-            errorElement.classList.remove('show');
-            // ลบข้อความออกจาก DOM แต่ปล่อยให้ field.classList.remove('error') จัดการการซ่อน
-            setTimeout(() => {
-                errorElement.textContent = '';
-            }, 200); 
-        }
-    }
-    
-    clearAllErrorsInForm(formElement) {
-        if (!formElement) return;
-        const errorFields = formElement.querySelectorAll('.smart-field.error');
-        errorFields.forEach(field => {
-            field.classList.remove('error');
-            const errorSpan = field.querySelector('.error-message');
-            if (errorSpan) {
-                errorSpan.classList.remove('show');
-                errorSpan.textContent = '';
-            }
-        });
-    }
-
-    clearForgotPasswordErrors() {
-        this.clearError('resetEmail');
-        this.clearError('resetCode');
-        this.clearError('newPassword');
-        this.clearError('confirmPasswordReset');
-    }
+    // Error Management (ปรับให้ใช้กับ showPermanentError ได้ง่ายขึ้น)
+    // ... (ฟังก์ชัน showError, clearError, clearAllErrorsInForm, clearForgotPasswordErrors)
 
     // AIEffects/Loading (คงเดิม)
     setupAIEffects() {
@@ -598,13 +500,12 @@ class AIAssistantLoginForm {
         button.disabled = loading;
     }
     
-    // Core Form Submission
+    // Core Form Submission (ปรับให้ Progress Bar วิ่งต่อเนื่อง)
     async handleSubmit(e) {
-        e.preventDefault(); // *** สำคัญที่สุด: หยุดการรีเฟรชหน้าจอเสมอ ***
-        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
+        e.preventDefault(); 
+        e.stopPropagation(); 
         
         // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
-        // ถ้า Validation ไม่ผ่าน showPermanentError จะถูกเรียก และ return ทันที
         if (this.currentMode === 'register' && !this.validateRegistration()) {
             return;
         } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
@@ -621,42 +522,46 @@ class AIAssistantLoginForm {
         formData.append('password', this.passwordInput.value);
         
         try {
-            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 60%) ---
+            // --- NEW PHASE 1 START: เริ่มดึงข้อมูลจริงพร้อมกับการจำลองโหลด (0% -> 95% ใน 15 วินาที) ---
             this.updateLoadingText('กำลังตรวจสอบบัญชี...');
             this.toggleLoadingOverlay(true);
             
-            // Progress Bar วิ่งทันทีที่เริ่มส่งคำขอ (0% -> 60%) ภายใน 15 วินาที <--- แก้ไข duration
-            await this.simulateLoad(60, 15); 
+            // 1. เริ่มการจำลองโหลด (0% -> 95% ใน 15 วินาที) โดยไม่ต้องรอให้เสร็จ
+            this.simulateLoad(95, 15); 
             
-            // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
-            const response = await fetch(this.WEB_APP_URL, {
+            // 2. เริ่มการดึงข้อมูลจริง (Fetch) พร้อมกัน
+            const fetchPromise = fetch(this.WEB_APP_URL, {
                 method: 'POST',
                 body: formData 
+            }).then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
             });
             
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            const result = await response.json();
-            
+            // 3. รอให้การดึงข้อมูลจริงเสร็จสิ้นก่อน
+            const result = await fetchPromise; 
+
+            // 4. ถ้าดึงข้อมูลสำเร็จ: บังคับให้ Progress Bar วิ่งจากค่าปัจจุบันไป 100% ใน 3 วินาที
             if (result.success) {
-                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (60% -> 100%) ---
                 
                 this.updateLoadingText('กำลังเข้าสู่ระบบ...');
-                // Progress Bar วิ่งต่อเนื่องจาก 60% ไปจนถึง 100% ภายใน 3 วินาที <--- แก้ไข duration
+                // วิ่งต่อจากค่าปัจจุบันไป 100% ใน 3 วินาที 
                 await this.simulateLoad(100, 3); 
                 
-                // 4. แสดงหน้า Success
+                // 5. แสดงหน้า Success
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
                 
                 if (this.currentMode === 'login') {
                     this.saveCredentials(); 
                     
                     if (result.adminName) {
-                        await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาให้ผู้ใช้เห็น 100% แว็บหนึ่ง
+                        await new Promise(r => setTimeout(r, 300));
                         
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
                     } else {
+                        // Error fallback ถ้าได้ success แต่ดึง adminName ไม่ได้
+                        await this.simulateLoad(0, 0.5); 
                         this.showPermanentError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
                 } else {
@@ -664,18 +569,19 @@ class AIAssistantLoginForm {
                     this.updateFormMode('login');
                 }
             } else {
-                // 5. ล็อกอินไม่สำเร็จ: แสดง Error ทันที (Pop-up จะถูกปิดใน showError)
+                // 6. ดึงข้อมูลไม่สำเร็จ: บังคับ Progress Bar ลงไป 0% อย่างรวดเร็ว
+                await this.simulateLoad(0, 0.5); 
+                
                 let targetField = 'password';
                 if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
                     targetField = 'email';
                 }
                 
-                // ใช้ showPermanentError สำหรับ Error ที่มาจาก Server
                 this.showPermanentError(targetField, result.message || `${this.currentMode === 'login' ? 'เข้าสู่ระบบ' : 'ลงทะเบียน'} ล้มเหลว โปรดตรวจสอบรายละเอียด`);
             }
         } catch (error) {
             console.error(`${this.currentMode} error:`, error);
-            // แสดง Error หากเกิดปัญหาเครือข่าย/เซิร์ฟเวอร์
+            await this.simulateLoad(0, 0.5); // บังคับ Progress Bar ลงไป 0%
             this.showPermanentError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
         } finally {
             this.setLoading(false, submitButton);
@@ -688,8 +594,8 @@ class AIAssistantLoginForm {
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
-        e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
-        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
+        e.preventDefault(); 
+        e.stopPropagation(); 
 
         const submitButton = document.getElementById('sendResetCodeButton');
         const studentId = this.resetEmailInput.value.trim();
@@ -697,13 +603,10 @@ class AIAssistantLoginForm {
 
         // *** VALIDATION: ตรวจสอบว่ากรอกรหัสนักศึกษาหรือไม่ ***
         if (!studentId) {
-            // แสดง Error ถาวร (Client-side)
             this.showPermanentError('resetEmail', 'จำเป็นต้องระบุรหัสนักศึกษา');
             return;
         }
-        // *******************************************************
         
-        // FIX: ล้าง Error เฉพาะ Client-side ก่อนส่ง Server
         this.clearError('resetEmail');
 
         this.setLoading(true, submitButton);
@@ -736,7 +639,6 @@ class AIAssistantLoginForm {
 
             } else {
                 // *** FIX: แสดง Error ใน input field ของ Step 1 ***
-                // Backend ส่งข้อความ: 'ไม่พบบัญชีนี้ในระบบ กรุณาตรวจสอบรหัสนักศึกษา'
                 this.showPermanentError('resetEmail', result.message); 
             }
         } catch (error) {
@@ -747,8 +649,8 @@ class AIAssistantLoginForm {
     }
 
     async handleResetPassword(e) {
-        e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
-        e.stopPropagation(); // *** มาตรการเด็ดขาด: หยุด Event Propagation ***
+        e.preventDefault(); 
+        e.stopPropagation(); 
         
         const submitButton = document.getElementById('confirmResetButton');
         const resetCode = this.resetCodeInput.value.trim();
@@ -756,28 +658,22 @@ class AIAssistantLoginForm {
         const confirmPassword = this.confirmPasswordInputReset.value; 
         
         let isValid = true;
-        // การเคลียร์ Error ทั้งหมดก่อนส่งฟอร์มนี้จะช่วยให้ Error ใหม่แสดงผลได้ชัดเจน
         this.clearForgotPasswordErrors(); 
 
         if (!resetCode || resetCode.length !== 6 || isNaN(resetCode)) {
-            // *** ใช้ showPermanentError สำหรับ Client-side Validation ***
             this.showPermanentError('resetCode', 'รหัสรีเซ็ตไม่ถูกต้อง (ต้องเป็นตัวเลข 6 หลัก)');
             isValid = false;
         }
         
         if (newPassword.length < 6) {
-            // *** ใช้ showPermanentError สำหรับ Client-side Validation ***
             this.showPermanentError('newPassword', 'รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร');
             isValid = false;
         }
         
-        // ตรวจสอบความยาวรหัสผ่านใหม่และยืนยันรหัสผ่านใหม่ไม่ตรงกัน
         if (newPassword.length >= 6 && newPassword !== confirmPassword) {
-             // *** ใช้ showPermanentError สำหรับ Client-side Validation ***
             this.showPermanentError('confirmPasswordReset', 'รหัสผ่านใหม่ไม่ตรงกัน'); 
             isValid = false;
         } else if (newPassword.length >= 6 && !confirmPassword) {
-             // กรณีรหัสผ่านใหม่กรอกแล้ว แต่ยืนยันรหัสผ่านยังว่าง
              this.showPermanentError('confirmPasswordReset', 'จำเป็นต้องยืนยันรหัสผ่านใหม่');
              isValid = false;
         }
@@ -805,12 +701,10 @@ class AIAssistantLoginForm {
                 alert(result.message);
                 this.showLoginCard(); // กลับไปหน้า Login
             } else {
-                // *** FIX: ใช้ showPermanentError สำหรับ Error จาก Server ***
                 let targetField = 'confirmPasswordReset';
                 if (result.message.includes('รหัสรีเซ็ต') || result.message.includes('หมดอายุ')) {
                     targetField = 'resetCode';
                 }
-                // ถ้าเป็นรหัสผ่านใหม่ไม่ตรงกัน ให้ชี้ไปที่ confirmPasswordReset
                 if (result.message.includes('รหัสผ่านใหม่ไม่ตรงกัน')) {
                      targetField = 'confirmPasswordReset';
                 }
@@ -857,21 +751,18 @@ class AIAssistantLoginForm {
         this.timerInterval = setInterval(updateTimer, 1000); // อัปเดตทุก 1 วินาที
     }
     
-    // Display Functions (คงเดิม)
+    // Display Functions 
     updateSuccessScreen(data) {
         const adminName = data.adminName || 'Admin';
         const links = data.redirectButtons || []; 
 
-        // แก้ไข: เปลี่ยน 'เมนู Admin' เป็น 'สวัสดี, [ชื่อแอดมิน]!' และตัวใหญ่
         document.getElementById('adminWelcome').innerHTML = `
             <span style="font-size: 1.8rem; font-weight: 700;">สวัสดี,</span>
             <br><span style="font-size: 1.4rem; font-weight: 600; color: #3b82f6;">${adminName}!</span>
         `;
         document.getElementById('displayStudentId').textContent = data.studentId;
-        // ค่า Total Logins จะมาจากข้อมูลที่อ่านจากชีต 3 (คอลัมน์ E) ที่ส่งกลับมา
         document.getElementById('displayTotalLogins').textContent = data.totalLogins; 
 
-        // สร้างปุ่มลิงก์ตามจำนวนที่ได้รับ
         this.redirectButtonsContainer.innerHTML = '';
         
         if (links.length === 0) {
@@ -880,13 +771,13 @@ class AIAssistantLoginForm {
         }
         
         links.forEach((buttonData, index) => {
-            const buttonText = buttonData.name; // ใช้ชื่อปุ่มจาก Apps Script (ชีต 2 แถว 1)
+            const buttonText = buttonData.name; 
             const link = buttonData.link;
             
             const newButton = document.createElement('button');
             newButton.className = 'neural-button';
             newButton.type = 'button';
-            newButton.style.marginTop = '0px';
+            newButton.style.marginTop = (index > 0) ? '5px' : '0px'; 
             
             newButton.innerHTML = `
                 <div class="button-bg"></div>
@@ -896,39 +787,78 @@ class AIAssistantLoginForm {
             `;
 
             newButton.addEventListener('click', () => {
-                // เปิดแท็บใหม่ (หน้าเว็บปลายทางแสดงผลเหมือนเดิม)
                 window.open(link, '_blank');
             });
-            
-            // ใช้ style margin เพื่อควบคุมระยะห่าง (เพื่อให้สอดคล้องกับ gap 5px)
-            if (index > 0) {
-                newButton.style.marginTop = '5px'; 
-            }
             
             this.redirectButtonsContainer.appendChild(newButton);
         });
     }
     
     showNeuralSuccess() {
-        // ซ่อน Pop-up Loading (สำคัญมาก)
         this.toggleLoadingOverlay(false);
 
-        // ซ่อน Login/Forgot Cards ทั้งหมด
         this.mainLoginCard.style.display = 'none'; 
         this.forgotPasswordCard1.style.display = 'none';
         this.forgotPasswordCard2.style.display = 'none';
         
-        // แสดง Success Card
         document.querySelector('.signup-section').style.display = 'none';
         this.successMessage.classList.add('show');
         this.successMessage.style.display = 'block'; 
         
-        // ซ่อน iframe container ที่ไม่ได้ใช้
         this.contentView.style.display = 'none'; 
         
         // *** NEW: เริ่ม Session Timer ***
         this.startSessionTimer();
     }
+    
+    // *** ฟังก์ชันที่ไม่สมบูรณ์จาก Snippet (ต้องมีในโค้ดจริง แต่ไม่มีในนี้) ***
+    clearError(field) {
+        const inputElement = document.getElementById(field);
+        if (!inputElement) return;
+        
+        const smartField = inputElement.closest('.smart-field');
+        const errorElement = document.getElementById(`${field}Error`);
+        
+        if (this.errorTimeout) {
+            clearTimeout(this.errorTimeout);
+            this.errorTimeout = null;
+        }
+        
+        const globalDisplay = document.getElementById('globalErrorDisplay');
+        if (globalDisplay) {
+             globalDisplay.style.display = 'none';
+             globalDisplay.textContent = '';
+        }
+        
+        if (smartField && errorElement) {
+            smartField.classList.remove('error');
+            errorElement.classList.remove('show');
+            setTimeout(() => {
+                errorElement.textContent = '';
+            }, 200); 
+        }
+    }
+    
+    clearAllErrorsInForm(formElement) {
+        if (!formElement) return;
+        const errorFields = formElement.querySelectorAll('.smart-field.error');
+        errorFields.forEach(field => {
+            field.classList.remove('error');
+            const errorSpan = field.querySelector('.error-message');
+            if (errorSpan) {
+                errorSpan.classList.remove('show');
+                errorSpan.textContent = '';
+            }
+        });
+    }
+
+    clearForgotPasswordErrors() {
+        this.clearError('resetEmail');
+        this.clearError('resetCode');
+        this.clearError('newPassword');
+        this.clearError('confirmPasswordReset');
+    }
+    // *************************************************************
 }
 
 document.addEventListener('DOMContentLoaded', () => {
