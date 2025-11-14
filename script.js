@@ -86,10 +86,11 @@ class AIAssistantLoginForm {
             this.emailInput.value = rememberedId;
             this.passwordInput.value = rememberedPass;
             
-            if (rememberCheckbox) rememberCheckbox.checked = true; 
-            
             this.forceLabelFloat(this.emailInput);
             this.forceLabelFloat(this.passwordInput);
+            
+            // Note: ต้องตรวจสอบ checkbox ก่อนใช้
+            if (rememberCheckbox) rememberCheckbox.checked = true; 
         } else {
              if (rememberCheckbox) rememberCheckbox.checked = false;
              this.emailInput.value = '';
@@ -205,8 +206,10 @@ class AIAssistantLoginForm {
     }
     
     // NEW: Simulation function (Progress Bar Start% -> Target% ตามเวลาที่กำหนด)
+    // Progress Bar วิ่งอย่างต่อเนื่องตามเวลา ไม่มีการดีดไป 80% ก่อน
     simulateLoad(targetProgress, durationInSeconds = 0.5) {
         return new Promise(resolve => {
+            // หยุดการวิ่งก่อนหน้า
             if (this.progressInterval) {
                 clearInterval(this.progressInterval);
             }
@@ -220,7 +223,9 @@ class AIAssistantLoginForm {
             }
 
             let startTime = performance.now();
-            // ลดเวลาการอัพเดทให้เร็วขึ้นเพื่อความสมจริง (50ms -> 20ms)
+            const endTime = startTime + (durationInSeconds * 1000);
+
+            // ความถี่ในการอัปเดต (เพื่อความราบรื่น)
             const intervalDuration = 20; 
 
             this.progressInterval = setInterval(() => {
@@ -541,10 +546,9 @@ class AIAssistantLoginForm {
             this.toggleLoadingOverlay(true);
             
             // Progress Bar ขยับทันทีที่เริ่มส่งคำขอ (0% -> 1%)
-            await this.simulateLoad(1, 0.1); 
+            this.updateProgressBar(1); 
             
             // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
-            // (GAS จะทำงานในฉากหลังและส่ง Response กลับมา)
             const response = await fetch(this.WEB_APP_URL, {
                 method: 'POST',
                 body: formData 
@@ -555,20 +559,24 @@ class AIAssistantLoginForm {
             const result = await response.json();
             
             if (result.success) {
-                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (1% -> 100%) ---
+                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (1% -> 60%) ---
                 
                 this.updateLoadingText('กำลังเข้าสู่ระบบ...');
-                // Progress Bar วิ่งต่อเนื่องจาก 1% ไปจนถึง 100% ภายใน 1.5 วินาที
-                await this.simulateLoad(100, 1.5); 
+                // Progress Bar วิ่งต่อเนื่องจาก 1% ไปจนถึง 60% ภายใน 0.5 วินาที
+                await this.simulateLoad(60, 0.5); 
                 
-                // 4. แสดงหน้า Success
+                // 3. แสดงหน้า Success (และ Progress Bar จะดีดไป 100% ใน showNeuralSuccess)
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
-                await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาเล็กน้อยก่อนเปลี่ยนหน้า
-
+                
                 if (this.currentMode === 'login') {
                     this.saveCredentials(); 
                     
                     if (result.adminName) {
+                        // หน่วงเวลาก่อนดีดไป 100% และแสดงหน้า Success
+                        await new Promise(r => setTimeout(r, 200)); 
+                        this.updateProgressBar(100);
+                        await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาให้เห็น 100% แว็บหนึ่ง
+                        
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
                     } else {
@@ -602,7 +610,7 @@ class AIAssistantLoginForm {
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
-        e.preventDefault(); // <--- ป้องกันการรีเฟรชหน้าจอ
+        e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
 
         const submitButton = document.getElementById('sendResetCodeButton');
         const studentId = this.resetEmailInput.value.trim();
@@ -660,7 +668,7 @@ class AIAssistantLoginForm {
     }
 
     async handleResetPassword(e) {
-        e.preventDefault(); // <--- ป้องกันการรีเฟรชหน้าจอ
+        e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
         
         const submitButton = document.getElementById('confirmResetButton');
         const resetCode = this.resetCodeInput.value.trim();
