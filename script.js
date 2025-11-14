@@ -53,7 +53,7 @@ class AIAssistantLoginForm {
         this.tempStudentId = null; 
 
         // URL Web App ล่าสุด (UPDATED!)
-        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzH5_rERyRW4PcEDt-q8-DwSpBx4ZTl5nW-CvsZfXEPZ4-FF6Q8vAacrOfP0B8sDYt6/exec'; 
+        this.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwRxWfDBZ9mIigSkyhR2BYGC1zdjNX1iL5KWAanEXmXBvFXIyUpa8kDoGdWAIEsG_8T/exec'; 
 
         // NEW: Loading Overlay Elements
         this.loadingOverlay = document.getElementById('loadingOverlay');
@@ -195,7 +195,7 @@ class AIAssistantLoginForm {
         this.percentageDisplay.textContent = `${percentage}%`;
     }
     
-    // NEW: Simulation function
+    // NEW: Simulation function (ใช้เมื่อล็อกอินสำเร็จแล้วเท่านั้น)
     simulateLoad(durationInSeconds = 2) {
         return new Promise(resolve => {
             if (this.isSimulatingLoad) {
@@ -203,7 +203,7 @@ class AIAssistantLoginForm {
             }
             this.isSimulatingLoad = true;
             this.updateProgressBar(0);
-            this.toggleLoadingOverlay(true);
+            this.toggleLoadingOverlay(true); // แสดง Pop-up
 
             let currentProgress = 0;
             const step = 100 / (durationInSeconds * 10); // 10 steps per second
@@ -211,18 +211,16 @@ class AIAssistantLoginForm {
             this.progressInterval = setInterval(() => {
                 currentProgress += step;
                 
-                // ให้ progress วิ่งไปถึง 80% ก่อน (เพื่อรอผลลัพธ์จาก Server)
-                if (currentProgress >= 80) {
-                    currentProgress = 80; 
+                // ให้วิ่งไปถึง 100%
+                if (currentProgress >= 100) {
+                    currentProgress = 100; 
                     clearInterval(this.progressInterval);
                     this.isSimulatingLoad = false;
+                    resolve(); // จบการจำลองเมื่อถึง 100%
                 }
                 
                 this.updateProgressBar(Math.floor(currentProgress));
 
-                if (!this.isSimulatingLoad && currentProgress >= 80) {
-                    resolve();
-                }
             }, 100); 
         });
     }
@@ -416,15 +414,15 @@ class AIAssistantLoginForm {
              targetFieldId = 'confirmPasswordReset'; // Step 2 Confirm Pass
         }
 
-
         const inputElement = document.getElementById(targetFieldId);
+        
+        // ปิด Pop-up (สำคัญมากสำหรับการแสดง Error)
+        this.toggleLoadingOverlay(false);
+        
         if (!inputElement) return;
 
         const smartField = inputElement.closest('.smart-field');
         const errorElement = document.getElementById(`${targetFieldId}Error`);
-        
-        // เราไม่ต้องการให้ error แสดงบน Pop-up, แต่ต้องการให้แสดงบนหน้า login หลัก
-        this.toggleLoadingOverlay(false); // ปิด Pop-up ทันทีเมื่อเกิด Error
         
         if (smartField && errorElement) {
              // เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
@@ -505,16 +503,16 @@ class AIAssistantLoginForm {
     async handleSubmit(e) {
         e.preventDefault();
         
+        // 1. ตรวจสอบความถูกต้องของ Input ก่อนส่ง API (Client-side validation)
         if (this.currentMode === 'register' && !this.validateRegistration()) {
             return;
         } else if (this.currentMode === 'login' && (!this.validateStudentId() || !this.validatePassword())) {
             return;
         }
 
-        // 1. เริ่มแสดง Pop-up และจำลองการโหลด (วิ่งไปถึง 80%)
-        this.setLoading(true, this.submitButton); // ยังคงแสดง Loading ที่ปุ่ม
-        await this.simulateLoad(2); // รอจนกระทั่ง Progress Bar วิ่งไปถึง 80%
-
+        const submitButton = this.submitButton;
+        this.setLoading(true, submitButton);
+        
         const formData = new FormData();
         formData.append('action', this.currentMode === 'login' ? 'admin_login_only_sheet3' : 'register'); 
         formData.append('studentId', this.emailInput.value.trim()); 
@@ -522,6 +520,7 @@ class AIAssistantLoginForm {
         formData.append('password', this.passwordInput.value);
         
         try {
+            // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบรหัสผ่าน
             const response = await fetch(this.WEB_APP_URL, {
                 method: 'POST',
                 body: formData 
@@ -532,18 +531,16 @@ class AIAssistantLoginForm {
             const result = await response.json();
             
             if (result.success) {
-                // 2. ถ้าสำเร็จ: เติม Progress Bar ให้เต็ม 100%
-                this.updateProgressBar(100);
-                
-                // 3. รอเล็กน้อยก่อนปิด Pop-up และแสดงหน้า Success
-                await new Promise(r => setTimeout(r, 500)); 
+                // 3. ล็อกอินสำเร็จ: เริ่มแสดง Pop-up และจำลองการโหลดไป 100%
+                this.updateProgressBar(0);
+                await this.simulateLoad(1.5); // โหลด 1.5 วินาที
                 
                 if (this.currentMode === 'login') {
-                    this.saveCredentials(); // บันทึกข้อมูลเมื่อล็อกอินสำเร็จ
+                    this.saveCredentials(); 
                     
                     if (result.adminName) {
                         this.updateSuccessScreen(result); 
-                        this.showNeuralSuccess(); // แสดงหน้า Success
+                        this.showNeuralSuccess(); 
                     } else {
                         // การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูลเพิ่มเติมได้ (ข้อความจาก Apps Script)
                         this.showError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
@@ -553,7 +550,7 @@ class AIAssistantLoginForm {
                     this.updateFormMode('login');
                 }
             } else {
-                // 4. ถ้าไม่สำเร็จ: แสดง Error และปิด Pop-up ทันที (ฟังก์ชัน showError จะทำตรงนี้แทน)
+                // 4. ล็อกอินไม่สำเร็จ: แสดง Error ทันที (Pop-up จะไม่โผล่มา)
                 let targetField = 'password';
                 if (result.message.includes('รหัสนักศึกษา') || result.message.includes('ไม่พบบัญชี') || result.message.includes('สิทธิ์')) {
                     targetField = 'email';
@@ -563,10 +560,11 @@ class AIAssistantLoginForm {
             }
         } catch (error) {
             console.error(`${this.currentMode} error:`, error);
+            // แสดง Error หากเกิดปัญหาเครือข่าย/เซิร์ฟเวอร์
             this.showError('password', 'การเชื่อมต่อระบบล้มเหลว (Network Error)'); 
         } finally {
-            this.setLoading(false, this.submitButton);
-            this.toggleLoadingOverlay(false); // ปิด Pop-up (กรณีสำเร็จ, ไม่สำเร็จ, หรือเกิดข้อผิดพลาดเครือข่าย)
+            this.setLoading(false, submitButton);
+            this.toggleLoadingOverlay(false); // ปิด Pop-up (กรณี Error หรือสำเร็จแล้ว)
         }
     }
 
