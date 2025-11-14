@@ -128,7 +128,7 @@ class AIAssistantLoginForm {
     bindEvents() {
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         
-        // Event input สำหรับฟอร์มหลักและ Register (ยังคงให้เคลียร์ error เมื่อพิมพ์)
+        // Event input สำหรับฟอร์มหลักและ Register (เคลียร์ error เมื่อพิมพ์)
         [this.emailInput, this.passwordInput, this.confirmPasswordInput].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
@@ -142,7 +142,6 @@ class AIAssistantLoginForm {
         });
         
         // Event input และ blur สำหรับฟอร์ม Forgot Password (Step 1 และ Step 2)
-        // *** ยืนยัน: ลบ this.clearError(input.id); ออกเพื่อให้ Error ค้างไว้ตามคำขอ ***
         [this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset].forEach(input => {
             if (input) { 
                  input.addEventListener('input', () => {
@@ -181,7 +180,7 @@ class AIAssistantLoginForm {
         this.passwordInput.setAttribute('placeholder', ' ');
     }
     
-    // NEW: Function to show/hide loading popup
+    // NEW: Function to show/hide loading popup (คงเดิม)
     toggleLoadingOverlay(show) {
         if (show) {
             this.loadingOverlay.classList.add('show');
@@ -192,21 +191,21 @@ class AIAssistantLoginForm {
         }
     }
     
-    // NEW: Function to update loading status text
+    // NEW: Function to update loading status text (คงเดิม)
     updateLoadingText(text) {
         if (this.loadingTextDisplay) {
             this.loadingTextDisplay.textContent = text;
         }
     }
 
-    // NEW: Function to update progress bar and percentage (using CSS Variable)
+    // NEW: Function to update progress bar and percentage (using CSS Variable) (คงเดิม)
     updateProgressBar(percentage) {
         // ต้องมั่นใจว่าไฟล์ style.css มี --progress-width: 0%; และ width: var(--progress-width); ใน .loader:after
         this.progressBar.style.setProperty('--progress-width', `${percentage}%`);
         this.percentageDisplay.textContent = `${percentage}%`;
     }
     
-    // NEW: Simulation function (Progress Bar Start% -> Target% ตามเวลาที่กำหนด)
+    // NEW: Simulation function (Progress Bar Start% -> Target% ตามเวลาที่กำหนด) (คงเดิม)
     simulateLoad(targetProgress, durationInSeconds = 0.5) {
         return new Promise(resolve => {
             // หยุดการวิ่งก่อนหน้า
@@ -247,7 +246,7 @@ class AIAssistantLoginForm {
         });
     }
 
-    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที
+    // NEW: ฟังก์ชันสำหรับแสดง Error แบบถาวร 20 วินาที (คงเดิม)
     showPermanentError(field, message, duration = 20000) {
         // 1. เรียกใช้ showError เดิมเพื่อแสดงผลทันที
         this.showError(field, message);
@@ -271,7 +270,7 @@ class AIAssistantLoginForm {
     }
 
 
-    // UI/Mode Management
+    // UI/Mode Management (คงเดิม)
     showForgotPasswordStep1() {
         this.mainLoginCard.style.display = 'none';
         this.successMessage.style.display = 'none';
@@ -345,14 +344,14 @@ class AIAssistantLoginForm {
     }
 
     setupPasswordToggle() {
-        // 1. ช่องรหัสผ่านหลัก
+        // 1. ช่องรหัสผ่านหลัก (คงเดิม)
         this.passwordToggle.addEventListener('click', () => {
             const isPassword = this.passwordInput.type === 'password';
             this.passwordInput.type = isPassword ? 'text' : 'password';
             this.passwordToggle.classList.toggle('toggle-active', isPassword);
         });
         
-        // 2. ช่องยืนยันรหัสผ่าน (Register Form)
+        // 2. ช่องยืนยันรหัสผ่าน (Register Form) (คงเดิม)
         const confirmToggle = document.getElementById('confirmPasswordToggle');
         if (confirmToggle && this.confirmPasswordInput) {
              confirmToggle.addEventListener('click', () => {
@@ -362,7 +361,7 @@ class AIAssistantLoginForm {
              });
         }
         
-        // 3. ช่องรหัสผ่านใหม่ (Reset Form)
+        // 3. ช่องรหัสผ่านใหม่ (Reset Form) (คงเดิม)
         if (this.newPasswordInput && document.getElementById('newPasswordToggle')) {
             document.getElementById('newPasswordToggle').addEventListener('click', () => {
                  const isPassword = this.newPasswordInput.type === 'password';
@@ -371,17 +370,17 @@ class AIAssistantLoginForm {
             });
         }
         
-        // 4. ช่องยืนยันรหัสผ่านใหม่ (Reset Form)
+        // 4. ช่องยืนยันรหัสผ่านใหม่ (Reset Form) (คงเดิม)
         if (this.confirmPasswordInputReset && document.getElementById('confirmPasswordResetToggle')) {
              document.getElementById('confirmPasswordResetToggle').addEventListener('click', () => {
                  const isPassword = this.confirmPasswordInputReset.type === 'password';
                  this.confirmPasswordInputReset.type = isPassword ? 'text' : 'password';
-                 document.getElementById('confirmPasswordResetToggle').classList.toggle('toggle-active', isPassword);
-            });
+                 this.confirmPasswordResetToggle.classList.toggle('toggle-active', isPassword);
+             });
         }
     }
 
-    // Validation Helpers
+    // Validation Helpers (คงเดิม)
     validateStudentId() {
         const studentId = this.emailInput.value.trim();
         if (!studentId) {
@@ -406,7 +405,7 @@ class AIAssistantLoginForm {
         return true;
     }
     
-    // Validation สำหรับโหมดลงทะเบียน
+    // Validation สำหรับโหมดลงทะเบียน (คงเดิม)
     validateRegistration() {
         let isValid = true;
         
@@ -453,7 +452,7 @@ class AIAssistantLoginForm {
         // 1. ปิด Pop-up (สำคัญมากสำหรับการแสดง Error)
         this.toggleLoadingOverlay(false);
         
-        // 2. ถ้าหา input element ไม่เจอ (เช่น field เป็น 'password' แต่เราอยู่ในหน้า Forgot Password Step 1) ให้ออก
+        // 2. ถ้าหา input element ไม่เจอ ให้ออก
         if (!inputElement) {
              console.error(`Error: Could not find input element for field ID: ${targetFieldId}`);
              return;
@@ -463,13 +462,8 @@ class AIAssistantLoginForm {
         const errorElement = document.getElementById(`${targetFieldId}Error`);
         
         if (smartField && errorElement) {
-             // 3. เคลียร์ error เก่าที่เคยแสดงในฟอร์มนั้นๆ ก่อนแสดงอันใหม่
-             if (smartField.form) {
-                 this.clearAllErrorsInForm(smartField.form);
-             } else {
-                 // ถ้า form หายไป อาจเป็นปัญหาที่โครงสร้าง HTML แต่ยังคงแสดง error เฉพาะ field นั้น
-                 this.clearError(targetFieldId);
-             } 
+             // 3. เคลียร์ error เฉพาะ Field ที่จะแสดงผลก่อน (เพื่อรองรับการแสดง Error ซ้ำ)
+             this.clearError(targetFieldId); // ใช้ clearError ธรรมดาเพื่อรีเซ็ตสถานะก่อนแสดง Error ใหม่
 
              // 4. แสดง Error ใหม่
              smartField.classList.add('error');
@@ -521,17 +515,18 @@ class AIAssistantLoginForm {
         this.clearError('confirmPasswordReset');
     }
 
-    // AIEffects/Loading (คงเดิม)
+    // AIEffects/Loading 
     setupAIEffects() {
         const inputsToTrack = [this.emailInput, this.passwordInput, this.resetEmailInput, this.resetCodeInput, this.newPasswordInput, this.confirmPasswordInputReset];
         if (this.confirmPasswordInput) inputsToTrack.push(this.confirmPasswordInput); 
 
         inputsToTrack.forEach(input => {
             if(input) {
-                // ผูก event input กับ clearError
-                 input.addEventListener('input', () => {
-                     this.clearError(input.id);
-                 });
+                // ❌ ลบส่วนนี้ออก เพราะมีใน bindEvents() แล้ว
+                // input.addEventListener('input', () => {
+                //     this.clearError(input.id);
+                // });
+                
                 input.addEventListener('focus', (e) => {
                     this.triggerNeuralEffect(e.target.closest('.smart-field'));
                 });
@@ -554,7 +549,7 @@ class AIAssistantLoginForm {
         button.disabled = loading;
     }
     
-    // Core Form Submission
+    // Core Form Submission (คงเดิม)
     async handleSubmit(e) {
         e.preventDefault();
         
@@ -575,12 +570,13 @@ class AIAssistantLoginForm {
         formData.append('password', this.passwordInput.value);
         
         try {
-            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 1%) ---
+            // --- PHASE 1 START: ตรวจสอบบัญชี (0% -> 60%) ---
             this.updateLoadingText('กำลังตรวจสอบบัญชี...');
             this.toggleLoadingOverlay(true);
             
-            // Progress Bar ขยับทันทีที่เริ่มส่งคำขอ (0% -> 1%)
-            this.updateProgressBar(1); 
+            // Progress Bar วิ่งทันทีที่เริ่มส่งคำขอ (0% -> 1%)
+            // ใช้ 1% เพื่อแสดงว่าเริ่มส่งคำขอแล้ว แต่ยังไม่ได้รับผลการตรวจสอบ
+            await this.simulateLoad(1, 0.1); 
             
             // 2. ส่ง API Call ไปยัง Google Apps Script (GAS) เพื่อตรวจสอบสิทธิ์
             const response = await fetch(this.WEB_APP_URL, {
@@ -593,11 +589,11 @@ class AIAssistantLoginForm {
             const result = await response.json();
             
             if (result.success) {
-                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (1% -> 60%) ---
+                // --- PHASE 2 START: เข้าสู่ระบบและโหลดเมนู (1% -> 100%) ---
                 
                 this.updateLoadingText('กำลังเข้าสู่ระบบ...');
-                // Progress Bar วิ่งต่อเนื่องจาก 1% ไปจนถึง 60% ภายใน 0.5 วินาที
-                await this.simulateLoad(60, 0.5); 
+                // Progress Bar วิ่งต่อเนื่องจาก 1% ไปจนถึง 100% ภายใน 2 วินาที
+                await this.simulateLoad(100, 2); 
                 
                 // 4. แสดงหน้า Success
                 this.updateLoadingText('เข้าสู่ระบบสำเร็จ กำลังนำไปสู่เมนู Admin...'); 
@@ -606,15 +602,11 @@ class AIAssistantLoginForm {
                     this.saveCredentials(); 
                     
                     if (result.adminName) {
-                        // หน่วงเวลาก่อนดีดไป 100% และแสดงหน้า Success
-                        await new Promise(r => setTimeout(r, 200)); 
-                        this.updateProgressBar(100);
-                        await new Promise(r => setTimeout(r, 300)); // หน่วงเวลาให้เห็น 100% แว็บหนึ่ง
+                        await new Promise(r => setTimeout(r, 500)); // หน่วงเวลาให้ผู้ใช้เห็น 100% 
                         
                         this.updateSuccessScreen(result); 
                         this.showNeuralSuccess(); 
                     } else {
-                        // ใช้ showPermanentError เมื่อมาจาก Server
                         this.showPermanentError('password', result.message || 'การเข้าสู่ระบบสำเร็จ แต่ไม่สามารถดึงข้อมูล Admin ได้');
                     }
                 } else {
@@ -642,11 +634,11 @@ class AIAssistantLoginForm {
     }
 
     // -----------------------------------------------------------
-    // --- Forgot Password Handlers ---
+    // --- Forgot Password Handlers --- (คงเดิม)
     // -----------------------------------------------------------
 
     async handleSendResetCode(e) {
-        e.preventDefault(); // <--- ป้องกันการรีเฟรชหน้าจอ
+        e.preventDefault(); // ป้องกันการรีเฟรชหน้าจอ
 
         const submitButton = document.getElementById('sendResetCodeButton');
         const studentId = this.resetEmailInput.value.trim();
